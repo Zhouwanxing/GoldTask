@@ -8,17 +8,12 @@
 
 
 FROM maven:alpine
-#指定环境变量url为/usr/helloworld
-ENV url /usr/GoldTask
 
-#指定容器的工作目录
-WORKDIR ${url}
+WORKDIR /code
 
-#复制helloworld下的所有文件到镜像中的/usr/helloworld目录中
-COPY /GoldTask ${url}
+COPY settings.xml /usr/share/maven/conf/settings.xml
 
-#把maven镜像中的maven配置文件settings.xml，替换为自己的settings.xml，为了加快下载
-COPY /usr/GoldTask/settings.xml /usr/share/maven/conf/settings.xml
+COPY . .
 
 #MVN 打包
 RUN ["mvn","package"]
