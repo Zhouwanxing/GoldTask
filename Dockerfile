@@ -18,7 +18,7 @@ WORKDIR ${url}
 COPY GoldTask ${url}
 
 #把maven镜像中的maven配置文件settings.xml，替换为自己的settings.xml，为了加快下载
-COPY GoldTask/settings.xml /usr/share/maven/conf/settings.xml
+COPY /usr/GoldTask/settings.xml /usr/share/maven/conf/settings.xml
 
 #MVN 打包
 RUN ["mvn","package"]
