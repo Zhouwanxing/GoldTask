@@ -38,18 +38,21 @@ public class HeartTask {
         try {
             body = HttpUtil.get("https://ws.chowsangsang.com/goldpriceapi/goldprice-poss/openapi/v1/list?region=CHN");
             oneP = JSONUtil.parseObj(body).getJSONArray("data").stream().filter(one -> "G_JW_SELL".equals(((JSONObject) one).getStr("type"))).map(one -> ((JSONObject) one).getStr("price")).findFirst().get();
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.warn("", e);
         }
         //周大福
         try {
             body = HttpUtil.get("https://api.ctfmall.com/wxmini/api/common/todayGoldPrice?action=gettodayprice");
             twoP = JSONUtil.parseObj(body).getJSONObject("data").getStr("todayPriceHK");
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.warn("", e);
         }
         try {
             HttpUtil.get("https://api.day.app/" + myService.getMyConfig().getBarkId() + "/周生生:" + oneP + ";周大福:" + twoP);
 //            log.info("https://api.day.app/" + myService.getMyConfig().getBarkId() + "/周生生:" + oneP + ";周大福:" + twoP);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.warn("", e);
         }
     }
 }
