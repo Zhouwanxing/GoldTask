@@ -15,6 +15,6 @@ public class MyService {
     }
 
     public MyConfig getMyConfig() {
-        return myConfig;
+        return myConfig == null ? new MyConfig() : myConfig;
     }
 }

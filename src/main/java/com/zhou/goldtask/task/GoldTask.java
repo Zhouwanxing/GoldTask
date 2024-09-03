@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
-@Service
+//@Service
 @Slf4j
 public class GoldTask {
     @Resource
