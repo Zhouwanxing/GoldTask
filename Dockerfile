@@ -9,6 +9,8 @@
 
 FROM maven:alpine
 
+ENV TZ=Asia/Shanghai
+
 WORKDIR /code
 
 COPY settings.xml /usr/share/maven/conf/settings.xml
