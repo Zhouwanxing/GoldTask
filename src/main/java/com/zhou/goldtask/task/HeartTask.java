@@ -27,7 +27,7 @@ public class HeartTask {
         } catch (Exception ignored) {
 
         }
-        if (now.getHour() == 12 && now.getMinute() == 0 && now.getSecond() > 52) {
+        if (now.getMinute() == 0 && now.getSecond() == 0) {
             goldTask();
         }
     }

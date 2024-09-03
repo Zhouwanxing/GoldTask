@@ -43,7 +43,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>-->
-        <dependency>
+        <!--<dependency>
             <groupId>org.ssssssss</groupId>
             <artifactId>magic-api-spring-boot-starter</artifactId>
             <version>2.1.1</version>
@@ -53,7 +53,7 @@
             <groupId>org.ssssssss</groupId>
             <artifactId>magic-api-plugin-task</artifactId>
             <version>2.1.1</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
