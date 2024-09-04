@@ -22,7 +22,7 @@ public class HeartTask {
     public void remindTaskRun() {
         LocalDateTime now = LocalDateTime.now();
         try {
-            log.info(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            log.info("{},{},{}", now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), now.getMinute(), now.getSecond());
             log.info(HttpUtil.get("https://goldtask.onrender.com/"));
         } catch (Exception ignored) {
 
@@ -49,7 +49,7 @@ public class HeartTask {
             log.warn("", e);
         }
         try {
-            HttpUtil.get("https://api.day.app/" + myService.getMyConfig().getBarkId() + "/周生生:" + oneP + ";周大福:" + twoP);
+            log.info("{}", HttpUtil.get("https://api.day.app/" + myService.getMyConfig().getBarkId() + "/周生生:" + oneP + ";周大福:" + twoP));
 //            log.info("https://api.day.app/" + myService.getMyConfig().getBarkId() + "/周生生:" + oneP + ";周大福:" + twoP);
         } catch (Exception e) {
             log.warn("", e);
