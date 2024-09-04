@@ -4,7 +4,6 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.zhou.goldtask.entity.EnvConfig;
-import com.zhou.goldtask.service.MyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -17,8 +16,6 @@ import java.time.format.DateTimeFormatter;
 @Service
 @Slf4j
 public class HeartTask {
-    @Resource
-    private MyService myService;
     @Resource
     private EnvConfig envConfig;
 
@@ -52,7 +49,7 @@ public class HeartTask {
         } catch (Exception e) {
             log.warn("", e);
         }
-        String urlString = "https://api.day.app/" + myService.getMyConfig().getBarkId() + "/" + LocalDate.now() + "周生生:" + oneP + ";周大福:" + twoP;
+        String urlString = "https://api.day.app/" + envConfig.getBarkId() + "/" + LocalDate.now() + "周生生:" + oneP + ";周大福:" + twoP;
         try {
             log.info("{},{}", HttpUtil.get(urlString), urlString);
         } catch (Exception e) {

@@ -9,4 +9,7 @@ import org.springframework.stereotype.Component;
 public class EnvConfig {
     @Value("${TASK_NAME:z}")
     private String taskName;
+
+    @Value("${BARK_ID:z}")
+    private String barkId;
 }
