@@ -58,6 +58,11 @@ public class BasicController {
         return "index.html";
     }
 
+    @RequestMapping("/zwx.html")
+    public String zwx() {
+        return "zwx.html";
+    }
+
     @ModelAttribute
     public void parseUser(@RequestParam(name = "name", defaultValue = "unknown user") String name
             , @RequestParam(name = "age", defaultValue = "12") Integer age, User user) {
