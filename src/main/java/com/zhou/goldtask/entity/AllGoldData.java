@@ -21,10 +21,12 @@ public class AllGoldData {
         return list;
     }
 
-    public void add(GoldEntity goldEntity) {
+    public boolean add(GoldEntity goldEntity) {
         if (list.stream().noneMatch(one -> one.getDate().equals(goldEntity.getDate()))) {
             list.add(goldEntity);
+            return true;
         }
+        return false;
     }
 
     public GoldEntity getLast() {

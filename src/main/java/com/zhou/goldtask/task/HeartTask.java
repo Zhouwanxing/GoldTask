@@ -1,10 +1,14 @@
 package com.zhou.goldtask.task;
 
 import cn.hutool.http.HttpUtil;
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.zhou.goldtask.entity.AllGoldData;
 import com.zhou.goldtask.entity.EnvConfig;
+import com.zhou.goldtask.entity.GoldEntity;
+import com.zhou.goldtask.service.GoldService;
+import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -12,14 +16,19 @@ import javax.annotation.Resource;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 @Slf4j
 public class HeartTask {
     @Resource
     private EnvConfig envConfig;
+    @Resource
+    private RedisTemplate<String, String> redisTemplate;
+    @Resource
+    private GoldService goldService;
 
-    @Scheduled(cron = "0/5 * * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     public void remindTaskRun() {
         LocalDateTime now = LocalDateTime.now();
         try {
@@ -28,28 +37,28 @@ public class HeartTask {
         } catch (Exception ignored) {
 
         }
+        if (now.getHour() == 3 && now.getMinute() == 0 && now.getSecond() == 0) {
+            goldService.genToDayGold();
+        } else if (now.getMinute() == 0 && now.getSecond() == 0) {
+            mem2Redis();
+        }
         if (now.getHour() == 12 && now.getMinute() == 0 && now.getSecond() == 0) {
             goldTask();
         }
     }
 
+    private void mem2Redis() {
+        Long size = redisTemplate.opsForList().size(Utils.goldRedisKey);
+        if (size == null || size == 0) {
+            List<GoldEntity> list = AllGoldData.getInstance().getList();
+            for (GoldEntity goldEntity : list) {
+                redisTemplate.opsForList().rightPush(Utils.goldRedisKey, JSONUtil.toJsonStr(goldEntity));
+            }
+        }
+    }
+
     private void goldTask() {
-        //周生生
-        String oneP = "", twoP = "", body = "";
-        try {
-            body = HttpUtil.get("https://ws.chowsangsang.com/goldpriceapi/goldprice-poss/openapi/v1/list?region=CHN");
-            oneP = JSONUtil.parseObj(body).getJSONArray("data").stream().filter(one -> "G_JW_SELL".equals(((JSONObject) one).getStr("type"))).map(one -> ((JSONObject) one).getStr("price")).findFirst().get();
-        } catch (Exception e) {
-            log.warn("", e);
-        }
-        //周大福
-        try {
-            body = HttpUtil.get("https://api.ctfmall.com/wxmini/api/common/todayGoldPrice?action=gettodayprice");
-            twoP = JSONUtil.parseObj(body).getJSONObject("data").getStr("todayPriceHK");
-        } catch (Exception e) {
-            log.warn("", e);
-        }
-        String urlString = "https://api.day.app/" + envConfig.getBarkId() + "/" + LocalDate.now() + "周生生:" + oneP + ";周大福:" + twoP;
+        String urlString = "https://api.day.app/" + envConfig.getBarkId() + "/" + LocalDate.now() + "周生生:" + AllGoldData.getInstance().getLast().getZss() + ";周大福:" + AllGoldData.getInstance().getLast().getZdf();
         try {
             log.info("{},{}", HttpUtil.get(urlString), urlString);
         } catch (Exception e) {
