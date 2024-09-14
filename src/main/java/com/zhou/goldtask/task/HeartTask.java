@@ -3,9 +3,9 @@ package com.zhou.goldtask.task;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 import com.zhou.goldtask.entity.AllGoldData;
-import com.zhou.goldtask.entity.EnvConfig;
 import com.zhou.goldtask.entity.GoldEntity;
 import com.zhou.goldtask.service.GoldService;
+import com.zhou.goldtask.service.ITaskService;
 import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -22,7 +22,7 @@ import java.util.List;
 @Slf4j
 public class HeartTask {
     @Resource
-    private EnvConfig envConfig;
+    private ITaskService taskService;
     @Resource
     private RedisTemplate<String, String> redisTemplate;
     @Resource
@@ -32,7 +32,7 @@ public class HeartTask {
     public void remindTaskRun() {
         LocalDateTime now = LocalDateTime.now();
         try {
-            log.info("{},{},{},{}", envConfig.getTaskName(), now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), now.getMinute(), now.getSecond());
+            log.info("{},{},{}", now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), now.getMinute(), now.getSecond());
             log.info(HttpUtil.get("https://goldtask.onrender.com/"));
         } catch (Exception ignored) {
 
@@ -58,11 +58,6 @@ public class HeartTask {
     }
 
     private void goldTask() {
-        String urlString = "https://api.day.app/" + envConfig.getBarkId() + "/" + LocalDate.now() + "周生生:" + AllGoldData.getInstance().getLast().getZss() + ";周大福:" + AllGoldData.getInstance().getLast().getZdf();
-        try {
-            log.info("{},{}", HttpUtil.get(urlString), urlString);
-        } catch (Exception e) {
-            log.warn("{}", urlString, e);
-        }
+        taskService.remindTask(LocalDate.now().toString(), "周生生:" + AllGoldData.getInstance().getLast().getZss() + ";周大福:" + AllGoldData.getInstance().getLast().getZdf());
     }
 }

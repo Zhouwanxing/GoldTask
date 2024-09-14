@@ -1,9 +1,7 @@
 package com.zhou.goldtask.service;
 
-import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 import com.zhou.goldtask.entity.AllGoldData;
-import com.zhou.goldtask.entity.EnvConfig;
 import com.zhou.goldtask.entity.GoldEntity;
 import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +17,7 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 public class StartedRunner implements CommandLineRunner {
     @Resource
-    private EnvConfig envConfig;
+    private ITaskService taskService;
     @Resource
     private RedisTemplate<String, String> redisTemplate;
     @Resource
@@ -27,12 +25,7 @@ public class StartedRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        String urlString = "https://api.day.app/" + envConfig.getBarkId() + "/" + LocalDateTime.now().format(DateTimeFormatter.ofPattern(Utils.dateTimeFormat)) + "服务启动";
-        try {
-            log.info("{},{}", HttpUtil.get(urlString), urlString);
-        } catch (Exception e) {
-            log.warn("{}", urlString, e);
-        }
+        taskService.remindTask(LocalDateTime.now().format(DateTimeFormatter.ofPattern(Utils.dateTimeFormat)), "服务启动");
         redisToMem();
     }
 
