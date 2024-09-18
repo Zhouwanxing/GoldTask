@@ -37,7 +37,7 @@ public class HeartTask {
         } catch (Exception ignored) {
 
         }
-        if (now.getHour() == 3 && now.getMinute() == 0 && now.getSecond() == 0) {
+        if (now.getHour() == 9 && now.getMinute() == 0 && now.getSecond() == 0) {
             goldService.genToDayGold();
         } else if (now.getMinute() == 0 && now.getSecond() == 0) {
             mem2Redis();
