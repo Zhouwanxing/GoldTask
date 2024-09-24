@@ -63,7 +63,12 @@ public class MyController {
     @PostMapping("/initData")
     public JSONObject initData(@RequestBody JSONObject data) {
         log.info("{}", data);
-        myService.saveStartUrl(data.getStr("url",""));
+        myService.saveStartUrl(data.getStr("url", ""));
         return new JSONObject().putOpt("success", true);
+    }
+
+    @PostMapping("/getUrls")
+    public JSONObject getUrls(@RequestBody JSONObject data) {
+        return new JSONObject().putOpt("urls", myService.getUrls(data.getStr("key")));
     }
 }
