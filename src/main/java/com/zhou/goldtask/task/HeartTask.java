@@ -55,6 +55,13 @@ public class HeartTask {
                 redisTemplate.opsForList().rightPush(Utils.goldRedisKey, JSONUtil.toJsonStr(goldEntity));
             }
         }
+        size = redisTemplate.opsForList().size(Utils.UrlRedisKey);
+        if (size == null || size == 0) {
+            List<String> list = AllGoldData.getInstance().getUrls();
+            for (String url : list) {
+                redisTemplate.opsForList().rightPush(Utils.UrlRedisKey, url);
+            }
+        }
     }
 
     private void goldTask() {

@@ -4,7 +4,6 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.zhou.goldtask.entity.AllGoldData;
 import com.zhou.goldtask.entity.GoldEntity;
-import com.zhou.goldtask.entity.MyConfig;
 import com.zhou.goldtask.service.MyService;
 import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
@@ -26,12 +25,6 @@ public class MyController {
     private MyService myService;
     @Resource
     private RedisTemplate<String, String> redisTemplate;
-
-    @PostMapping("/initConfig")
-    public String initConfig(@RequestBody JSONObject config) {
-        myService.initConfig(config.toBean(MyConfig.class));
-        return "success";
-    }
 
     @GetMapping("/testA")
     public JSONObject testA() {
@@ -65,5 +58,12 @@ public class MyController {
         a.putOpt("list", list);
         a.putOpt("size", size);
         return a;
+    }
+
+    @PostMapping("/initData")
+    public JSONObject initData(@RequestBody JSONObject data) {
+        log.info("{}", data);
+        myService.saveStartUrl(data.getStr("url",""));
+        return new JSONObject().putOpt("success", true);
     }
 }

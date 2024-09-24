@@ -6,6 +6,7 @@ import java.util.List;
 public class AllGoldData {
     private static AllGoldData instance;
     private final List<GoldEntity> list = new ArrayList<>();
+    private final List<String> urls = new ArrayList<>();
 
     private AllGoldData() {
     }
@@ -21,9 +22,21 @@ public class AllGoldData {
         return list;
     }
 
+    public List<String> getUrls() {
+        return urls;
+    }
+
     public boolean add(GoldEntity goldEntity) {
         if (list.stream().noneMatch(one -> one.getDate().equals(goldEntity.getDate()))) {
             list.add(goldEntity);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean addUrl(String url) {
+        if (urls.stream().noneMatch(one -> one.equals(url))) {
+            urls.add(url);
             return true;
         }
         return false;
