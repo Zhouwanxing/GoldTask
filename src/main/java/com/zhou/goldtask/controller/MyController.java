@@ -5,6 +5,7 @@ import cn.hutool.json.JSONUtil;
 import com.zhou.goldtask.entity.AllGoldData;
 import com.zhou.goldtask.entity.GoldEntity;
 import com.zhou.goldtask.service.MyService;
+import com.zhou.goldtask.service.UrlService;
 import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -23,6 +24,8 @@ import java.util.List;
 public class MyController {
     @Resource
     private MyService myService;
+    @Resource
+    private UrlService urlService;
     @Resource
     private RedisTemplate<String, String> redisTemplate;
 
@@ -63,7 +66,7 @@ public class MyController {
     @PostMapping("/initData")
     public JSONObject initData(@RequestBody JSONObject data) {
         log.info("{}", data);
-        myService.saveStartUrl(data.getStr("url", ""));
+        urlService.addUrl(data.getStr("url", ""));
         return new JSONObject().putOpt("success", true);
     }
 

@@ -1,6 +1,5 @@
 package com.zhou.goldtask.service;
 
-import cn.hutool.core.util.StrUtil;
 import com.zhou.goldtask.entity.AllGoldData;
 import com.zhou.goldtask.entity.EnvConfig;
 import com.zhou.goldtask.utils.Utils;
@@ -19,20 +18,6 @@ public class MyService {
     private RedisTemplate<String, String> redisTemplate;
     @Resource
     private EnvConfig envConfig;
-
-    public void saveStartUrl(String url) {
-        if (StrUtil.isBlankIfStr(url)) {
-            return;
-        }
-        /*String[] split = url.split("//");
-        String host = split[1].split("/")[0];
-        if (StrUtil.isBlankIfStr(host)) {
-            return;
-        }
-        String newUrl = split[0] + "//" + host;*/
-        redisTemplate.opsForList().rightPush(Utils.UrlRedisKey, url);
-        AllGoldData.getInstance().addUrl(url);
-    }
 
     public List<String> getUrls(String key, boolean isCheck) {
         if (!isCheck) {

@@ -6,6 +6,7 @@ import com.zhou.goldtask.entity.AllGoldData;
 import com.zhou.goldtask.entity.GoldEntity;
 import com.zhou.goldtask.service.GoldService;
 import com.zhou.goldtask.service.ITaskService;
+import com.zhou.goldtask.service.UrlService;
 import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -27,6 +28,8 @@ public class HeartTask {
     private RedisTemplate<String, String> redisTemplate;
     @Resource
     private GoldService goldService;
+    @Resource
+    private UrlService urlService;
 
     @Scheduled(cron = "0/10 * * * * ?")
     public void remindTaskRun() {
@@ -37,13 +40,16 @@ public class HeartTask {
         } catch (Exception ignored) {
 
         }
-        if (now.getHour() == 9 && now.getMinute() == 0 && now.getSecond() == 0) {
-            goldService.genToDayGold();
-        } else if (now.getMinute() == 0 && now.getSecond() == 0) {
-            mem2Redis();
-        }
-        if (now.getHour() == 12 && now.getMinute() == 0 && now.getSecond() == 0) {
-            goldTask();
+        if (now.getMinute() == 0 && now.getSecond() == 0) {
+            if (now.getHour() == 5) {
+                urlService.checkNewUrl();
+            } else if (now.getHour() == 9) {
+                goldService.genToDayGold();
+            } else if (now.getHour() == 12) {
+                goldTask();
+            } else {
+                mem2Redis();
+            }
         }
     }
 
