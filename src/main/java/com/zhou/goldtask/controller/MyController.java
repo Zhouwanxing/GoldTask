@@ -69,6 +69,12 @@ public class MyController {
 
     @PostMapping("/getUrls")
     public JSONObject getUrls(@RequestBody JSONObject data) {
-        return new JSONObject().putOpt("urls", myService.getUrls(data.getStr("key")));
+        return new JSONObject().putOpt("urls", myService.getUrls(data.getStr("key"), true));
+    }
+
+    @PostMapping("/deleteUrl")
+    public JSONObject deleteUrl(@RequestBody JSONObject data) {
+        myService.deleteUrl(data.getStr("url"));
+        return new JSONObject().putOpt("urls", myService.getUrls(null, false));
     }
 }

@@ -41,5 +41,15 @@ public class StartedRunner implements CommandLineRunner {
             AllGoldData.getInstance().add(JSONUtil.toBean(index, GoldEntity.class));
         }
         log.info("allGoldData size:{}", AllGoldData.getInstance().getList().size());
+
+        size = redisTemplate.opsForList().size(Utils.UrlRedisKey);
+        if (size == null || size == 0) {
+            return;
+        }
+        for (int i = 0; i < size; i++) {
+            AllGoldData.getInstance().addUrl(redisTemplate.opsForList().index(Utils.UrlRedisKey, i));
+        }
+        log.info("urlData size:{}", AllGoldData.getInstance().getUrls().size());
+
     }
 }

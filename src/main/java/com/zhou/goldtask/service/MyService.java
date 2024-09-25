@@ -21,20 +21,31 @@ public class MyService {
     private EnvConfig envConfig;
 
     public void saveStartUrl(String url) {
-        String[] split = url.split("//");
+        if (StrUtil.isBlankIfStr(url)) {
+            return;
+        }
+        /*String[] split = url.split("//");
         String host = split[1].split("/")[0];
         if (StrUtil.isBlankIfStr(host)) {
             return;
         }
-        String newUrl = split[0] + "//" + host;
-        redisTemplate.opsForList().rightPush(Utils.UrlRedisKey, newUrl);
-        AllGoldData.getInstance().addUrl(newUrl);
+        String newUrl = split[0] + "//" + host;*/
+        redisTemplate.opsForList().rightPush(Utils.UrlRedisKey, url);
+        AllGoldData.getInstance().addUrl(url);
     }
 
-    public List<String> getUrls(String key) {
+    public List<String> getUrls(String key, boolean isCheck) {
+        if (!isCheck) {
+            return AllGoldData.getInstance().getUrls();
+        }
         if (key != null && key.length() > 5 && envConfig.getCheckKey().equals(key)) {
             return AllGoldData.getInstance().getUrls();
         }
         return new ArrayList<>();
+    }
+
+    public void deleteUrl(String url) {
+        redisTemplate.opsForList().remove(Utils.UrlRedisKey, 0, url);
+        AllGoldData.getInstance().removeUrl(url);
     }
 }

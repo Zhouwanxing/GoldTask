@@ -42,6 +42,10 @@ public class AllGoldData {
         return false;
     }
 
+    public void removeUrl(String url) {
+        urls.remove(url);
+    }
+
     public GoldEntity getLast() {
         if (list.size() == 0) {
             return new GoldEntity("", 0, 0);
