@@ -80,4 +80,10 @@ public class MyController {
         myService.deleteUrl(data.getStr("url"));
         return new JSONObject().putOpt("urls", myService.getUrls(null, false));
     }
+
+    @GetMapping("/checkNewUrl")
+    public JSONObject checkNewUrl() {
+        urlService.checkNewUrl();
+        return new JSONObject().putOpt("success", true);
+    }
 }
