@@ -64,7 +64,7 @@ public class UrlService {
         try {
             String body = HttpRequest.get(url).execute().body();
             log.info(body);
-            if (body != null && url.contains("window.atob")) {
+            if (body != null && body.contains("window.atob")) {
                 String en = body.substring(body.indexOf("window.atob") + 13, body.indexOf("\"", body.indexOf("window.atob(") + 15));
                 return new String(Base64.getDecoder().decode(en));
             }
