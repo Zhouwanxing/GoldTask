@@ -18,6 +18,6 @@ public class Mp4Service {
     }
 
     public boolean save(Mp4Entity mp4Entity) {
-        return mongoService.saveOne("my_mp4", mp4Entity, Mp4Entity.class);
+        return mongoService.saveOne(mp4Entity, Mp4Entity.class);
     }
 }

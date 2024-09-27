@@ -6,8 +6,10 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.zhou.goldtask.annotation.TableName;
 import com.zhou.goldtask.entity.EnvConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.springframework.stereotype.Service;
@@ -40,14 +42,14 @@ public class MongoService {
         }
     }
 
-    public <T> boolean saveOne(String tableName, Object entity, Class<T> tClass) {
+    public <T> boolean saveOne(Object entity, Class<T> tClass) {
         MongoClient client = getMongoClient();
         if (client == null) {
             return false;
         }
         try {
-            T obj = JSONUtil.parse(entity).toBean(tClass);
-            client.getDatabase(dbName).getCollection(tableName, tClass).insertOne(obj);
+            client.getDatabase(dbName).getCollection(tClass.getAnnotation(TableName.class).value())
+                    .insertOne(Document.parse(JSONUtil.toJsonStr(entity)));
         } catch (Exception e) {
             log.warn("", e);
             return false;
