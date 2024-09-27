@@ -45,13 +45,31 @@ public class UrlService {
     private String getUrlLocation(String url) {
         log.info(url);
         try {
-            Map<String, List<String>> headers = HttpRequest.get(url).execute().headers();
-            headers.keySet().forEach(key -> log.info(key + ":" + headers.get(key)));
-            List<String> location = headers.get("Location");
-            return location != null && location.size() > 0 ? location.get(0) : "";
+            if (url.contains("154.88.28.8")) {
+                return getEnUrl(url);
+            } else {
+                Map<String, List<String>> headers = HttpRequest.get(url).execute().headers();
+                headers.keySet().forEach(key -> log.info(key + ":" + headers.get(key)));
+                List<String> location = headers.get("Location");
+                return location != null && location.size() > 0 ? location.get(0) : "";
+            }
         } catch (Exception e) {
             log.warn("", e);
-            return "";
         }
+        return "";
+    }
+
+
+    private String getEnUrl(String url) {
+        try {
+            String body = HttpRequest.get(url).execute().body();
+            if (body != null && url.contains("window.atob")) {
+                String en = body.substring(body.indexOf("window.atob") + 13, body.indexOf("\"", body.indexOf("window.atob(") + 15));
+                return new String(Base64.getDecoder().decode(en));
+            }
+        } catch (Exception ignored) {
+
+        }
+        return null;
     }
 }
