@@ -18,4 +18,7 @@ public class EnvConfig {
 
     @Value("${CHECK_KEY:z}")
     private String checkKey;
+
+    @Value("${spring.data.mongodb.uri:}")
+    private String mongoUri;
 }
