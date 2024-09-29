@@ -1,10 +1,13 @@
 package com.zhou.goldtask.service;
 
+import cn.hutool.http.HttpUtil;
 import com.zhou.goldtask.entity.AllGoldData;
 import com.zhou.goldtask.entity.Mp4Entity;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -35,10 +38,18 @@ public class Mp4Service {
     private void genNewOne(String url) {
         log.info("{} start.", url);
         try {
-            Document doc = Jsoup.connect(url)
-//                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36")
+            Document doc = Jsoup.connect(url.endsWith("/") ? url + "indexaKo.js" : url + "/indexaKo.js")
                     .timeout(5000)
                     .get();
+            Elements elements = doc.getElementsByClass("menu").get(0).getElementsByTag("a");
+            String href = null;
+            for (Element element : elements) {
+                href = element.attr("href");
+                log.info("{}", href);
+                /*doc = Jsoup.connect(url + href)
+                        .timeout(5000)
+                        .get();*/
+            }
             log.info("{}", doc.body());
         } catch (Exception e) {
             log.warn("", e);
@@ -51,7 +62,8 @@ public class Mp4Service {
             Document doc = Jsoup.connect(url).timeout(5000).get();
             log.info("{}", doc.body());
         } catch (Exception e) {
-            log.warn("", e);
+            String s = HttpUtil.get(url, 5000);
+            log.info("{}", s);
         }
     }
 }
