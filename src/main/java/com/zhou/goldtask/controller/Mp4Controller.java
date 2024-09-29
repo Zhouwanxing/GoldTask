@@ -5,9 +5,7 @@ import com.zhou.goldtask.entity.Mp4Entity;
 import com.zhou.goldtask.service.Mp4Service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -29,5 +27,18 @@ public class Mp4Controller {
     public JSONObject save() {
         String s = Math.random() + "";
         return new JSONObject().putOpt("success", mp4Service.save(Mp4Entity.builder()._id(s).name("test" + s).build()));
+    }
+
+    @GetMapping("/genNew")
+    public JSONObject genNew() {
+        mp4Service.genNew();
+        return new JSONObject().putOpt("success", true);
+    }
+
+
+    @PostMapping("/ajaxUrl")
+    public JSONObject ajaxUrl(@RequestBody JSONObject jsonObject) {
+        mp4Service.ajaxUrl(jsonObject.getStr("url"));
+        return new JSONObject().putOpt("success", true);
     }
 }
