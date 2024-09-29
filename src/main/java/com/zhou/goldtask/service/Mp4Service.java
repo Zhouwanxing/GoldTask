@@ -41,16 +41,38 @@ public class Mp4Service {
             Document doc = Jsoup.connect(url.endsWith("/") ? url + "indexaKo.js" : url + "/indexaKo.js")
                     .timeout(5000)
                     .get();
-            Elements elements = doc.getElementsByClass("menu").get(0).getElementsByTag("a");
+            Elements menu = doc.getElementsByClass("menu");
+            if (menu.size() == 0) {
+                return;
+            }
+            Elements elements = menu.get(0).getElementsByTag("a");
             String href = null;
             for (Element element : elements) {
                 href = element.attr("href");
+                if (href.contains("javascript") || href.contains("/pic/")) {
+                    continue;
+                }
                 log.info("{}", href);
-                /*doc = Jsoup.connect(url + href)
+                doc = Jsoup.connect(url + href)
                         .timeout(5000)
-                        .get();*/
+                        .get();
+                Elements channels = doc.getElementsByClass("channel-list");
+                if (channels.size() == 0) {
+                    continue;
+                }
+                Elements tag = channels.get(0).getElementsByTag("a");
+                for (Element element1 : tag) {
+                    String href1 = element1.attr("href");
+                    log.info(href1);
+                    doc = Jsoup.connect(url + href1)
+                            .timeout(5000)
+                            .get();
+                    String text = doc.getElementsByClass("textlink").text();
+                    log.info("{}", text);
+                    String download = doc.getElementsByClass("download").text();
+                    log.info("{}", download);
+                }
             }
-            log.info("{}", doc.body());
         } catch (Exception e) {
             log.warn("", e);
         }
