@@ -6,6 +6,7 @@ import com.zhou.goldtask.entity.AllGoldData;
 import com.zhou.goldtask.entity.GoldEntity;
 import com.zhou.goldtask.service.GoldService;
 import com.zhou.goldtask.service.ITaskService;
+import com.zhou.goldtask.service.Mp4Service;
 import com.zhou.goldtask.service.UrlService;
 import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,8 @@ public class HeartTask {
     private GoldService goldService;
     @Resource
     private UrlService urlService;
+    @Resource
+    private Mp4Service mp4Service;
 
     @Scheduled(cron = "0/10 * * * * ?")
     public void remindTaskRun() {
@@ -41,8 +44,10 @@ public class HeartTask {
 
         }
         if (now.getMinute() == 0 && now.getSecond() == 0) {
-            if (now.getHour() == 5) {
+            if (now.getHour() == 1) {
                 urlService.checkNewUrl();
+            } else if (now.getHour() == 2) {
+                mp4Service.genNew();
             } else if (now.getHour() == 9) {
                 goldService.genToDayGold();
             } else if (now.getHour() == 12) {

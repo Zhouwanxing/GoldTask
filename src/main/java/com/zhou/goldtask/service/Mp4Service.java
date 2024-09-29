@@ -72,13 +72,14 @@ public class Mp4Service {
                     if (textLink == null || "".equals(textLink) || "".equals(download)) {
                         log.info("{}\n{}", mp4Href, doc.body());
                     } else {
-                        /*mongoService.saveOne(Mp4Entity.builder()
+                        mongoService.saveOne(Mp4Entity.builder()
                                 .name(textLink)
                                 .path(menuHref)
                                 .url(download)
                                 .date(date)
                                 .img(img)
-                                .build().urlToId().dateToDate(), Mp4Entity.class);*/
+                                .build().urlToId().dateToDate(), Mp4Entity.class);
+                        Thread.sleep(500);
                     }
                 }
             }
