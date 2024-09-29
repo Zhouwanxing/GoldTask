@@ -11,6 +11,7 @@ import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -18,11 +19,6 @@ import java.util.List;
 public class Mp4Service {
     @Resource
     private MongoService mongoService;
-
-    public Mp4Entity findOne() {
-        return null;
-//        return mongoTemplate.findOne(new Query(), Mp4Entity.class);
-    }
 
     public boolean save(Mp4Entity mp4Entity) {
         return mongoService.saveOne(mp4Entity, Mp4Entity.class);
@@ -38,39 +34,48 @@ public class Mp4Service {
     private void genNewOne(String url) {
         log.info("{} start.", url);
         try {
-            Document doc = Jsoup.connect(url.endsWith("/") ? url + "indexaKo.js" : url + "/indexaKo.js")
+            Document doc = Jsoup.connect(url + "/indexaKo.js")
                     .timeout(5000)
                     .get();
             Elements menu = doc.getElementsByClass("menu");
             if (menu.size() == 0) {
                 return;
             }
-            Elements elements = menu.get(0).getElementsByTag("a");
-            String href = null;
+            Elements channels = null, elements = menu.get(0).getElementsByTag("a");
+            List<String> urls = new ArrayList<>();
+            String menuHref = null, mp4Href = null, textLink = null, download = null;
+            String[] textLinks = null;
             for (Element element : elements) {
-                href = element.attr("href");
-                if (href.contains("javascript") || href.contains("/pic/")) {
+                menuHref = element.attr("href");
+                if (menuHref.contains("javascript") || menuHref.contains("/pic/")) {
                     continue;
                 }
-                log.info("{}", href);
-                doc = Jsoup.connect(url + href)
-                        .timeout(5000)
-                        .get();
-                Elements channels = doc.getElementsByClass("channel-list");
+                channels = Jsoup.connect(url + menuHref).timeout(5000).get().getElementsByClass("channel-list");
                 if (channels.size() == 0) {
                     continue;
                 }
-                Elements tag = channels.get(0).getElementsByTag("a");
-                for (Element element1 : tag) {
-                    String href1 = element1.attr("href");
-                    log.info(href1);
-                    doc = Jsoup.connect(url + href1)
+                for (Element mp4Element : channels.get(0).getElementsByTag("a")) {
+                    mp4Href = mp4Element.attr("href");
+                    if (urls.contains(mp4Href)) {
+                        continue;
+                    }
+                    urls.add(mp4Href);
+                    log.info(mp4Href);
+                    doc = Jsoup.connect(url + mp4Href)
                             .timeout(5000)
                             .get();
-                    String text = doc.getElementsByClass("textlink").text();
-                    log.info("{}", text);
-                    String download = doc.getElementsByClass("download").text();
-                    log.info("{}", download);
+                    textLinks = doc.getElementsByClass("textlink").get(0).html().split("&nbsp;&nbsp;");
+                    textLink = textLinks[textLinks.length - 1];
+                    download = doc.getElementsByClass("download").get(0).getElementsByTag("a").get(0).attr("href");
+                    if (textLink == null || "".equals(textLink) || "".equals(download)) {
+                        log.info("{}\n{}", mp4Href, doc.body());
+                    } else {
+                        mongoService.saveOne(Mp4Entity.builder()
+                                .name(textLink)
+                                .path(menuHref)
+                                .url(download)
+                                .build().urlToId(), Mp4Entity.class);
+                    }
                 }
             }
         } catch (Exception e) {
