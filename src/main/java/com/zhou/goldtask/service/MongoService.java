@@ -46,7 +46,7 @@ public class MongoService {
         }
     }
 
-    public <T> boolean saveOne(Object entity, Class<T> tClass) {
+    public <T> boolean saveOne(T entity, Class<T> tClass) {
         MongoClient client = getMongoClient();
         if (client == null) {
             return false;

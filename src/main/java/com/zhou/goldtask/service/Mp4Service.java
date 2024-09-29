@@ -43,19 +43,21 @@ public class Mp4Service {
             }
             Elements channels = null, elements = menu.get(0).getElementsByTag("a");
             List<String> urls = new ArrayList<>();
-            String menuHref = null, mp4Href = null, textLink = null, download = null;
+            String menuHref = null, mp4Href = null, textLink = null, download = null, date = null, img = null;
             String[] textLinks = null;
             for (Element element : elements) {
                 menuHref = element.attr("href");
                 if (menuHref.contains("javascript") || menuHref.contains("/pic/")) {
                     continue;
                 }
-                channels = Jsoup.connect(url + menuHref).timeout(5000).get().getElementsByClass("channel-list");
+                channels = Jsoup.connect(url + menuHref).timeout(5000).get().getElementsByClass("preview-item");
                 if (channels.size() == 0) {
                     continue;
                 }
-                for (Element mp4Element : channels.get(0).getElementsByTag("a")) {
-                    mp4Href = mp4Element.attr("href");
+                for (Element channel : channels) {
+                    mp4Href = channel.getElementsByTag("a").attr("href");
+                    date = channel.getElementsByTag("i").text();
+                    img = channel.getElementsByTag("img").attr("data-original");
                     if (urls.contains(mp4Href)) {
                         continue;
                     }
@@ -70,11 +72,13 @@ public class Mp4Service {
                     if (textLink == null || "".equals(textLink) || "".equals(download)) {
                         log.info("{}\n{}", mp4Href, doc.body());
                     } else {
-                        mongoService.saveOne(Mp4Entity.builder()
+                        /*mongoService.saveOne(Mp4Entity.builder()
                                 .name(textLink)
                                 .path(menuHref)
                                 .url(download)
-                                .build().urlToId(), Mp4Entity.class);
+                                .date(date)
+                                .img(img)
+                                .build().urlToId().dateToDate(), Mp4Entity.class);*/
                     }
                 }
             }
