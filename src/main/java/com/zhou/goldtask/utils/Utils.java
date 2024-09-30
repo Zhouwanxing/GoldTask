@@ -5,5 +5,7 @@ public class Utils {
     public static String goldRedisKey = "gold-data";
     public static String UrlRedisKey = "url-data";
     public static String Mp4RedisKey = "mp4-data:";
+    public static String HeartbeatUrl = "https://goldtask.onrender.com/";
     public static int goldMaxSize = 100;
+
 }

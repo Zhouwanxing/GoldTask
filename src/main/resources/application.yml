@@ -1,5 +1,9 @@
 server:
   port: 10000
+  tomcat:
+    threads:
+      min-spare: 1
+      max: 10
 my:
   task: bark
 magic-api:

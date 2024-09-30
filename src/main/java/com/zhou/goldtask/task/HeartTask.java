@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -38,8 +37,7 @@ public class HeartTask {
     public void remindTaskRun() {
         LocalDateTime now = LocalDateTime.now();
         try {
-            log.info("{},{},{}", now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), now.getMinute(), now.getSecond());
-            log.info(HttpUtil.get("https://goldtask.onrender.com/"));
+            HttpUtil.get(Utils.HeartbeatUrl);
         } catch (Exception ignored) {
 
         }
