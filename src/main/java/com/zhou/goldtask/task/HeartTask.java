@@ -37,7 +37,7 @@ public class HeartTask {
     public void remindTaskRun() {
         LocalDateTime now = LocalDateTime.now();
         try {
-            HttpUtil.get(Utils.HeartbeatUrl);
+            log.info(HttpUtil.get(Utils.HeartbeatUrl));
         } catch (Exception ignored) {
 
         }
