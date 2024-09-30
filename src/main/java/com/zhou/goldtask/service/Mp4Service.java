@@ -3,11 +3,13 @@ package com.zhou.goldtask.service;
 import cn.hutool.http.HttpUtil;
 import com.zhou.goldtask.entity.AllGoldData;
 import com.zhou.goldtask.entity.Mp4Entity;
+import com.zhou.goldtask.repository.Mp4Repository;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -18,11 +20,9 @@ import java.util.List;
 @Slf4j
 public class Mp4Service {
     @Resource
-    private MongoService mongoService;
-
-    public boolean save(Mp4Entity mp4Entity) {
-        return mongoService.saveOne(mp4Entity, Mp4Entity.class);
-    }
+    private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private Mp4Repository mp4Repository;
 
     public void genNew() {
         List<String> urls = AllGoldData.getInstance().getUrls();
@@ -72,14 +72,13 @@ public class Mp4Service {
                     if (textLink == null || "".equals(textLink) || "".equals(download)) {
                         log.info("{}\n{}", mp4Href, doc.body());
                     } else {
-                        mongoService.saveOne(Mp4Entity.builder()
+                        mp4Repository.save(Mp4Entity.builder()
                                 .name(textLink)
                                 .path(menuHref)
                                 .url(download)
                                 .date(date)
                                 .img(img)
-                                .build().urlToId().dateToDate(), Mp4Entity.class);
-                        Thread.sleep(500);
+                                .build().urlToId().dateToDate());
                     }
                 }
             }

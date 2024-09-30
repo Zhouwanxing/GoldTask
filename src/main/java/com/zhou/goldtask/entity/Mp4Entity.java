@@ -3,12 +3,14 @@ package com.zhou.goldtask.entity;
 import com.zhou.goldtask.annotation.TableName;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 
 @Data
 @Builder
 @TableName("my_mp4")
+@Document("my_mp4")
 public class Mp4Entity {
     private String _id;
     private String name;

@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
@@ -23,7 +22,7 @@ import java.util.List;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
-@Service
+//@Service
 @Slf4j
 public class MongoService {
     @Resource
