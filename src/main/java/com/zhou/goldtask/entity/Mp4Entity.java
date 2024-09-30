@@ -3,6 +3,7 @@ package com.zhou.goldtask.entity;
 import com.zhou.goldtask.annotation.TableName;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 @TableName("my_mp4")
 @Document("my_mp4")
 public class Mp4Entity {
+    @Id
     private String _id;
     private String name;
     private String path;
