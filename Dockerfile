@@ -21,5 +21,9 @@ COPY . .
 RUN ["mvn","package"]
 
 #执行java -jar启动命令
-ENTRYPOINT ["java", "-jar","target/GoldTask.jar"]
+ENTRYPOINT ["java", "-Xms256m", "-Xmx500m", \
+                   "-XX:MetaspaceSize=64m", "-XX:MaxMetaspaceSize=128m", \
+                   "-XX:+UseSerialGC", \
+                   "-XX:NewRatio=3", \
+                   "-Xss256k", "-jar","target/GoldTask.jar"]
 EXPOSE 10000
