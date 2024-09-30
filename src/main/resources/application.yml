@@ -16,4 +16,7 @@ magic-api:
     password: admin
   resource:
     location: /magic-api
+spring:
+  profiles:
+    active: dev
 
