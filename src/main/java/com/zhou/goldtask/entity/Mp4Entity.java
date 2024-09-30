@@ -24,7 +24,7 @@ public class Mp4Entity {
     public Mp4Entity urlToId() {
         if (url != null) {
             String[] split = url.split("/");
-            this._id = split[split.length - 2];
+            this._id = split[split.length - 3] + "/" + split[split.length - 2];
         }
         return this;
     }
