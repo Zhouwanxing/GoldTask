@@ -43,7 +43,7 @@ public class Mp4Service {
         List<Mp4Entity> list = mp4Dao.findByPage(page);
         for (Mp4Entity mp4 : list) {
             if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(Utils.Mp4ImgRedisKey + mp4.get_id()))) {
-                mp4.setImg(stringRedisTemplate.opsForValue().get(mp4.get_id()));
+                mp4.setImg(stringRedisTemplate.opsForValue().get(Utils.Mp4ImgRedisKey + mp4.get_id()));
             } else {
                 mp4.setImg(setMp4Url(mp4));
             }
