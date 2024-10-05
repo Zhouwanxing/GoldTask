@@ -52,7 +52,7 @@ public class Mp4Service {
     }
 
     private String setMp4Url(Mp4Entity mp4) {
-        String url = mp4.getUrl();
+        String url = mp4.getImg();
         try {
             log.info("start:{}", url);
             String data = HttpUtil.get(url, 1000);
