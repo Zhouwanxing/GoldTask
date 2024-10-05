@@ -3,6 +3,7 @@ package com.zhou.goldtask.service;
 import cn.hutool.http.HttpUtil;
 import com.zhou.goldtask.entity.AllGoldData;
 import com.zhou.goldtask.entity.Mp4Entity;
+import com.zhou.goldtask.repository.Mp4Dao;
 import com.zhou.goldtask.repository.Mp4Repository;
 import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,8 @@ public class Mp4Service {
     private StringRedisTemplate stringRedisTemplate;
     @Resource
     private Mp4Repository mp4Repository;
+    @Resource
+    private Mp4Dao mp4Dao;
 
     public void saveOne() {
         Mp4Entity entity = Mp4Entity.builder()
@@ -34,6 +37,33 @@ public class Mp4Service {
                 .img("img")
                 .build().urlToId().dateToDate();
         mp4Repository.save(entity);
+    }
+
+    public List<Mp4Entity> pageShowList(Integer page) {
+        List<Mp4Entity> list = mp4Dao.findByPage(page);
+        for (Mp4Entity mp4 : list) {
+            if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(Utils.Mp4ImgRedisKey + mp4.get_id()))) {
+                mp4.setImg(stringRedisTemplate.opsForValue().get(mp4.get_id()));
+            } else {
+                mp4.setImg(setMp4Url(mp4));
+            }
+        }
+        return list;
+    }
+
+    private String setMp4Url(Mp4Entity mp4) {
+        String url = mp4.getUrl();
+        try {
+            log.info("start:{}", url);
+            String data = HttpUtil.get(url, 1000);
+            if (data != null && !"".equals(data)) {
+                stringRedisTemplate.opsForValue().set(Utils.Mp4ImgRedisKey + mp4.get_id(), data, 1, TimeUnit.DAYS);
+                return data;
+            }
+        } catch (Exception e) {
+            log.warn("", e);
+        }
+        return url;
     }
 
     public void genNew() {
