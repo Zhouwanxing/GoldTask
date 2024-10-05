@@ -51,6 +51,10 @@ public class Mp4Service {
         return list;
     }
 
+    public long count() {
+        return mp4Repository.count();
+    }
+
     private String setMp4Url(Mp4Entity mp4) {
         String url = mp4.getImg();
         try {

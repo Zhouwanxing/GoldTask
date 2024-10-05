@@ -22,4 +22,8 @@ public class Mp4Dao {
         query.limit(10);
         return mongoTemplate.find(query, Mp4Entity.class);
     }
+
+    public long count() {
+        return mongoTemplate.count(new Query(), Mp4Entity.class);
+    }
 }

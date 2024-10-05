@@ -47,6 +47,6 @@ public class Mp4Controller {
 
     @GetMapping("/pageShowList")
     public JSONObject pageShowList(@RequestParam(value = "page", defaultValue = "1") Integer page) {
-        return new JSONObject().putOpt("list", mp4Service.pageShowList(page));
+        return new JSONObject().putOpt("list", mp4Service.pageShowList(page)).putOpt("count", mp4Service.count());
     }
 }
