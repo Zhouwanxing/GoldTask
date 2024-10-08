@@ -1,6 +1,7 @@
 package com.zhou.goldtask.controller;
 
 import cn.hutool.json.JSONObject;
+import com.zhou.goldtask.service.ITaskService;
 import com.zhou.goldtask.service.Mp4Service;
 import com.zhou.goldtask.service.UrlService;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 
 @Controller
 @Slf4j
@@ -19,6 +21,8 @@ public class Mp4Controller {
     private Mp4Service mp4Service;
     @Resource
     private UrlService urlService;
+    @Resource
+    private ITaskService taskService;
 
     @RequestMapping("/test")
     public String test() {
@@ -46,7 +50,12 @@ public class Mp4Controller {
     }
 
     @GetMapping("/pageShowList")
-    public JSONObject pageShowList(@RequestParam(value = "page", defaultValue = "1") Integer page) {
-        return new JSONObject().putOpt("list", mp4Service.pageShowList(page)).putOpt("count", mp4Service.count());
+    public JSONObject pageShowList(@RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "devId", defaultValue = "") String devId) {
+        if (mp4Service.isMyDev(devId)) {
+            return new JSONObject().putOpt("list", mp4Service.pageShowList(page)).putOpt("count", mp4Service.count());
+        } else {
+            taskService.remindTask("设备码", devId);
+            return new JSONObject().putOpt("list", Collections.emptyList()).putOpt("count", 0);
+        }
     }
 }

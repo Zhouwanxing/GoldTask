@@ -1,9 +1,11 @@
 package com.zhou.goldtask.repository;
 
+import com.zhou.goldtask.entity.DevEntity;
 import com.zhou.goldtask.entity.Mp4Entity;
 import org.bson.Document;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,12 @@ public class Mp4Dao {
         query.skip((page - 1) * 10L);
         query.limit(10);
         return mongoTemplate.find(query, Mp4Entity.class);
+    }
+
+    public boolean isMyDev(String devId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(devId));
+        return mongoTemplate.count(query, DevEntity.class) > 0;
     }
 
     public long count() {

@@ -28,6 +28,10 @@ public class Mp4Service {
     @Resource
     private Mp4Dao mp4Dao;
 
+    public boolean isMyDev(String devId) {
+        return mp4Dao.isMyDev(devId);
+    }
+
     public void saveOne() {
         Mp4Entity entity = Mp4Entity.builder()
                 .name("textLink")
