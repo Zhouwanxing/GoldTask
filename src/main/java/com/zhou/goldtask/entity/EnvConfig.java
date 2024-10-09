@@ -21,4 +21,6 @@ public class EnvConfig {
 
     @Value("${spring.data.mongodb.uri:}")
     private String mongoUri;
+    @Value("${HOST_NAME:}")
+    private String hostName;
 }

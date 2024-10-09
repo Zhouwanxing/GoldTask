@@ -58,4 +58,10 @@ public class Mp4Controller {
             return new JSONObject().putOpt("list", Collections.emptyList()).putOpt("count", 0);
         }
     }
+
+    @GetMapping("/toNotLike")
+    public JSONObject toNotLike(@RequestParam(value = "id") String id) {
+        mp4Service.toNotLike(id);
+        return new JSONObject().putOpt("success", true);
+    }
 }

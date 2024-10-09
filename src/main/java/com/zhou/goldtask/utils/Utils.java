@@ -8,4 +8,5 @@ public class Utils {
     public static String Mp4ImgRedisKey = "mp4-img-data:";
     public static String HeartbeatUrl = "https://goldtask.onrender.com/";
     public static int goldMaxSize = 1000;
+    public static String localhost = "localhost";
 }

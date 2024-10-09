@@ -55,13 +55,20 @@ public class Mp4Service {
         return list;
     }
 
+    public void toNotLike(String id){
+        mp4Dao.updateNotLike(id);
+    }
+
     public long count() {
-        return mp4Repository.count();
+        return mp4Dao.count();
     }
 
     private String setMp4Url(Mp4Entity mp4) {
         String url = mp4.getImg();
         try {
+            if (url == null || "".equals(url)) {
+                return "";
+            }
             log.info("start:{}", url);
             String data = HttpUtil.get(url, 1000);
             if (data != null && !"".equals(data)) {
