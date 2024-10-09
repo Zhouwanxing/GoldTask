@@ -102,7 +102,7 @@ public class Mp4Service {
             String menuHref = null;
             for (Element element : elements) {
                 menuHref = element.attr("href");
-                if (menuHref.contains("javascript") || menuHref.contains("/pic/")) {
+                if (menuHref.contains("javascript") || menuHref.contains("/pic/") || menuHref.contains("/dongman/")) {
                     continue;
                 }
                 oneType(url, menuHref);
