@@ -61,7 +61,14 @@ public class Mp4Controller {
 
     @GetMapping("/toNotLike")
     public JSONObject toNotLike(@RequestParam(value = "id") String id) {
-        mp4Service.toNotLike(id);
+        mp4Service.updateLike(id, false);
+        return new JSONObject().putOpt("success", true);
+    }
+
+
+    @GetMapping("/updateLike")
+    public JSONObject updateLike(@RequestParam(value = "id") String id, @RequestParam(value = "like") boolean isLike) {
+        mp4Service.updateLike(id, isLike);
         return new JSONObject().putOpt("success", true);
     }
 }

@@ -55,10 +55,6 @@ public class Mp4Service {
         return list;
     }
 
-    public void toNotLike(String id){
-        mp4Dao.updateNotLike(id);
-    }
-
     public long count() {
         return mp4Dao.count();
     }
@@ -165,5 +161,9 @@ public class Mp4Service {
             String s = HttpUtil.get(url, 5000);
             log.info("{}", s);
         }
+    }
+
+    public void updateLike(String id, boolean isLike) {
+        mp4Dao.updateLike(id, isLike);
     }
 }

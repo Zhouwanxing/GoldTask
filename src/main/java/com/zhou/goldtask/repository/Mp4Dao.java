@@ -45,9 +45,9 @@ public class Mp4Dao {
         return mongoTemplate.count(query, Mp4Entity.class);
     }
 
-    public void updateNotLike(String id) {
+    public void updateLike(String id, boolean isLike) {
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(id));
-        mongoTemplate.updateFirst(query, new Update().set("like", false), Mp4Entity.class);
+        mongoTemplate.updateFirst(query, new Update().set("like", isLike), Mp4Entity.class);
     }
 }
