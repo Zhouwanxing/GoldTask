@@ -50,9 +50,12 @@ public class Mp4Controller {
     }
 
     @GetMapping("/pageShowList")
-    public JSONObject pageShowList(@RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "devId", defaultValue = "") String devId) {
+    public JSONObject pageShowList(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                   @RequestParam(value = "devId", defaultValue = "") String devId,
+                                   @RequestParam(value = "showLike", required = false) boolean isShowLike
+    ) {
         if (mp4Service.isMyDev(devId)) {
-            return new JSONObject().putOpt("list", mp4Service.pageShowList(page)).putOpt("count", mp4Service.count());
+            return new JSONObject().putOpt("list", mp4Service.pageShowList(page, isShowLike)).putOpt("count", mp4Service.count(isShowLike));
         } else {
             taskService.remindTask("设备码", devId);
             return new JSONObject().putOpt("list", Collections.emptyList()).putOpt("count", 0);

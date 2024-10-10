@@ -21,9 +21,18 @@ public class Mp4Dao {
     @Resource
     private EnvConfig envConfig;
 
-    public List<Mp4Entity> findByPage(int page) {
+    private Query findBaseQuery(boolean isShowLike) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("like").in(true, null));
+        if (isShowLike) {
+            query.addCriteria(Criteria.where("like").is(true));
+        } else {
+            query.addCriteria(Criteria.where("like").isNull());
+        }
+        return query;
+    }
+
+    public List<Mp4Entity> findByPage(int page, boolean isShowLike) {
+        Query query = findBaseQuery(isShowLike);
         query.with(Sort.by(Sort.Direction.DESC, "date", "path"));
         query.skip((page - 1) * 10L);
         query.limit(10);
@@ -39,10 +48,8 @@ public class Mp4Dao {
         return mongoTemplate.count(query, DevEntity.class) > 0;
     }
 
-    public long count() {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("like").in(true, null));
-        return mongoTemplate.count(query, Mp4Entity.class);
+    public long count(boolean isShowLike) {
+        return mongoTemplate.count(findBaseQuery(isShowLike), Mp4Entity.class);
     }
 
     public void updateLike(String id, boolean isLike) {

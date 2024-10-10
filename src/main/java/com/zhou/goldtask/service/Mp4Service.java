@@ -43,8 +43,8 @@ public class Mp4Service {
         mp4Repository.save(entity);
     }
 
-    public List<Mp4Entity> pageShowList(Integer page) {
-        List<Mp4Entity> list = mp4Dao.findByPage(page);
+    public List<Mp4Entity> pageShowList(Integer page, boolean isShowLike) {
+        List<Mp4Entity> list = mp4Dao.findByPage(page, isShowLike);
         for (Mp4Entity mp4 : list) {
             if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(Utils.Mp4ImgRedisKey + mp4.get_id()))) {
                 mp4.setImg(stringRedisTemplate.opsForValue().get(Utils.Mp4ImgRedisKey + mp4.get_id()));
@@ -55,8 +55,8 @@ public class Mp4Service {
         return list;
     }
 
-    public long count() {
-        return mp4Dao.count();
+    public long count(boolean isShowLike) {
+        return mp4Dao.count(isShowLike);
     }
 
     private String setMp4Url(Mp4Entity mp4) {
