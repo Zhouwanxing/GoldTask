@@ -4,10 +4,7 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 import com.zhou.goldtask.entity.AllGoldData;
 import com.zhou.goldtask.entity.GoldEntity;
-import com.zhou.goldtask.service.GoldService;
-import com.zhou.goldtask.service.ITaskService;
-import com.zhou.goldtask.service.Mp4Service;
-import com.zhou.goldtask.service.UrlService;
+import com.zhou.goldtask.service.*;
 import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -32,6 +29,8 @@ public class HeartTask {
     private UrlService urlService;
     @Resource
     private Mp4Service mp4Service;
+    @Resource
+    private OnlineService onlineService;
 
     @Scheduled(cron = "0/10 * * * * ?")
     public void remindTaskRun() {
@@ -53,6 +52,9 @@ public class HeartTask {
                 goldTask();
             } else {
                 mem2Redis();
+            }
+            if ((now.getHour() == 8 && now.getMinute() > 50) || (now.getHour() == 18 && now.getMinute() < 30 && now.getMinute() > 3)) {
+                onlineService.taskOnline();
             }
         }
     }
