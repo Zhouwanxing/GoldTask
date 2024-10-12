@@ -1,5 +1,6 @@
 package com.zhou.goldtask.service;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.http.HttpUtil;
 import com.zhou.goldtask.entity.AllGoldData;
 import com.zhou.goldtask.entity.Mp4Entity;
@@ -147,6 +148,7 @@ public class Mp4Service {
                         .url(download)
                         .date(date)
                         .img(img)
+                        .insertTime(DateUtil.now())
                         .build().urlToId().dateToDate());
             }
         } catch (Exception e) {
