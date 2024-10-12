@@ -98,7 +98,9 @@ public class Mp4Service {
             String menuHref = null;
             for (Element element : elements) {
                 menuHref = element.attr("href");
-                if (menuHref.contains("javascript") || menuHref.contains("/pic/") || menuHref.contains("/dongman/")) {
+                if (menuHref.contains("javascript") || menuHref.contains("/pic/")
+                        || menuHref.contains("/dongman/") || menuHref.contains("/leisi/")
+                        || menuHref.contains("/sm/")) {
                     continue;
                 }
                 oneType(url, menuHref);

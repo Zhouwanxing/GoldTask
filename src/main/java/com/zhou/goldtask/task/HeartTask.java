@@ -42,11 +42,11 @@ public class HeartTask {
 
         }
         if (now.getMinute() == 0 && now.getSecond() == 0) {
-            if (now.getHour() == 1) {
+            if (now.getHour() % 12 == 1) {
                 urlService.checkNewUrl();
-            } else if (now.getHour() == 2) {
+            } else if (now.getHour() % 12 == 2) {
                 mp4Service.genNew();
-            } else if (now.getHour() == 9) {
+            } else if (now.getHour() % 12 == 10) {
                 goldService.genToDayGold();
             } else if (now.getHour() == 12) {
                 goldTask();

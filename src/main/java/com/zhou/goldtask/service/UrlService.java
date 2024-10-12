@@ -1,5 +1,6 @@
 package com.zhou.goldtask.service;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import com.zhou.goldtask.entity.AllGoldData;
@@ -11,7 +12,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -45,7 +45,7 @@ public class UrlService {
         }
         AllGoldData.getInstance().addUrl(url);
         redisTemplate.opsForList().rightPush(Utils.UrlRedisKey, url);
-        urlRepository.save(UrlEntity.builder()._id(url).date(LocalDate.now().toString()).build());
+        urlRepository.save(UrlEntity.builder()._id(url).date(DateUtil.now()).build());
     }
 
     private String getUrlLocation(String url) {
@@ -86,7 +86,7 @@ public class UrlService {
             return;
         }
         for (int i = 0; i < size; i++) {
-            urlRepository.save(UrlEntity.builder()._id(redisTemplate.opsForList().index(Utils.UrlRedisKey, i)).date(LocalDate.now().toString()).build());
+            urlRepository.save(UrlEntity.builder()._id(redisTemplate.opsForList().index(Utils.UrlRedisKey, i)).date(DateUtil.now()).build());
         }
     }
 }
