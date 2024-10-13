@@ -142,7 +142,7 @@ public class Mp4Service {
             if (textLink == null || "".equals(textLink) || "".equals(download)) {
                 log.info("{}\n{}", url, doc.body());
             } else {
-                mp4Repository.save(Mp4Entity.builder()
+                mp4Repository.insert(Mp4Entity.builder()
                         .name(textLink)
                         .path(menuHref)
                         .url(download)
