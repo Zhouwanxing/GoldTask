@@ -101,7 +101,8 @@ public class Mp4Service {
                 menuHref = element.attr("href");
                 if (menuHref.contains("javascript") || menuHref.contains("/pic/")
                         || menuHref.contains("/dongman/") || menuHref.contains("/leisi/")
-                        || menuHref.contains("/sm/")) {
+                        || menuHref.contains("/sm/") || menuHref.contains("/nxx/")
+                        || menuHref.contains("/giga/")) {
                     continue;
                 }
                 oneType(url, menuHref);
