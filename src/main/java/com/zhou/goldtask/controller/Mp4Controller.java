@@ -1,5 +1,7 @@
 package com.zhou.goldtask.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.hutool.json.JSONObject;
 import com.zhou.goldtask.service.ITaskService;
 import com.zhou.goldtask.service.Mp4Service;
@@ -16,6 +18,8 @@ import java.util.Collections;
 @RestController
 @RequestMapping("/page/mp4")
 @CrossOrigin
+@SaCheckLogin
+@SaCheckRole("mp4")
 public class Mp4Controller {
     @Resource
     private Mp4Service mp4Service;

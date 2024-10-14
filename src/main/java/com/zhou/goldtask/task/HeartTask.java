@@ -3,6 +3,7 @@ package com.zhou.goldtask.task;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 import com.zhou.goldtask.entity.AllGoldData;
+import com.zhou.goldtask.entity.EnvConfig;
 import com.zhou.goldtask.entity.GoldEntity;
 import com.zhou.goldtask.service.*;
 import com.zhou.goldtask.utils.Utils;
@@ -31,9 +32,14 @@ public class HeartTask {
     private Mp4Service mp4Service;
     @Resource
     private OnlineService onlineService;
+    @Resource
+    private EnvConfig envConfig;
 
     @Scheduled(cron = "0/10 * * * * ?")
     public void remindTaskRun() {
+        if (Utils.localhost.equals(envConfig.getHostName())) {
+            return;
+        }
         LocalDateTime now = LocalDateTime.now();
         try {
             log.info(HttpUtil.get(Utils.HeartbeatUrl, 3000));
