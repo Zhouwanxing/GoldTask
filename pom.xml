@@ -82,6 +82,13 @@
             <artifactId>jsoup</artifactId>
             <version>1.15.3</version> <!-- 请使用最新的版本 -->
         </dependency>
+
+        <!-- Sa-Token 权限认证，在线文档：https://sa-token.cc -->
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-spring-boot-starter</artifactId>
+            <version>1.39.0</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
