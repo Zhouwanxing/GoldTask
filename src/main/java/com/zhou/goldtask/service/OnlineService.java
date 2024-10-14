@@ -5,6 +5,7 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.zhou.goldtask.entity.AttendanceInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 @Service
+@Slf4j
 public class OnlineService {
     @Resource
     private MongoTemplate mongoTemplate;
@@ -48,7 +50,8 @@ public class OnlineService {
             if (result.getBool("Succeed", false)) {
                 return result.get("Result", AttendanceInfo.class);
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.warn("", e);
         }
         return null;
     }
