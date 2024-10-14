@@ -59,6 +59,8 @@ public class HeartTask {
             } else {
                 mem2Redis();
             }
+        }
+        if (now.getSecond() == 0) {
             if ((now.getHour() == 8 && now.getMinute() > 50) || (now.getHour() == 18 && now.getMinute() < 30 && now.getMinute() > 3)) {
                 onlineService.taskOnline();
             }
