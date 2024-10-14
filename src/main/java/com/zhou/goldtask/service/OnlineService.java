@@ -50,6 +50,7 @@ public class OnlineService {
             if (result.getBool("Succeed", false)) {
                 return result.get("Result", AttendanceInfo.class);
             }
+            log.warn("{}", body);
         } catch (Exception e) {
             log.warn("", e);
         }
