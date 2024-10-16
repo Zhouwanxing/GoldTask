@@ -1,10 +1,8 @@
 package com.zhou.goldtask.task;
 
 import cn.hutool.http.HttpUtil;
-import cn.hutool.json.JSONUtil;
 import com.zhou.goldtask.entity.AllGoldData;
 import com.zhou.goldtask.entity.EnvConfig;
-import com.zhou.goldtask.entity.GoldEntity;
 import com.zhou.goldtask.service.*;
 import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
@@ -68,14 +66,7 @@ public class HeartTask {
     }
 
     private void mem2Redis() {
-        Long size = redisTemplate.opsForList().size(Utils.goldRedisKey);
-        if (size == null || size == 0) {
-            List<GoldEntity> list = AllGoldData.getInstance().getList();
-            for (GoldEntity goldEntity : list) {
-                redisTemplate.opsForList().rightPush(Utils.goldRedisKey, JSONUtil.toJsonStr(goldEntity));
-            }
-        }
-        size = redisTemplate.opsForList().size(Utils.UrlRedisKey);
+        Long size = redisTemplate.opsForList().size(Utils.UrlRedisKey);
         if (size == null || size == 0) {
             List<String> list = AllGoldData.getInstance().getUrls();
             for (String url : list) {
@@ -85,6 +76,6 @@ public class HeartTask {
     }
 
     private void goldTask() {
-        taskService.remindTask(LocalDate.now().toString(), "周生生:" + AllGoldData.getInstance().getLast().getZss() + ";周大福:" + AllGoldData.getInstance().getLast().getZdf());
+        taskService.remindTask(LocalDate.now().toString(), "周生生:" + goldService.getTodayGold().getZss() + ";周大福:" + goldService.getTodayGold().getZdf());
     }
 }

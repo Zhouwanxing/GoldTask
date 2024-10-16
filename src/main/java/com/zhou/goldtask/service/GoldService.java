@@ -4,11 +4,9 @@ package com.zhou.goldtask.service;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.zhou.goldtask.entity.AllGoldData;
 import com.zhou.goldtask.entity.GoldEntity;
-import com.zhou.goldtask.utils.Utils;
+import com.zhou.goldtask.repository.GoldRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -18,7 +16,12 @@ import java.time.LocalDate;
 @Slf4j
 public class GoldService {
     @Resource
-    private RedisTemplate<String, String> redisTemplate;
+    private GoldRepository goldRepository;
+
+    public GoldEntity getTodayGold() {
+        GoldEntity item = goldRepository.findItemById(LocalDate.now().toString());
+        return item == null ? GoldEntity.builder()._id("").zdf(0).zss(0).build() : item;
+    }
 
     public void genToDayGold() {
         //周生生
@@ -39,13 +42,6 @@ public class GoldService {
         } catch (Exception e) {
             log.warn("", e);
         }
-        GoldEntity gold = GoldEntity.builder().date(LocalDate.now().toString()).zss(zss).zdf(zdf).build();
-        if (AllGoldData.getInstance().add(gold)) {
-            redisTemplate.opsForList().rightPush(Utils.goldRedisKey, JSONUtil.toJsonStr(gold));
-        }
-        if (AllGoldData.getInstance().getList().size() > Utils.goldMaxSize) {
-            redisTemplate.opsForList().leftPop(Utils.goldRedisKey);
-            AllGoldData.getInstance().getList().remove(0);
-        }
+        goldRepository.save(GoldEntity.builder()._id(LocalDate.now().toString()).zss(zss).zdf(zdf).build());
     }
 }

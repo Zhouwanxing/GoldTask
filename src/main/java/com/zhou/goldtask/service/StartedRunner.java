@@ -1,8 +1,6 @@
 package com.zhou.goldtask.service;
 
-import cn.hutool.json.JSONUtil;
 import com.zhou.goldtask.entity.AllGoldData;
-import com.zhou.goldtask.entity.GoldEntity;
 import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -20,8 +18,6 @@ public class StartedRunner implements CommandLineRunner {
     private ITaskService taskService;
     @Resource
     private RedisTemplate<String, String> redisTemplate;
-    @Resource
-    private GoldService goldService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -30,19 +26,7 @@ public class StartedRunner implements CommandLineRunner {
     }
 
     private void redisToMem() {
-        Long size = redisTemplate.opsForList().size(Utils.goldRedisKey);
-        if (size == null || size == 0) {
-            goldService.genToDayGold();
-            return;
-        }
-        String index = null;
-        for (int i = 0; i < size; i++) {
-            index = redisTemplate.opsForList().index(Utils.goldRedisKey, i);
-            AllGoldData.getInstance().add(JSONUtil.toBean(index, GoldEntity.class));
-        }
-        log.info("allGoldData size:{}", AllGoldData.getInstance().getList().size());
-
-        size = redisTemplate.opsForList().size(Utils.UrlRedisKey);
+        Long size = redisTemplate.opsForList().size(Utils.UrlRedisKey);
         if (size == null || size == 0) {
             return;
         }
