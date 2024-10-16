@@ -35,7 +35,7 @@ public class HeartTask {
     @Resource
     private EnvConfig envConfig;
 
-    @Scheduled(cron = "0/10 * * * * ?")
+    @Scheduled(cron = "${heartTask.cron:0 * * * * ?}")
     public void remindTaskRun() {
         if (Utils.localhost.equals(envConfig.getHostName())) {
             return;
