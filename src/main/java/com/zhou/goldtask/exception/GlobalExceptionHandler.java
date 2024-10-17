@@ -9,6 +9,6 @@ public class GlobalExceptionHandler {
     // 全局异常拦截
     @ExceptionHandler
     public SaResult handlerException(Exception e) {
-        return SaResult.error(e.getMessage());
+        return SaResult.error(e.getMessage()).setCode(401);
     }
 }

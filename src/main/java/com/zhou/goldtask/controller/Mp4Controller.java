@@ -77,7 +77,7 @@ public class Mp4Controller {
     public SaResult initData(@RequestBody JSONObject data) {
         log.info("{}", data);
         urlService.addUrl(data.getStr("url", ""));
-        return SaResult.data(urlService.getUrls());
+        return getUrls();
     }
 
     @PostMapping("/getUrls")
