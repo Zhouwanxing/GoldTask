@@ -2,6 +2,7 @@ package com.zhou.goldtask.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.util.SaResult;
 import cn.hutool.json.JSONObject;
 import com.zhou.goldtask.service.Mp4Service;
 import com.zhou.goldtask.service.UrlService;
@@ -50,22 +51,25 @@ public class Mp4Controller {
     }
 
     @GetMapping("/pageShowList")
-    public JSONObject pageShowList(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                   @RequestParam(value = "showLike", required = false) boolean isShowLike
+    public SaResult pageShowList(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                 @RequestParam(value = "showLike", required = false) boolean isShowLike
     ) {
-        return new JSONObject().putOpt("list", mp4Service.pageShowList(page, isShowLike)).putOpt("count", mp4Service.count(isShowLike));
+        SaResult result = SaResult.ok();
+        result.set("list", mp4Service.pageShowList(page, isShowLike));
+        result.set("count", mp4Service.count(isShowLike));
+        return result;
     }
 
     @GetMapping("/toNotLike")
-    public JSONObject toNotLike(@RequestParam(value = "id") String id) {
+    public SaResult toNotLike(@RequestParam(value = "id") String id) {
         mp4Service.updateLike(id, false);
-        return new JSONObject().putOpt("success", true);
+        return SaResult.ok();
     }
 
 
     @GetMapping("/updateLike")
-    public JSONObject updateLike(@RequestParam(value = "id") String id, @RequestParam(value = "like") boolean isLike) {
+    public SaResult updateLike(@RequestParam(value = "id") String id, @RequestParam(value = "like") boolean isLike) {
         mp4Service.updateLike(id, isLike);
-        return new JSONObject().putOpt("success", true);
+        return SaResult.ok();
     }
 }

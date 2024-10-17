@@ -1,6 +1,5 @@
 package com.zhou.goldtask.repository;
 
-import com.zhou.goldtask.entity.DevEntity;
 import com.zhou.goldtask.entity.EnvConfig;
 import com.zhou.goldtask.entity.Mp4Entity;
 import com.zhou.goldtask.utils.Utils;
@@ -40,12 +39,6 @@ public class Mp4Dao {
             query.fields().exclude("name", "img");
         }
         return mongoTemplate.find(query, Mp4Entity.class);
-    }
-
-    public boolean isMyDev(String devId) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("_id").is(devId));
-        return mongoTemplate.count(query, DevEntity.class) > 0;
     }
 
     public long count(boolean isShowLike) {
