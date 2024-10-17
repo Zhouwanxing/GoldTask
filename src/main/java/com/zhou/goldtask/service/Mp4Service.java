@@ -121,7 +121,7 @@ public class Mp4Service {
                 if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(Utils.Mp4RedisKey + mp4Href))) {
                     continue;
                 }
-                stringRedisTemplate.opsForValue().set(Utils.Mp4RedisKey + mp4Href, "1", 1, TimeUnit.DAYS);
+                stringRedisTemplate.opsForValue().set(Utils.Mp4RedisKey + mp4Href, "", 13, TimeUnit.HOURS);
                 handleOneLast(url + mp4Href,
                         channel.getElementsByTag("i").text(),
                         channel.getElementsByTag("img").attr("data-original"), menuHref);
