@@ -72,4 +72,22 @@ public class Mp4Controller {
         mp4Service.updateLike(id, isLike);
         return SaResult.ok();
     }
+
+    @PostMapping("/saveUrl")
+    public SaResult initData(@RequestBody JSONObject data) {
+        log.info("{}", data);
+        urlService.addUrl(data.getStr("url", ""));
+        return SaResult.data(urlService.getUrls());
+    }
+
+    @PostMapping("/getUrls")
+    public SaResult getUrls() {
+        return SaResult.data(urlService.getUrls());
+    }
+
+    @PostMapping("/deleteUrl")
+    public SaResult deleteUrl(@RequestBody JSONObject data) {
+        urlService.deleteUrl(data.getStr("url"));
+        return getUrls();
+    }
 }

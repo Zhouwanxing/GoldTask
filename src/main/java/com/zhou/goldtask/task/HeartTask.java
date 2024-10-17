@@ -1,27 +1,22 @@
 package com.zhou.goldtask.task;
 
 import cn.hutool.http.HttpUtil;
-import com.zhou.goldtask.entity.AllGoldData;
 import com.zhou.goldtask.entity.EnvConfig;
 import com.zhou.goldtask.service.*;
 import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @Slf4j
 public class HeartTask {
     @Resource
     private ITaskService taskService;
-    @Resource
-    private RedisTemplate<String, String> redisTemplate;
     @Resource
     private GoldService goldService;
     @Resource
@@ -54,23 +49,11 @@ public class HeartTask {
                 goldService.genToDayGold();
             } else if (now.getHour() == 12) {
                 goldTask();
-            } else {
-                mem2Redis();
             }
         }
         if (now.getSecond() == 0) {
             if ((now.getHour() == 8 && now.getMinute() > 50) || (now.getHour() == 18 && now.getMinute() < 30 && now.getMinute() > 3)) {
                 onlineService.taskOnline();
-            }
-        }
-    }
-
-    private void mem2Redis() {
-        Long size = redisTemplate.opsForList().size(Utils.UrlRedisKey);
-        if (size == null || size == 0) {
-            List<String> list = AllGoldData.getInstance().getUrls();
-            for (String url : list) {
-                redisTemplate.opsForList().rightPush(Utils.UrlRedisKey, url);
             }
         }
     }

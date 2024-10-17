@@ -3,27 +3,23 @@ package com.zhou.goldtask.service;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
-import com.zhou.goldtask.entity.AllGoldData;
 import com.zhou.goldtask.entity.UrlEntity;
 import com.zhou.goldtask.repository.UrlRepository;
-import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class UrlService {
     @Resource
-    private RedisTemplate<String, String> redisTemplate;
-    @Resource
     private UrlRepository urlRepository;
 
     public void checkNewUrl() {
-        List<String> urls = AllGoldData.getInstance().getUrls();
+        List<String> urls = getUrls();
         Set<String> addUrls = new HashSet<>();
         String newUrl = null;
         for (String url : urls) {
@@ -39,13 +35,22 @@ public class UrlService {
         }
     }
 
+    public List<String> getUrls() {
+        return urlRepository.findAllSort().stream().map(UrlEntity::get_id).collect(Collectors.toList());
+    }
+
+    public void deleteUrl(String url) {
+        urlRepository.deleteById(url);
+    }
+
     public void addUrl(String url) {
         if (StrUtil.isBlankIfStr(url)) {
             return;
         }
-        AllGoldData.getInstance().addUrl(url);
-        redisTemplate.opsForList().rightPush(Utils.UrlRedisKey, url);
-        urlRepository.save(UrlEntity.builder()._id(url).date(DateUtil.now()).build());
+        try {
+            urlRepository.insert(UrlEntity.builder()._id(url).date(DateUtil.now()).build());
+        } catch (Exception ignored) {
+        }
     }
 
     private String getUrlLocation(String url) {
@@ -78,15 +83,5 @@ public class UrlService {
 
         }
         return null;
-    }
-
-    public void redisUrlToDb() {
-        Long size = redisTemplate.opsForList().size(Utils.UrlRedisKey);
-        if (size == null || size == 0) {
-            return;
-        }
-        for (int i = 0; i < size; i++) {
-            urlRepository.save(UrlEntity.builder()._id(redisTemplate.opsForList().index(Utils.UrlRedisKey, i)).date(DateUtil.now()).build());
-        }
     }
 }

@@ -2,7 +2,6 @@ package com.zhou.goldtask.service;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.http.HttpUtil;
-import com.zhou.goldtask.entity.AllGoldData;
 import com.zhou.goldtask.entity.Mp4Entity;
 import com.zhou.goldtask.repository.Mp4Dao;
 import com.zhou.goldtask.repository.Mp4Repository;
@@ -28,6 +27,8 @@ public class Mp4Service {
     private Mp4Repository mp4Repository;
     @Resource
     private Mp4Dao mp4Dao;
+    @Resource
+    private UrlService urlService;
 
     public void saveOne() {
         Mp4Entity entity = Mp4Entity.builder()
@@ -75,7 +76,7 @@ public class Mp4Service {
     }
 
     public void genNew() {
-        List<String> urls = AllGoldData.getInstance().getUrls();
+        List<String> urls = urlService.getUrls();
         for (String url : urls) {
             genNewOne(url);
         }
