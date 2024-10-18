@@ -1,6 +1,8 @@
 package com.zhou.goldtask.task;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.http.HttpUtil;
+import com.zhou.goldtask.controller.WebSocketServer;
 import com.zhou.goldtask.entity.EnvConfig;
 import com.zhou.goldtask.service.*;
 import com.zhou.goldtask.utils.Utils;
@@ -32,6 +34,8 @@ public class HeartTask {
     private EnvConfig envConfig;
     @Resource
     private MongoTemplate mongoTemplate;
+    @Resource
+    private WebSocketServer webSocketServer;
 
     @Scheduled(cron = "${heartTask.cron:0 * * * * ?}")
     public void remindTaskRun() {
@@ -41,7 +45,8 @@ public class HeartTask {
         LocalDateTime now = LocalDateTime.now();
         try {
             log.info(HttpUtil.get(Utils.HeartbeatUrl, 3000));
-            log.info(HttpUtil.get(Utils.HeartbeatNginxUrl, 3000));
+//            log.info(HttpUtil.get(Utils.HeartbeatNginxUrl, 3000));
+            webSocketServer.sendToAllClient(DateUtil.now());
         } catch (Exception ignored) {
 
         }
