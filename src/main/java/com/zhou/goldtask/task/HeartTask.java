@@ -5,10 +5,13 @@ import com.zhou.goldtask.entity.EnvConfig;
 import com.zhou.goldtask.service.*;
 import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -27,6 +30,8 @@ public class HeartTask {
     private OnlineService onlineService;
     @Resource
     private EnvConfig envConfig;
+    @Resource
+    private MongoTemplate mongoTemplate;
 
     @Scheduled(cron = "${heartTask.cron:0 * * * * ?}")
     public void remindTaskRun() {
@@ -58,7 +63,20 @@ public class HeartTask {
         }
     }
 
+    private String getMongoUse() {
+        try {
+            Document document = mongoTemplate.executeCommand("{ dbStats: 1 }");
+            long totalSize = document.getLong("dataSize") + document.getLong("indexSize");
+            double mb = (double) totalSize / 1024 / 1024;
+            DecimalFormat decimalFormat = new DecimalFormat("#.00");
+            return mb > 1 ? decimalFormat.format(mb) + "MB" : decimalFormat.format((double) totalSize / 1024) + "KB";
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
     private void goldTask() {
-        taskService.remindTask(LocalDate.now().toString(), "周生生:" + goldService.getTodayGold().getZss() + ";周大福:" + goldService.getTodayGold().getZdf());
+        String content = "周生生:" + goldService.getTodayGold().getZss() + ";周大福:" + goldService.getTodayGold().getZdf() + ";占用:" + getMongoUse();
+        taskService.remindTask(LocalDate.now().toString(), content, true);
     }
 }

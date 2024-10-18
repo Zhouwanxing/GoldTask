@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
+/**
+ * https://bark.day.app/#/?id=bark
+ */
 @Service
 @Slf4j
 @ConditionalOnProperty(prefix = "my", name = "task", havingValue = "bark")
@@ -19,9 +22,9 @@ public class BarkTaskService implements ITaskService {
     private EnvConfig envConfig;
 
     @Override
-    public void remindTask(String title, String body) {
+    public void remindTask(String title, String body, boolean isAutoSave) {
         String urlString = "https://api.day.app/" + envConfig.getBarkId();
-        String data = JSONUtil.toJsonStr(new JSONObject().putOpt("body", body).putOpt("title", title));
+        String data = JSONUtil.toJsonStr(new JSONObject().putOpt("body", body).putOpt("title", title).putOpt("isArchive", isAutoSave ? "1" : ""));
         try {
             log.info("{},{},{}", HttpUtil.post(urlString, data), urlString, data);
         } catch (Exception e) {

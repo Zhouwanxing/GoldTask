@@ -17,6 +17,6 @@ public class StartedRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        taskService.remindTask(LocalDateTime.now().format(DateTimeFormatter.ofPattern(Utils.dateTimeFormat)), "服务启动");
+        taskService.remindTask(LocalDateTime.now().format(DateTimeFormatter.ofPattern(Utils.dateTimeFormat)), "服务启动", false);
     }
 }

@@ -99,7 +99,7 @@ public class Mp4Service {
                 if (menuHref.contains("javascript") || menuHref.contains("/pic/")
                         || menuHref.contains("/dongman/") || menuHref.contains("/leisi/")
                         || menuHref.contains("/sm/") || menuHref.contains("/nxx/")
-                        || menuHref.contains("/giga/")) {
+                        || menuHref.contains("/giga/") || menuHref.contains("/youma/")) {
                     continue;
                 }
                 oneType(url, menuHref);
