@@ -1,7 +1,9 @@
 package com.zhou.goldtask.repository;
 
+import cn.hutool.core.util.StrUtil;
 import com.zhou.goldtask.entity.EnvConfig;
 import com.zhou.goldtask.entity.Mp4Entity;
+import com.zhou.goldtask.entity.Mp4LikeDto;
 import com.zhou.goldtask.utils.Utils;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -49,5 +51,23 @@ public class Mp4Dao {
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(id));
         mongoTemplate.updateFirst(query, new Update().set("like", isLike), Mp4Entity.class);
+    }
+
+    public List<String> getAllPath() {
+        return mongoTemplate.findDistinct("path", Mp4Entity.class, String.class);
+    }
+
+    public List<Mp4Entity> findByDto(Mp4LikeDto dto) {
+        Query query = findBaseQuery(true);
+        if (!StrUtil.isEmptyIfStr(dto.getPath())) {
+            query.addCriteria(Criteria.where("path").is(dto.getPath()));
+        }
+        query.with(Sort.by(Sort.Direction.DESC, "date", "path"));
+        query.skip((dto.getPage() - 1) * 10L);
+        query.limit(10);
+        if (Utils.localhost.equals(envConfig.getHostName())) {
+            query.fields().exclude("name", "img");
+        }
+        return mongoTemplate.find(query, Mp4Entity.class);
     }
 }

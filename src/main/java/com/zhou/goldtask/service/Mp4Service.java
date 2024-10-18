@@ -3,6 +3,7 @@ package com.zhou.goldtask.service;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.http.HttpUtil;
 import com.zhou.goldtask.entity.Mp4Entity;
+import com.zhou.goldtask.entity.Mp4LikeDto;
 import com.zhou.goldtask.repository.Mp4Dao;
 import com.zhou.goldtask.repository.Mp4Repository;
 import com.zhou.goldtask.utils.Utils;
@@ -42,7 +43,10 @@ public class Mp4Service {
     }
 
     public List<Mp4Entity> pageShowList(Integer page, boolean isShowLike) {
-        List<Mp4Entity> list = mp4Dao.findByPage(page, isShowLike);
+        return handleList(mp4Dao.findByPage(page, isShowLike));
+    }
+
+    private List<Mp4Entity> handleList(List<Mp4Entity> list) {
         for (Mp4Entity mp4 : list) {
             if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(Utils.Mp4ImgRedisKey + mp4.get_id()))) {
                 mp4.setImg(stringRedisTemplate.opsForValue().get(Utils.Mp4ImgRedisKey + mp4.get_id()));
@@ -51,6 +55,10 @@ public class Mp4Service {
             }
         }
         return list;
+    }
+
+    public List<Mp4Entity> searchLike(Mp4LikeDto dto) {
+        return handleList(mp4Dao.findByDto(dto));
     }
 
     public long count(boolean isShowLike) {
@@ -170,5 +178,9 @@ public class Mp4Service {
         if (!isLike) {
             stringRedisTemplate.delete(Utils.Mp4RedisKey + id);
         }
+    }
+
+    public List<String> getAllPath(){
+        return mp4Dao.getAllPath();
     }
 }
