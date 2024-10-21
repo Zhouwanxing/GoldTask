@@ -61,6 +61,10 @@ public class Mp4Service {
         return handleList(mp4Dao.findByDto(dto));
     }
 
+    public long searchLikeCount(Mp4LikeDto dto) {
+        return mp4Dao.searchLikeCount(dto);
+    }
+
     public long count(boolean isShowLike) {
         return mp4Dao.count(isShowLike);
     }
@@ -180,7 +184,7 @@ public class Mp4Service {
         }
     }
 
-    public List<String> getAllPath(){
+    public List<String> getAllPath() {
         return mp4Dao.getAllPath();
     }
 }

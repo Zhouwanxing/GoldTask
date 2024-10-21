@@ -58,10 +58,7 @@ public class Mp4Dao {
     }
 
     public List<Mp4Entity> findByDto(Mp4LikeDto dto) {
-        Query query = findBaseQuery(true);
-        if (!StrUtil.isEmptyIfStr(dto.getPath())) {
-            query.addCriteria(Criteria.where("path").is(dto.getPath()));
-        }
+        Query query = searchLikeQuery(dto);
         query.with(Sort.by(Sort.Direction.DESC, "date", "path"));
         query.skip((dto.getPage() - 1) * 10L);
         query.limit(10);
@@ -69,5 +66,18 @@ public class Mp4Dao {
             query.fields().exclude("name", "img");
         }
         return mongoTemplate.find(query, Mp4Entity.class);
+    }
+
+    private Query searchLikeQuery(Mp4LikeDto dto) {
+        Query query = findBaseQuery(true);
+        if (!StrUtil.isEmptyIfStr(dto.getPath())) {
+            query.addCriteria(Criteria.where("path").is(dto.getPath()));
+        }
+        return query;
+    }
+
+    public long searchLikeCount(Mp4LikeDto dto) {
+        Query query = searchLikeQuery(dto);
+        return mongoTemplate.count(query, Mp4Entity.class);
     }
 }
