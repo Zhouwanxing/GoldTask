@@ -1,12 +1,11 @@
 package com.zhou.goldtask.controller;
 
+import cn.hutool.json.JSONUtil;
+import com.zhou.goldtask.entity.WsData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import javax.websocket.OnClose;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
+import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.util.Collection;
@@ -21,7 +20,7 @@ import java.util.Map;
 @Slf4j
 public class WebSocketServer {
     //存放会话对象
-    private static Map<String, Session> sessionMap = new HashMap();
+    private static final Map<String, Session> sessionMap = new HashMap<>();
 
     /**
      * 连接建立成功调用的方法
@@ -30,6 +29,12 @@ public class WebSocketServer {
     public void onOpen(Session session, @PathParam("sid") String sid) {
         log.info("客户端：" + sid + "建立连接");
         sessionMap.put(sid, session);
+        sendOnlineUser();
+    }
+
+    private void sendOnlineUser() {
+        sendToAllClient(WsData.builder().type("onlineUser").from("system").message(String.join(",", sessionMap.keySet())).build());
+
     }
 
     /**
@@ -40,24 +45,36 @@ public class WebSocketServer {
     @OnMessage
     public void onMessage(String message, @PathParam("sid") String sid) {
         log.info("收到来自客户端：" + sid + "的信息:" + message);
+        if (JSONUtil.isTypeJSON(message)) {
+            WsData wsData = JSONUtil.toBean(message, WsData.class);
+            wsData.setFrom(sid);
+            wsData.setType("newMessage");
+            wsData.setId(System.currentTimeMillis() + "");
+            sendToClient(wsData.getTo(), wsData);
+        }
     }
 
     /**
      * 连接关闭调用的方法
      *
-     * @param sid
+     * @param sid 1
      */
     @OnClose
     public void onClose(@PathParam("sid") String sid) {
         log.info("连接断开:" + sid);
         sessionMap.remove(sid);
+        sendOnlineUser();
     }
 
     /**
      * 群发
      *
-     * @param message
+     * @param message 1
      */
+    public void sendToAllClient(WsData message) {
+        sendToAllClient(message.toString());
+    }
+
     public void sendToAllClient(String message) {
         Collection<Session> sessions = sessionMap.values();
         for (Session session : sessions) {
@@ -65,8 +82,24 @@ public class WebSocketServer {
                 //服务器向客户端发送消息
                 session.getBasicRemote().sendText(message);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.warn("", e);
             }
         }
+    }
+
+    public void sendToClient(String sid, String message) {
+        Session session = sessionMap.get(sid);
+        if (session == null) {
+            return;
+        }
+        try {
+            session.getBasicRemote().sendText(message);
+        } catch (Exception e) {
+            log.warn("", e);
+        }
+    }
+
+    public void sendToClient(String sid, WsData message) {
+        sendToClient(sid, message.toString());
     }
 }

@@ -47,7 +47,7 @@ public class HeartTask {
             HttpUtil.get(Utils.HeartbeatUrl, 3000);
 //            log.info();
 //            log.info(HttpUtil.get(Utils.HeartbeatNginxUrl, 3000));
-            webSocketServer.sendToAllClient(DateUtil.now());
+//            webSocketServer.sendToAllClient(DateUtil.now());
         } catch (Exception ignored) {
 
         }
