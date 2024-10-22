@@ -102,6 +102,7 @@ public class Mp4Service {
                     .get();
             Elements menu = doc.getElementsByClass("menu");
             if (menu.size() == 0) {
+                handleOther(url);
                 return;
             }
             Elements elements = menu.get(0).getElementsByTag("a");
@@ -118,6 +119,13 @@ public class Mp4Service {
             }
         } catch (Exception e) {
             log.warn("", e);
+        }
+    }
+
+    private void handleOther(String url) {
+        List<String> paths = mp4Dao.distinctPath();
+        for (String path : paths) {
+            oneType(url, path);
         }
     }
 

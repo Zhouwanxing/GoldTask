@@ -80,4 +80,8 @@ public class Mp4Dao {
         Query query = searchLikeQuery(dto);
         return mongoTemplate.count(query, Mp4Entity.class);
     }
+
+    public List<String> distinctPath() {
+        return mongoTemplate.findDistinct("path", Mp4Entity.class, String.class);
+    }
 }
