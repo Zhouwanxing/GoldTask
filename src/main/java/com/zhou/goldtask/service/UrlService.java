@@ -21,17 +21,19 @@ public class UrlService {
     public void checkNewUrl() {
         List<String> urls = getUrls();
         Set<String> addUrls = new HashSet<>();
-        String newUrl = null;
+        String newUrl;
         for (String url : urls) {
             newUrl = getUrlLocation(url);
             if (newUrl != null && newUrl.startsWith("http") && !urls.contains(newUrl)) {
                 addUrls.add(newUrl);
             }
-        }
-        if (addUrls.size() > 0) {
-            for (String addUrl : addUrls) {
-                addUrl(addUrl);
+            newUrl = getEnUrl(url);
+            if (newUrl != null && newUrl.startsWith("http") && !urls.contains(newUrl)) {
+                addUrls.add(newUrl);
             }
+        }
+        for (String addUrl : addUrls) {
+            addUrl(addUrl);
         }
     }
 

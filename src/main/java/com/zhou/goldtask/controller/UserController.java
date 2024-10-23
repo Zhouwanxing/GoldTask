@@ -24,7 +24,7 @@ public class UserController {
 
     @RequestMapping("/heartbeat")
     public String heartbeat() {
-        return "success";
+        return "s";
     }
 
     @RequestMapping("/login")
