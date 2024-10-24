@@ -9,17 +9,14 @@ my:
 magic-api:
   web: /magic/web
   task:
-    thread-name-prefix: magic-task- #???????
+    thread-name-prefix: magic-task-
     pool:
-      size: 8 #??????????CPU???
+      size: 2
     shutdown:
-      awaitTermination: false #?????????????????false
-      awaitTerminationPeriod: 10s # ????????????????
-  security:
-    username: admin
-    password: admin
+      awaitTermination: false
+      awaitTerminationPeriod: 10s
   resource:
-    location: /magic-api
+    type: redis
 spring:
   profiles:
     active: dev
