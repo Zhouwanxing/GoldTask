@@ -50,7 +50,14 @@ public class Mp4Dao {
     public void updateLike(String id, boolean isLike) {
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(id));
-        mongoTemplate.updateFirst(query, new Update().set("like", isLike), Mp4Entity.class);
+        Update like = new Update().set("like", isLike);
+        if (!isLike) {
+            like.unset("url");
+            like.unset("date");
+            like.unset("insertTime");
+            like.unset("name");
+        }
+        mongoTemplate.updateFirst(query, like, Mp4Entity.class);
     }
 
     public List<String> getAllPath() {
