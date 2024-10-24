@@ -75,7 +75,7 @@ public class Mp4Service {
             if (url == null || "".equals(url)) {
                 return "";
             }
-            log.info("start:{}", url);
+//            log.info("start:{}", url);
             String data = HttpUtil.get(url, 1000);
             if (data != null && !"".equals(data)) {
                 stringRedisTemplate.opsForValue().set(Utils.Mp4ImgRedisKey + mp4.get_id(), data, 1, TimeUnit.DAYS);
