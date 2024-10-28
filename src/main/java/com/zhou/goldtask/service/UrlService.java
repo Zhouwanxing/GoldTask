@@ -26,10 +26,12 @@ public class UrlService {
             newUrl = getUrlLocation(url);
             if (newUrl != null && newUrl.startsWith("http") && !urls.contains(newUrl)) {
                 addUrls.add(newUrl);
+                break;
             }
             newUrl = getEnUrl(url);
             if (newUrl != null && newUrl.startsWith("http") && !urls.contains(newUrl)) {
                 addUrls.add(newUrl);
+                break;
             }
         }
         for (String addUrl : addUrls) {
