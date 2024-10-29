@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 public class UrlService {
     @Resource
     private UrlRepository urlRepository;
+    @Resource
+    private Mp4Service mp4Service;
 
     public void checkNewUrl() {
         List<String> urls = getUrls();
@@ -36,7 +38,9 @@ public class UrlService {
         }
         for (String addUrl : addUrls) {
             addUrl(addUrl);
+            urls.add(0, addUrl);
         }
+        mp4Service.genNew(urls);
     }
 
     public List<String> getUrls() {

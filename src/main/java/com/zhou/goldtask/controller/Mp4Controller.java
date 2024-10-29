@@ -35,7 +35,7 @@ public class Mp4Controller {
 
     @GetMapping("/genNew")
     public JSONObject genNew() {
-        mp4Service.genNew();
+        mp4Service.genNew(null);
         return new JSONObject().putOpt("success", true);
     }
 

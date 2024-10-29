@@ -7,9 +7,12 @@ import cn.hutool.json.JSONUtil;
 import com.zhou.goldtask.entity.GoldEntity;
 import com.zhou.goldtask.repository.GoldRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 
 @Service
@@ -17,6 +20,10 @@ import java.time.LocalDate;
 public class GoldService {
     @Resource
     private GoldRepository goldRepository;
+    @Resource
+    private MongoTemplate mongoTemplate;
+    @Resource
+    private ITaskService taskService;
 
     public GoldEntity getTodayGold() {
         GoldEntity item = goldRepository.findItemById(LocalDate.now().toString());
@@ -43,5 +50,23 @@ public class GoldService {
             log.warn("", e);
         }
         goldRepository.save(GoldEntity.builder()._id(LocalDate.now().toString()).zss(zss).zdf(zdf).build());
+        taskService.remindTask(LocalDate.now().toString(), "周生生:" + zss + ";周大福:" + zdf + ";占用:" + getMongoUse(), true);
+    }
+
+    public void goldTask() {
+        String content = "周生生:" + getTodayGold().getZss() + ";周大福:" + getTodayGold().getZdf() + ";占用:" + getMongoUse();
+        taskService.remindTask(LocalDate.now().toString(), content, true);
+    }
+
+    private String getMongoUse() {
+        try {
+            Document document = mongoTemplate.executeCommand("{ dbStats: 1 }");
+            long totalSize = document.getLong("dataSize") + document.getLong("indexSize");
+            double mb = (double) totalSize / 1024 / 1024;
+            DecimalFormat decimalFormat = new DecimalFormat("#.00");
+            return mb > 1 ? decimalFormat.format(mb) + "MB" : decimalFormat.format((double) totalSize / 1024) + "KB";
+        } catch (Exception e) {
+            return "";
+        }
     }
 }

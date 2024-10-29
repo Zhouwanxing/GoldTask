@@ -87,8 +87,10 @@ public class Mp4Service {
         return url;
     }
 
-    public void genNew() {
-        List<String> urls = urlService.getUrls();
+    public void genNew(List<String> urls) {
+        if (urls == null || urls.size() == 0) {
+            urls = urlService.getUrls();
+        }
         for (String url : urls) {
             if (handleOther(url)) {
                 break;
