@@ -1,8 +1,6 @@
 package com.zhou.goldtask.task;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.http.HttpUtil;
-import com.zhou.goldtask.controller.WebSocketServer;
 import com.zhou.goldtask.entity.EnvConfig;
 import com.zhou.goldtask.service.*;
 import com.zhou.goldtask.utils.Utils;
@@ -34,8 +32,6 @@ public class HeartTask {
     private EnvConfig envConfig;
     @Resource
     private MongoTemplate mongoTemplate;
-    @Resource
-    private WebSocketServer webSocketServer;
 
     @Scheduled(cron = "${heartTask.cron:0 * * * * ?}")
     public void remindTaskRun() {
@@ -52,13 +48,11 @@ public class HeartTask {
 
         }
         if (now.getMinute() == 0 && now.getSecond() == 0) {
-            if (now.getHour() % 12 == 1) {
+            if (now.getHour() == 1) {
                 urlService.checkNewUrl();
-            } else if (now.getHour() % 12 == 2) {
                 mp4Service.genNew();
-            } else if (now.getHour() % 12 == 10) {
-                goldService.genToDayGold();
             } else if (now.getHour() == 12) {
+                goldService.genToDayGold();
                 goldTask();
             }
         }

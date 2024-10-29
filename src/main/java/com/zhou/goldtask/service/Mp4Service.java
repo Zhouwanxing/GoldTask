@@ -90,55 +90,37 @@ public class Mp4Service {
     public void genNew() {
         List<String> urls = urlService.getUrls();
         for (String url : urls) {
-            genNewOne(url);
+            if (handleOther(url)) {
+                break;
+            }
         }
     }
 
-    private void genNewOne(String url) {
-        log.info("{} start.", url);
-        try {
-            Document doc = Jsoup.connect(url + "/indexaKo.js")
-                    .timeout(5000)
-                    .get();
-            Elements menu = doc.getElementsByClass("menu");
-            if (menu.size() == 0) {
-                handleOther(url);
-                return;
-            }
-            Elements elements = menu.get(0).getElementsByTag("a");
-            String menuHref = null;
-            for (Element element : elements) {
-                menuHref = element.attr("href");
-                if (menuHref.contains("javascript") || menuHref.contains("/pic/")
-                        || menuHref.contains("/dongman/") || menuHref.contains("/leisi/")
-                        || menuHref.contains("/sm/") || menuHref.contains("/nxx/")
-                        || menuHref.contains("/giga/") || menuHref.contains("/youma/")) {
-                    continue;
-                }
-                oneType(url, menuHref);
-            }
-        } catch (Exception e) {
-            log.warn("", e);
-        }
-    }
-
-    private void handleOther(String url) {
+    private boolean handleOther(String url) {
         List<String> paths = mp4Dao.distinctPath();
+        boolean isIn = false;
         for (String path : paths) {
-            oneType(url, path);
+            if (oneType(url, path)) {
+                isIn = true;
+            }
         }
+        return isIn;
     }
 
-    private void oneType(String url, String menuHref) {
+    private boolean oneType(String url, String menuHref) {
         try {
             Elements channels = Jsoup.connect(url + menuHref).timeout(5000).get().getElementsByClass("preview-item");
             if (channels.size() == 0) {
-                return;
+                return false;
             }
-            String mp4Href = null;
+            String mp4Href;
+            int count = 0;
             for (Element channel : channels) {
                 mp4Href = channel.getElementsByTag("a").attr("href");
                 if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(Utils.Mp4RedisKey + mp4Href))) {
+                    if (count++ > 4) {
+                        break;
+                    }
                     continue;
                 }
                 stringRedisTemplate.opsForValue().set(Utils.Mp4RedisKey + mp4Href, "1", 7, TimeUnit.DAYS);
@@ -146,8 +128,10 @@ public class Mp4Service {
                         channel.getElementsByTag("i").text(),
                         channel.getElementsByTag("img").attr("data-original"), menuHref);
             }
+            return true;
         } catch (Exception e) {
             log.warn("", e);
+            return false;
         }
     }
 
