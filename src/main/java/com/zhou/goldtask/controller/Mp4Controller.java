@@ -4,8 +4,8 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.util.SaResult;
 import cn.hutool.json.JSONObject;
-import com.zhou.goldtask.entity.Mp4Entity;
 import com.zhou.goldtask.entity.Mp4LikeDto;
+import com.zhou.goldtask.repository.Mp4Dao;
 import com.zhou.goldtask.service.Mp4Service;
 import com.zhou.goldtask.service.UrlService;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +26,8 @@ public class Mp4Controller {
     private Mp4Service mp4Service;
     @Resource
     private UrlService urlService;
+    @Resource
+    private Mp4Dao mp4Dao;
 
     @RequestMapping("/test")
     public String test() {
@@ -84,7 +86,7 @@ public class Mp4Controller {
 
     @PostMapping("/getUrls")
     public SaResult getUrls() {
-        return SaResult.data(urlService.getUrls());
+        return SaResult.data(mp4Dao.getUrls());
     }
 
     @PostMapping("/deleteUrl")

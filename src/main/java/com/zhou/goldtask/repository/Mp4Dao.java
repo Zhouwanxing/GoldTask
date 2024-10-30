@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.zhou.goldtask.entity.EnvConfig;
 import com.zhou.goldtask.entity.Mp4Entity;
 import com.zhou.goldtask.entity.Mp4LikeDto;
+import com.zhou.goldtask.entity.UrlEntity;
 import com.zhou.goldtask.utils.Utils;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class Mp4Dao {
@@ -21,6 +23,8 @@ public class Mp4Dao {
     private MongoTemplate mongoTemplate;
     @Resource
     private EnvConfig envConfig;
+    @Resource
+    private UrlRepository urlRepository;
 
     private Query findBaseQuery(boolean isShowLike) {
         Query query = new Query();
@@ -90,5 +94,9 @@ public class Mp4Dao {
 
     public List<String> distinctPath() {
         return mongoTemplate.findDistinct("path", Mp4Entity.class, String.class);
+    }
+
+    public List<String> getUrls() {
+        return urlRepository.findAllSort().stream().map(UrlEntity::get_id).collect(Collectors.toList());
     }
 }

@@ -28,8 +28,6 @@ public class Mp4Service {
     private Mp4Repository mp4Repository;
     @Resource
     private Mp4Dao mp4Dao;
-    @Resource
-    private UrlService urlService;
 
     public void saveOne() {
         Mp4Entity entity = Mp4Entity.builder()
@@ -89,7 +87,7 @@ public class Mp4Service {
 
     public void genNew(List<String> urls) {
         if (urls == null || urls.size() == 0) {
-            urls = urlService.getUrls();
+            urls = mp4Dao.getUrls();
         }
         for (String url : urls) {
             if (handleOther(url)) {

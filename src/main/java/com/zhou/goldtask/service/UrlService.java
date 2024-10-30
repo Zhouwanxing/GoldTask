@@ -4,13 +4,13 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import com.zhou.goldtask.entity.UrlEntity;
+import com.zhou.goldtask.repository.Mp4Dao;
 import com.zhou.goldtask.repository.UrlRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -19,9 +19,11 @@ public class UrlService {
     private UrlRepository urlRepository;
     @Resource
     private Mp4Service mp4Service;
+    @Resource
+    private Mp4Dao mp4Dao;
 
     public void checkNewUrl() {
-        List<String> urls = getUrls();
+        List<String> urls = mp4Dao.getUrls();
         Set<String> addUrls = new HashSet<>();
         String newUrl;
         for (String url : urls) {
@@ -41,10 +43,6 @@ public class UrlService {
             urls.add(0, addUrl);
         }
         mp4Service.genNew(urls);
-    }
-
-    public List<String> getUrls() {
-        return urlRepository.findAllSort().stream().map(UrlEntity::get_id).collect(Collectors.toList());
     }
 
     public void deleteUrl(String url) {
