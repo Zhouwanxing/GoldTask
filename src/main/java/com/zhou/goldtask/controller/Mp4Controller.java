@@ -48,12 +48,6 @@ public class Mp4Controller {
         return new JSONObject().putOpt("success", true);
     }
 
-    @GetMapping("/getNewStart")
-    public JSONObject getNewStart() {
-        urlService.checkNewUrl();
-        return new JSONObject().putOpt("success", true);
-    }
-
     @GetMapping("/pageShowList")
     public SaResult pageShowList(@RequestParam(value = "page", defaultValue = "1") Integer page,
                                  @RequestParam(value = "showLike", required = false) boolean isShowLike

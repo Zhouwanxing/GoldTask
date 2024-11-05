@@ -4,10 +4,12 @@ import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.util.SaResult;
 import cn.hutool.json.JSONObject;
+import com.zhou.goldtask.service.UrlService;
 import com.zhou.goldtask.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,6 +23,8 @@ import javax.annotation.Resource;
 public class UserController {
     @Resource
     private UserService userService;
+    @Resource
+    private UrlService urlService;
 
     @RequestMapping("/heartbeat")
     public String heartbeat() {
@@ -53,6 +57,12 @@ public class UserController {
     @RequestMapping("/logout")
     public SaResult logOut() {
         StpUtil.logout();
+        return SaResult.ok();
+    }
+
+    @GetMapping("/getNewStart")
+    public SaResult getNewStart() {
+        urlService.checkNewUrl();
         return SaResult.ok();
     }
 }

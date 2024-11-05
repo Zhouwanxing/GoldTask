@@ -41,7 +41,8 @@ public class Mp4Service {
     }
 
     public List<Mp4Entity> pageShowList(Integer page, boolean isShowLike) {
-        return handleList(mp4Dao.findByPage(page, isShowLike));
+        return mp4Dao.findByPage(page, isShowLike);
+//        return handleList(mp4Dao.findByPage(page, isShowLike));
     }
 
     private List<Mp4Entity> handleList(List<Mp4Entity> list) {
