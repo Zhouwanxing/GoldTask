@@ -4,6 +4,24 @@ server:
     threads:
       min-spare: 1
       max: 10
+# 数据监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
 my:
   task: bark
 magic-api:
@@ -18,6 +36,8 @@ magic-api:
   resource:
     type: redis
 spring:
+  application:
+    name: my-demo
   profiles:
     active: dev
 
