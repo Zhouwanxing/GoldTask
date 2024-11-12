@@ -124,7 +124,7 @@ public class Mp4Service {
                     }
                     continue;
                 }
-                stringRedisTemplate.opsForValue().set(Utils.Mp4RedisKey + mp4Href, "1", 7, TimeUnit.DAYS);
+                stringRedisTemplate.opsForValue().set(Utils.Mp4RedisKey + mp4Href, menuHref, 20, TimeUnit.DAYS);
                 handleOneLast(url + mp4Href,
                         channel.getElementsByTag("i").text(),
                         channel.getElementsByTag("img").attr("data-original"), menuHref);
