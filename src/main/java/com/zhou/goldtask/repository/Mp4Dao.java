@@ -38,7 +38,7 @@ public class Mp4Dao {
 
     public List<Mp4Entity> findByPage(int page, boolean isShowLike) {
         Query query = findBaseQuery(isShowLike);
-        query.with(Sort.by(Sort.Direction.DESC, "date", "path"));
+        query.with(Sort.by(Sort.Direction.DESC, "date", "path", "_id"));
         query.skip((page - 1) * 10L);
         query.limit(10);
         if (Utils.localhost.equals(envConfig.getHostName())) {
@@ -70,7 +70,7 @@ public class Mp4Dao {
 
     public List<Mp4Entity> findByDto(Mp4LikeDto dto) {
         Query query = searchLikeQuery(dto);
-        query.with(Sort.by(Sort.Direction.DESC, "date", "path"));
+        query.with(Sort.by(Sort.Direction.DESC, "date", "path", "_id"));
         query.skip((dto.getPage() - 1) * 10L);
         query.limit(10);
         if (Utils.localhost.equals(envConfig.getHostName())) {
