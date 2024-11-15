@@ -4,6 +4,7 @@ import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.util.SaResult;
 import cn.hutool.json.JSONObject;
+import com.zhou.goldtask.service.FileService;
 import com.zhou.goldtask.service.UrlService;
 import com.zhou.goldtask.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,8 @@ public class UserController {
     private UserService userService;
     @Resource
     private UrlService urlService;
+    @Resource
+    private FileService fileService;
 
     @RequestMapping("/heartbeat")
     public String heartbeat() {
@@ -64,5 +67,10 @@ public class UserController {
     public SaResult getNewStart() {
         urlService.checkNewUrl();
         return SaResult.ok();
+    }
+
+    @GetMapping("/getFileContent")
+    public SaResult getAllUrl(String fileName) {
+        return SaResult.data(fileService.getFileContentList(fileName));
     }
 }

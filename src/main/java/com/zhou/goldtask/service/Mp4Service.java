@@ -28,6 +28,8 @@ public class Mp4Service {
     private Mp4Repository mp4Repository;
     @Resource
     private Mp4Dao mp4Dao;
+    @Resource
+    private FileService fileService;
 
     public void saveOne() {
         Mp4Entity entity = Mp4Entity.builder()
@@ -145,18 +147,33 @@ public class Mp4Service {
             if (textLink == null || "".equals(textLink) || "".equals(download)) {
                 log.info("{}\n{}", url, doc.body());
             } else {
-                mp4Repository.insert(Mp4Entity.builder()
+                Mp4Entity entity = Mp4Entity.builder()
                         .name(textLink)
                         .path(menuHref)
                         .url(download)
                         .date(date)
                         .img(img)
                         .insertTime(DateUtil.now())
-                        .build().urlToId().dateToDate());
+                        .build().urlToId().dateToDate();
+                if (idNotExists(entity)) {
+                    mp4Repository.insert(entity);
+                }
             }
         } catch (Exception e) {
             log.warn("", e);
         }
+    }
+
+    private boolean idNotExists(Mp4Entity entity) {
+        String fileName = entity.getIdStartDate();
+        if (fileName == null || "".equals(fileName)) {
+            return true;
+        }
+        boolean exists = fileService.getFileContentList(fileName).contains(entity.get_id());
+        if (exists) {
+            log.info("文件检测存在该id:{}", entity.get_id());
+        }
+        return !exists;
     }
 
     public void ajaxUrl(String url) {

@@ -36,4 +36,11 @@ public class Mp4Entity {
         }
         return this;
     }
+
+    public String getIdStartDate() {
+        if (_id == null || !_id.contains("/")) {
+            return "";
+        }
+        return _id.split("/")[0];
+    }
 }
