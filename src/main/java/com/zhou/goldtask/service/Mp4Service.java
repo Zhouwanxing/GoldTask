@@ -156,7 +156,11 @@ public class Mp4Service {
                         .insertTime(DateUtil.now())
                         .build().urlToId().dateToDate();
                 if (idNotExists(entity)) {
-                    mp4Repository.insert(entity);
+                    try {
+                        mp4Repository.insert(entity);
+                    } catch (Exception ignored) {
+
+                    }
                 }
             }
         } catch (Exception e) {
