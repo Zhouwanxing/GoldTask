@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 
 @Controller
 @Slf4j
@@ -32,6 +33,10 @@ public class UserController {
 
     @RequestMapping("/heartbeat")
     public String heartbeat() {
+        LocalDateTime now = LocalDateTime.now();
+        if (now.getMinute() % 10 == 0) {
+            userService.mongoTest();
+        }
         return "s";
     }
 

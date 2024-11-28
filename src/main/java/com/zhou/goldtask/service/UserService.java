@@ -11,6 +11,10 @@ public class UserService {
     @Resource
     private UserRepository userRepository;
 
+    public void mongoTest() {
+        userRepository.count();
+    }
+
 
     public boolean isExistUser(String userName, String password) {
         UserEntity user = userRepository.findById(userName).orElse(null);
