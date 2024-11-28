@@ -71,7 +71,7 @@ public class UserController {
 
     @GetMapping("/getNewStart")
     public SaResult getNewStart() {
-        urlService.checkNewUrl();
+        urlService.checkNewUrl(false);
         return SaResult.ok();
     }
 

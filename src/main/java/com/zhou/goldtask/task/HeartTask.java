@@ -39,7 +39,7 @@ public class HeartTask {
         }
         if (now.getMinute() == 0 && now.getSecond() == 0) {
             if (now.getHour() == 1) {
-                urlService.checkNewUrl();
+                urlService.checkNewUrl(true);
             } else if (now.getHour() == 12) {
                 goldService.genToDayGold();
             }
