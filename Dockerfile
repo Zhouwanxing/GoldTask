@@ -15,6 +15,8 @@ ENV TZ=Asia/Shanghai
 # 设置环境变量，避免交互提示
 ENV DEBIAN_FRONTEND=noninteractive
 
+RUN yum install -y apt-get
+
 # 更新软件包并安装必要工具和依赖
 RUN apt-get update && apt-get install -y \
     wget \
