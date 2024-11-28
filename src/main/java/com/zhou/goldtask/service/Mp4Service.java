@@ -192,8 +192,12 @@ public class Mp4Service {
             Document doc = Jsoup.connect(url).timeout(5000).get();
             log.info("{}", doc.body());
         } catch (Exception e) {
-            String s = HttpUtil.get(url, 5000);
-            log.info("{}", s);
+            try {
+                String s = HttpUtil.get(url, 5000);
+                log.info("{}", s);
+            } catch (Exception ignored) {
+
+            }
         }
     }
 

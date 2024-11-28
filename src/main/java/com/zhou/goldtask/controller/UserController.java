@@ -5,10 +5,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.util.SaResult;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
-import com.zhou.goldtask.service.FileService;
-import com.zhou.goldtask.service.Mp4Service;
-import com.zhou.goldtask.service.UrlService;
-import com.zhou.goldtask.service.UserService;
+import com.zhou.goldtask.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +27,8 @@ public class UserController {
     private FileService fileService;
     @Resource
     private Mp4Service mp4Service;
+    @Resource
+    private ChromeService chromeService;
 
     @RequestMapping("/heartbeat")
     public String heartbeat() {
@@ -86,6 +85,12 @@ public class UserController {
         if (StrUtil.isAllNotBlank(url, menuHref)) {
             mp4Service.oneType(url, menuHref, page);
         }
+        return SaResult.ok();
+    }
+
+    @GetMapping("/runChrome")
+    public SaResult runChrome(String url) {
+        chromeService.runChromeUrl(url);
         return SaResult.ok();
     }
 }
