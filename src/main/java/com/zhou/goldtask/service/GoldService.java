@@ -1,6 +1,7 @@
 package com.zhou.goldtask.service;
 
 
+import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -51,6 +52,18 @@ public class GoldService {
         }
         goldRepository.save(GoldEntity.builder()._id(LocalDate.now().toString()).zss(zss).zdf(zdf).build());
         taskService.remindTask(LocalDate.now().toString(), "周生生:" + zss + ";周大福:" + zdf + ";占用:" + getMongoUse(), true);
+    }
+
+    public int getCcb() {
+        try {
+            String cookie = HttpRequest.get("https://gold2.ccb.com/tran/WCCMainPlatV5?CCB_IBSVersion=V5&SERVLET_NAME=WCCMainPlatV5&TXCODE=NGJS01")
+                    .header("Cookie", "tranCCBIBS1=DFAfiPr7u9HaynOy9toVyYvbyaVqK10%2CtVkhlKSIu8U0ubLdxDHtSjUE5GUqlAYOt4UVlIXSurEQtMXitnURpZVoutER12gvPJjYIk; ")
+                    .execute().body();
+            return JSONUtil.parseObj(cookie).getInt("Cst_Buy_Prc");
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
+        return 0;
     }
 
     public void goldTask() {

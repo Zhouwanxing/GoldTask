@@ -110,9 +110,11 @@ public class Mp4Service {
         return isIn;
     }
 
-    private boolean oneType(String url, String menuHref) {
+    public boolean oneType(String url, String menuHref, int page) {
         try {
-            Elements channels = Jsoup.connect(url + menuHref).timeout(5000).get().getElementsByClass("preview-item");
+            String newUrl = url + menuHref + (page > 1 ? "index_" + page + ".html" : "");
+            Elements channels = Jsoup.connect(newUrl).timeout(5000).get().getElementsByClass("preview-item");
+            log.info("{}\n{}", newUrl, channels.size());
             if (channels.size() == 0) {
                 return false;
             }
@@ -136,6 +138,10 @@ public class Mp4Service {
             log.warn("", e);
             return false;
         }
+    }
+
+    private boolean oneType(String url, String menuHref) {
+        return oneType(url, menuHref, 1);
     }
 
     private void handleOneLast(String url, String date, String img, String menuHref) {

@@ -3,16 +3,15 @@ package com.zhou.goldtask.controller;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.util.SaResult;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import com.zhou.goldtask.service.FileService;
+import com.zhou.goldtask.service.Mp4Service;
 import com.zhou.goldtask.service.UrlService;
 import com.zhou.goldtask.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -28,6 +27,8 @@ public class UserController {
     private UrlService urlService;
     @Resource
     private FileService fileService;
+    @Resource
+    private Mp4Service mp4Service;
 
     @RequestMapping("/heartbeat")
     public String heartbeat() {
@@ -72,5 +73,14 @@ public class UserController {
     @GetMapping("/getFileContent")
     public SaResult getAllUrl(String fileName) {
         return SaResult.data(fileService.getFileContentList(fileName));
+    }
+
+
+    @GetMapping("/genOtherPage")
+    public SaResult genOtherPage(String url, String menuHref, @RequestParam(defaultValue = "1") int page) {
+        if (StrUtil.isAllNotBlank(url, menuHref)) {
+            mp4Service.oneType(url, menuHref, page);
+        }
+        return SaResult.ok();
     }
 }
