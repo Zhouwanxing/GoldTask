@@ -20,8 +20,6 @@ RUN apk add --no-cache \
     curl \
     wget \
     unzip \
-    chromium \
-    chromium-chromedriver \
     libstdc++ \
     nss \
     freetype \
