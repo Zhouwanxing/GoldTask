@@ -15,31 +15,21 @@ ENV TZ=Asia/Shanghai
 # 设置环境变量，避免交互提示
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN yum install -y apt-get
-
-# 更新软件包并安装必要工具和依赖
-RUN apt-get update && apt-get install -y \
+RUN apk add --no-cache \
+    bash \
+    curl \
     wget \
     unzip \
-    curl \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxcursor1 \
-    libxdamage1 \
-    libxi6 \
-    libxtst6 \
-    libnss3 \
-    libxrandr2 \
-    libasound2 \
-    libpangocairo-1.0-0 \
-    libxshmfence1 \
-    libgbm1 \
-    libglib2.0-0 \
-    libgtk-3-0 \
-    libgdk-pixbuf2.0-0 \
-    libpango-1.0-0 \
-    libatk1.0-0 \
-    --no-install-recommends
+    chromium \
+    chromium-chromedriver \
+    libstdc++ \
+    nss \
+    freetype \
+    harfbuzz \
+    ttf-freefont \
+    udev \
+    mesa-gl \
+    xvfb
 
 # 下载并安装 Chrome 二进制文件
 ARG CHROME_VERSION=131.0.6778.85
@@ -54,9 +44,6 @@ RUN wget -O /tmp/chromedriver.zip https://storage.googleapis.com/chrome-for-test
     unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
     rm /tmp/chromedriver.zip && \
     chmod +x /usr/local/bin/chromedriver
-
-# 清理缓存
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /code
 
