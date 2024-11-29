@@ -39,7 +39,7 @@ public class ChromeService {
     }
 
     public void runChromeUrl(String url) {
-        System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
+        System.setProperty("webdriver.chrome.driver", "/chromedriver");
         System.setProperty("webdriver.chrome.silentOutput", "true");
         System.setProperty("webdriver.chrome.whitelistedIps", "");
         // 设置 ChromeOptions 以启用无界面模式
