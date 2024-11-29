@@ -41,7 +41,7 @@ RUN wget -O /tmp/chrome-linux64.zip https://storage.googleapis.com/chrome-for-te
 RUN wget -O /tmp/chromedriver.zip https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chromedriver-linux64.zip && \
     unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
     rm /tmp/chromedriver.zip && \
-    chmod +x /usr/local/bin/chromedriver-linux64/chromedriver \
+    chmod +x /usr/local/bin/chromedriver-linux64/chromedriver
 
 WORKDIR /code
 
