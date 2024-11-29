@@ -38,7 +38,7 @@ RUN wget -O /tmp/chrome-linux64.zip https://storage.googleapis.com/chrome-for-te
     rm /tmp/chrome-linux64.zip
 
 # 下载并安装 ChromeDriver（与 Chrome 版本一致）
-RUN unzip chromedriver.zip -d /usr/ && \
+RUN unzip chromedriver-linux64.zip -d /usr/ && \
     chmod +x /usr/chromedriver
 
 WORKDIR /code
