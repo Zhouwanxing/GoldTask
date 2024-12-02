@@ -201,11 +201,8 @@ public class Mp4Service {
         }
     }
 
-    public void updateLike(String id, boolean isLike) {
-        mp4Dao.updateLike(id, isLike);
-        if (!isLike) {
-            stringRedisTemplate.delete(Utils.Mp4RedisKey + id);
-        }
+    public void updateLike(String id, String flag) {
+        mp4Dao.updateLike(id, flag);
     }
 
     public List<String> getAllPath() {

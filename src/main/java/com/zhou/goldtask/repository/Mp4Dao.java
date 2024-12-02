@@ -51,15 +51,18 @@ public class Mp4Dao {
         return mongoTemplate.count(findBaseQuery(isShowLike), Mp4Entity.class);
     }
 
-    public void updateLike(String id, boolean isLike) {
+    public void updateLike(String id, String flag) {
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(id));
+        boolean isLike = !"delete".equals(flag);
         Update like = new Update().set("like", isLike);
         if (!isLike) {
             like.unset("url");
             like.unset("date");
             like.unset("insertTime");
             like.unset("name");
+        } else {
+            like.set("flag", flag);
         }
         mongoTemplate.updateFirst(query, like, Mp4Entity.class);
     }
