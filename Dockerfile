@@ -13,35 +13,35 @@ ENV TZ=Asia/Shanghai
 
 
 # 设置环境变量，避免交互提示
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apk add --no-cache \
-    bash \
-    curl \
-    wget \
-    unzip \
-    libstdc++ \
-    nss \
-    freetype \
-    harfbuzz \
-    ttf-freefont \
-    udev \
-    mesa-gl \
-    xvfb
-
-# 下载并安装 Chrome 二进制文件
-ARG CHROME_VERSION=131.0.6778.85
-RUN wget -O /tmp/chrome-linux64.zip https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chrome-linux64.zip && \
-    unzip /tmp/chrome-linux64.zip -d /opt/ && \
-    mv /opt/chrome-linux64 /opt/chrome && \
-    ln -s /opt/chrome/chrome /usr/bin/google-chrome && \
-    rm /tmp/chrome-linux64.zip
-
-# 下载并安装 ChromeDriver（与 Chrome 版本一致）
-RUN wget -O /tmp/chromedriver.zip https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chromedriver-linux64.zip && \
-    unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
-    rm /tmp/chromedriver.zip && \
-    chmod +x /usr/local/bin/chromedriver-linux64/chromedriver
+#ENV DEBIAN_FRONTEND=noninteractive
+#
+#RUN apk add --no-cache \
+#    bash \
+#    curl \
+#    wget \
+#    unzip \
+#    libstdc++ \
+#    nss \
+#    freetype \
+#    harfbuzz \
+#    ttf-freefont \
+#    udev \
+#    mesa-gl \
+#    xvfb
+#
+## 下载并安装 Chrome 二进制文件
+#ARG CHROME_VERSION=131.0.6778.85
+#RUN wget -O /tmp/chrome-linux64.zip https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chrome-linux64.zip && \
+#    unzip /tmp/chrome-linux64.zip -d /opt/ && \
+#    mv /opt/chrome-linux64 /opt/chrome && \
+#    ln -s /opt/chrome/chrome /usr/bin/google-chrome && \
+#    rm /tmp/chrome-linux64.zip
+#
+## 下载并安装 ChromeDriver（与 Chrome 版本一致）
+#RUN wget -O /tmp/chromedriver.zip https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chromedriver-linux64.zip && \
+#    unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
+#    rm /tmp/chromedriver.zip && \
+#    chmod +x /usr/local/bin/chromedriver-linux64/chromedriver
 
 WORKDIR /code
 
