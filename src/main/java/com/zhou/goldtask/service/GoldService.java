@@ -1,10 +1,12 @@
 package com.zhou.goldtask.service;
 
 
-import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.zhou.goldtask.entity.GoldEntity;
 import com.zhou.goldtask.repository.GoldRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -26,19 +28,14 @@ public class GoldService {
     @Resource
     private ITaskService taskService;
 
-    public GoldEntity getTodayGold() {
-        GoldEntity item = goldRepository.findItemById(LocalDate.now().toString());
-        return item == null ? GoldEntity.builder()._id("").zdf(0).zss(0).build() : item;
-    }
-
     public void genToDayGold() {
         //周生生
         String oneP = "", twoP = "", body = "";
-        int zss = 0, zdf = 0;
+        GoldEntity gold = GoldEntity.builder()._id(LocalDate.now().toString()).build();
         try {
             body = HttpUtil.get("https://ws.chowsangsang.com/goldpriceapi/goldprice-poss/openapi/v1/list?region=CHN");
             oneP = JSONUtil.parseObj(body).getJSONArray("data").stream().filter(one -> "G_JW_SELL".equals(((JSONObject) one).getStr("type"))).map(one -> ((JSONObject) one).getStr("price")).findFirst().get();
-            zss = (int) Double.parseDouble(oneP);
+            gold.setZss((int) Double.parseDouble(oneP));
         } catch (Exception e) {
             log.warn("", e);
         }
@@ -46,29 +43,31 @@ public class GoldService {
         try {
             body = HttpUtil.get("https://api.ctfmall.com/wxmini/api/common/todayGoldPrice?action=gettodayprice");
             twoP = JSONUtil.parseObj(body).getJSONObject("data").getStr("todayPriceHK");
-            zdf = (int) Double.parseDouble(twoP);
+            gold.setZdf((int) Double.parseDouble(twoP));
         } catch (Exception e) {
             log.warn("", e);
         }
-        goldRepository.save(GoldEntity.builder()._id(LocalDate.now().toString()).zss(zss).zdf(zdf).build());
-        taskService.remindTask(LocalDate.now().toString(), "周生生:" + zss + ";周大福:" + zdf + ";占用:" + getMongoUse(), true);
+        gold.setCcb(getCcb());
+        goldRepository.save(gold);
+        taskService.remindTask(LocalDate.now().toString(), "周生生:" + gold.getZss() + ";周大福:" + gold.getZdf() + ";建设银行:" + gold.getCcb() + ";占用:" + getMongoUse(), true);
     }
 
     public int getCcb() {
         try {
-            String cookie = HttpRequest.get("https://gold2.ccb.com/tran/WCCMainPlatV5?CCB_IBSVersion=V5&SERVLET_NAME=WCCMainPlatV5&TXCODE=NGJS01")
-                    .header("Cookie", "tranCCBIBS1=DFAfiPr7u9HaynOy9toVyYvbyaVqK10%2CtVkhlKSIu8U0ubLdxDHtSjUE5GUqlAYOt4UVlIXSurEQtMXitnURpZVoutER12gvPJjYIk; ")
-                    .execute().body();
-            return JSONUtil.parseObj(cookie).getInt("Cst_Buy_Prc");
+            WebClient webClient = new WebClient();
+            webClient.setAjaxController(new NicelyResynchronizingAjaxController());
+            webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
+            webClient.getOptions().setThrowExceptionOnScriptError(false);
+            webClient.getOptions().setCssEnabled(true);
+            webClient.getOptions().setJavaScriptEnabled(true);
+            webClient.getOptions().setActiveXNative(false);
+            HtmlPage page = webClient.getPage("https://gold2.ccb.com/chn/home/gold_new/cpjs/index.shtml");
+            webClient.waitForBackgroundJavaScript(5000);
+            page = webClient.getPage("https://gold2.ccb.com/tran/WCCMainPlatV5?CCB_IBSVersion=V5&SERVLET_NAME=WCCMainPlatV5&TXCODE=NGJS01");
+            return JSONUtil.parseObj(page.getBody().getFirstChild().toString()).getInt("Cst_Buy_Prc");
         } catch (Exception ignored) {
-            ignored.printStackTrace();
         }
         return 0;
-    }
-
-    public void goldTask() {
-        String content = "周生生:" + getTodayGold().getZss() + ";周大福:" + getTodayGold().getZdf() + ";占用:" + getMongoUse();
-        taskService.remindTask(LocalDate.now().toString(), content, true);
     }
 
     private String getMongoUse() {

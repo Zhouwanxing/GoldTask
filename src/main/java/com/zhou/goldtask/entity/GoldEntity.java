@@ -17,4 +17,5 @@ public class GoldEntity {
     private String _id;
     private int zdf;
     private int zss;
+    private int ccb;
 }
