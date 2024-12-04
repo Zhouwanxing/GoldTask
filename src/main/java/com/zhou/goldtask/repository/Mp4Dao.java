@@ -84,6 +84,9 @@ public class Mp4Dao {
 
     private Query searchLikeQuery(Mp4LikeDto dto) {
         Query query = findBaseQuery(true);
+        if (dto.isShowBest()) {
+            query.addCriteria(Criteria.where("flag").is("best"));
+        }
         if (!StrUtil.isEmptyIfStr(dto.getPath())) {
             query.addCriteria(Criteria.where("path").is(dto.getPath()));
         }
