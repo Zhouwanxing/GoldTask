@@ -29,9 +29,14 @@ public class GoldService {
     private ITaskService taskService;
 
     public void genToDayGold() {
+        String now = LocalDate.now().toString();
+        GoldEntity item = goldRepository.findItemById(now);
+        if (item != null && now.equals(item.get_id())) {
+            return;
+        }
         //周生生
         String oneP = "", twoP = "", body = "";
-        GoldEntity gold = GoldEntity.builder()._id(LocalDate.now().toString()).build();
+        GoldEntity gold = GoldEntity.builder()._id(now).build();
         try {
             body = HttpUtil.get("https://ws.chowsangsang.com/goldpriceapi/goldprice-poss/openapi/v1/list?region=CHN");
             oneP = JSONUtil.parseObj(body).getJSONArray("data").stream().filter(one -> "G_JW_SELL".equals(((JSONObject) one).getStr("type"))).map(one -> ((JSONObject) one).getStr("price")).findFirst().get();
@@ -47,9 +52,10 @@ public class GoldService {
         } catch (Exception e) {
             log.warn("", e);
         }
+        log.info("{}", gold.toString());
         gold.setCcb(getCcb());
         goldRepository.save(gold);
-        taskService.remindTask(LocalDate.now().toString(), "周生生:" + gold.getZss() + ";周大福:" + gold.getZdf() + ";建设银行:" + gold.getCcb() + ";占用:" + getMongoUse(), true);
+        taskService.remindTask(now, "周生生:" + gold.getZss() + ";周大福:" + gold.getZdf() + ";建设银行:" + gold.getCcb() + ";占用:" + getMongoUse(), true);
     }
 
     public int getCcb() {
@@ -58,7 +64,7 @@ public class GoldService {
             webClient.setAjaxController(new NicelyResynchronizingAjaxController());
             webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
             webClient.getOptions().setThrowExceptionOnScriptError(false);
-            webClient.getOptions().setCssEnabled(true);
+            webClient.getOptions().setCssEnabled(false);
             webClient.getOptions().setJavaScriptEnabled(true);
             webClient.getOptions().setActiveXNative(false);
             HtmlPage page = webClient.getPage("https://gold2.ccb.com/chn/home/gold_new/cpjs/index.shtml");
