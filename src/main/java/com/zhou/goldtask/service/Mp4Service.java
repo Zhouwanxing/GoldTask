@@ -1,6 +1,7 @@
 package com.zhou.goldtask.service;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import com.zhou.goldtask.entity.Mp4Entity;
 import com.zhou.goldtask.entity.Mp4LikeDto;
@@ -76,10 +77,14 @@ public class Mp4Service {
             if (url == null || "".equals(url)) {
                 return "";
             }
+            if (StrUtil.isNotEmpty(mp4.getImgStr())) {
+                return mp4.getImgStr();
+            }
 //            log.info("start:{}", url);
             String data = HttpUtil.get(url, 1000);
             if (data != null && !"".equals(data)) {
                 stringRedisTemplate.opsForValue().set(Utils.Mp4ImgRedisKey + mp4.get_id(), data, 1, TimeUnit.DAYS);
+                mp4Dao.updateImgStr(mp4.get_id(), data);
                 return data;
             }
         } catch (Exception e) {

@@ -67,6 +67,13 @@ public class Mp4Dao {
         mongoTemplate.updateFirst(query, like, Mp4Entity.class);
     }
 
+    public void updateImgStr(String id, String imgStr) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(id));
+        Update like = new Update().set("imgStr", imgStr);
+        mongoTemplate.updateFirst(query, like, Mp4Entity.class);
+    }
+
     public List<String> getAllPath() {
         return mongoTemplate.findDistinct("path", Mp4Entity.class, String.class);
     }
