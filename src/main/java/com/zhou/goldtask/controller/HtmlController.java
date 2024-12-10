@@ -24,9 +24,12 @@ public class HtmlController {
         // 这里添加你的登录逻辑，例如验证用户名和密码
         // 假设登录成功，设置Cookie
         Cookie cookie = new Cookie("username", username);
+        cookie.setSecure(true);
         cookie.setMaxAge(60 * 60 * 24); // Cookie有效期一天
         response.addCookie(cookie);
-
+        response.addHeader("Set-Cookie",
+                String.format("%s=%s; HttpOnly; Secure; SameSite=None",
+                        cookie.getName(), cookie.getValue()));
         return "redirect:/home"; // 登录成功后重定向到主页
     }
 
