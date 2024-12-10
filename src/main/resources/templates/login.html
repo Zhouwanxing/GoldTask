@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>首页</title>
+</head>
+<body>
+<h1>欢迎来到首页</h1>
+<form th:action="@{/setCookie}" method="get">
+    <label for="username">请输入用户名:</label>
+    <input type="text" name="username" id="username" required>
+    <button type="submit">登录</button>
+</form>
+</body>
+</html>

@@ -40,6 +40,10 @@ spring:
     name: my-demo
   profiles:
     active: dev
+  thymeleaf:
+    enabled: true
+    prefix: classpath:/templates/
+    suffix: .html
 
 ############## Sa-Token 配置 (文档: https://sa-token.cc) ##############
 sa-token:

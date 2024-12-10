@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>显示 Cookie</title>
+</head>
+<body>
+<h1>显示 Cookie 值</h1>
+<p>cookie username: <span th:text="${username}">未知用户</span></p>
+
+<!-- 退出按钮，清理 Cookie -->
+<form th:action="@{/logout}" method="get" style="display:inline;">
+    <button type="submit">退出</button>
+</form>
+</body>
+</html>
