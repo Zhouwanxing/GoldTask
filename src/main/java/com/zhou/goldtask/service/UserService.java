@@ -15,7 +15,7 @@ public class UserService {
 
     public void mongoTest() {
         long count = userRepository.count();
-        log.info("mongo 检测:" + count);
+//        log.info("mongo 检测:" + count);
     }
 
 
