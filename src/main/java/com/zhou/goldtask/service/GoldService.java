@@ -67,6 +67,7 @@ public class GoldService {
             webClient.getOptions().setCssEnabled(false);
             webClient.getOptions().setJavaScriptEnabled(true);
             webClient.getOptions().setActiveXNative(false);
+            webClient.getOptions().setTimeout(5000);
             HtmlPage page = webClient.getPage("https://gold2.ccb.com/chn/home/gold_new/cpjs/index.shtml");
             webClient.waitForBackgroundJavaScript(5000);
             page = webClient.getPage("https://gold2.ccb.com/tran/WCCMainPlatV5?CCB_IBSVersion=V5&SERVLET_NAME=WCCMainPlatV5&TXCODE=NGJS01");
