@@ -1,6 +1,8 @@
 package com.zhou.goldtask.service;
 
 
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -59,8 +63,7 @@ public class GoldService {
     }
 
     public int getCcb() {
-        try {
-            WebClient webClient = new WebClient();
+        try (WebClient webClient = new WebClient()) {
             webClient.setAjaxController(new NicelyResynchronizingAjaxController());
             webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
             webClient.getOptions().setThrowExceptionOnScriptError(false);
@@ -70,10 +73,22 @@ public class GoldService {
             webClient.getOptions().setTimeout(5000);
             HtmlPage page = webClient.getPage("https://gold2.ccb.com/chn/home/gold_new/cpjs/index.shtml");
             webClient.waitForBackgroundJavaScript(5000);
+            webClient.getCache().clear();
             page = webClient.getPage("https://gold2.ccb.com/tran/WCCMainPlatV5?CCB_IBSVersion=V5&SERVLET_NAME=WCCMainPlatV5&TXCODE=NGJS01");
             return JSONUtil.parseObj(page.getBody().getFirstChild().toString()).getInt("Cst_Buy_Prc");
         } catch (Exception ignored) {
         }
+        return 0;
+    }
+
+    public int getCcbNew() {
+        HttpResponse execute = HttpRequest.get("https://gold2.ccb.com/chn/home/gold_new/cpjs/index.shtml").execute();
+        Map<String, List<String>> headers = execute.headers();
+        for (String s : headers.keySet()) {
+            System.out.println(s + "=" + headers.get(s));
+        }
+        String body = execute.body();
+        System.out.println(body);
         return 0;
     }
 

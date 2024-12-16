@@ -26,18 +26,21 @@ public class Mp4Dao {
     @Resource
     private UrlRepository urlRepository;
 
-    private Query findBaseQuery(boolean isShowLike) {
+    private Query findBaseQuery(boolean isShowLike, String path) {
         Query query = new Query();
         if (isShowLike) {
             query.addCriteria(Criteria.where("like").is(true));
         } else {
             query.addCriteria(Criteria.where("like").isNull());
         }
+        if (path != null && !"".equals(path)) {
+            query.addCriteria(Criteria.where("path").is(path));
+        }
         return query;
     }
 
-    public List<Mp4Entity> findByPage(int page, boolean isShowLike) {
-        Query query = findBaseQuery(isShowLike);
+    public List<Mp4Entity> findByPage(int page, boolean isShowLike, String path) {
+        Query query = findBaseQuery(isShowLike, path);
         query.with(Sort.by(Sort.Direction.DESC, "date", "path", "_id"));
         query.skip((page - 1) * 10L);
         query.limit(10);
@@ -47,8 +50,8 @@ public class Mp4Dao {
         return mongoTemplate.find(query, Mp4Entity.class);
     }
 
-    public long count(boolean isShowLike) {
-        return mongoTemplate.count(findBaseQuery(isShowLike), Mp4Entity.class);
+    public long count(boolean isShowLike, String path) {
+        return mongoTemplate.count(findBaseQuery(isShowLike, path), Mp4Entity.class);
     }
 
     public void updateLike(String id, String flag) {
@@ -90,7 +93,7 @@ public class Mp4Dao {
     }
 
     private Query searchLikeQuery(Mp4LikeDto dto) {
-        Query query = findBaseQuery(true);
+        Query query = findBaseQuery(true, null);
         if (dto.isShowBest()) {
             query.addCriteria(Criteria.where("flag").is("best"));
         }

@@ -43,8 +43,8 @@ public class Mp4Service {
         mp4Repository.save(entity);
     }
 
-    public List<Mp4Entity> pageShowList(Integer page, boolean isShowLike) {
-        return mp4Dao.findByPage(page, isShowLike);
+    public List<Mp4Entity> pageShowList(Integer page, boolean isShowLike, String path) {
+        return mp4Dao.findByPage(page, isShowLike, path);
 //        return handleList(mp4Dao.findByPage(page, isShowLike));
     }
 
@@ -67,8 +67,8 @@ public class Mp4Service {
         return mp4Dao.searchLikeCount(dto);
     }
 
-    public long count(boolean isShowLike) {
-        return mp4Dao.count(isShowLike);
+    public long count(boolean isShowLike, String path) {
+        return mp4Dao.count(isShowLike, path);
     }
 
     private String setMp4Url(Mp4Entity mp4) {

@@ -50,11 +50,12 @@ public class Mp4Controller {
 
     @GetMapping("/pageShowList")
     public SaResult pageShowList(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                 @RequestParam(value = "showLike", required = false) boolean isShowLike
+                                 @RequestParam(value = "showLike", required = false) boolean isShowLike,
+                                 @RequestParam(value = "path", required = false, defaultValue = "") String path
     ) {
         SaResult result = SaResult.ok();
-        result.set("list", mp4Service.pageShowList(page, isShowLike));
-        result.set("count", mp4Service.count(isShowLike));
+        result.set("list", mp4Service.pageShowList(page, isShowLike, path));
+        result.set("count", mp4Service.count(isShowLike, path));
         return result;
     }
 
