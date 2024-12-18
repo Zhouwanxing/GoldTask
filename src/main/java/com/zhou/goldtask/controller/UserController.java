@@ -40,26 +40,29 @@ public class UserController {
     }
 
     @RequestMapping("/login")
-    public SaResult doLogin(String username, String password) {
+    public SaResult doLogin(String username, String password, @RequestParam(required = false, defaultValue = "", value = "dev") String dev) {
         if (userService.isExistUser(username, password)) {
-            StpUtil.login(username);
-            return SaResult.data(getUserInfo());
+            StpUtil.login(username, dev);
+            return SaResult.data(getUserInfo(dev));
         }
         return SaResult.error();
     }
 
-    private JSONObject getUserInfo() {
+    private JSONObject getUserInfo(String dev) {
         JSONObject jsonObject = new JSONObject();
         SaTokenInfo info = StpUtil.getTokenInfo();
         jsonObject.set("tokenName", info.getTokenName());
         jsonObject.set("tokenValue", info.getTokenValue());
         jsonObject.set("roles", StpUtil.getPermissionList());
+        if ("swing".equals(dev)) {
+
+        }
         return jsonObject;
     }
 
     @RequestMapping("/isLogin")
     public SaResult isLogin() {
-        return StpUtil.isLogin() ? SaResult.data(getUserInfo()) : SaResult.error();
+        return StpUtil.isLogin() ? SaResult.data(getUserInfo("")) : SaResult.error();
     }
 
     @RequestMapping("/logout")
