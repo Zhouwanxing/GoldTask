@@ -7,6 +7,9 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import com.zhou.goldtask.service.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +32,8 @@ public class UserController {
     private Mp4Service mp4Service;
     @Resource
     private ChromeService chromeService;
+    @Resource
+    private MongoTemplate mongoTemplate;
 
     @RequestMapping("/heartbeat")
     public String heartbeat() {
@@ -55,7 +60,9 @@ public class UserController {
         jsonObject.set("tokenValue", info.getTokenValue());
         jsonObject.set("roles", StpUtil.getPermissionList());
         if ("swing".equals(dev)) {
-
+            Query query = new Query();
+            query.addCriteria(Criteria.where("_id").is("swingConfig"));
+            jsonObject.set("swingConfig", mongoTemplate.findOne(query, JSONObject.class, "system_config"));
         }
         return jsonObject;
     }
