@@ -48,7 +48,7 @@ public class Mp4Service {
 //        return handleList(mp4Dao.findByPage(page, isShowLike));
     }
 
-    private List<Mp4Entity> handleList(List<Mp4Entity> list) {
+    public List<Mp4Entity> handleList(List<Mp4Entity> list) {
         for (Mp4Entity mp4 : list) {
             if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(Utils.Mp4ImgRedisKey + mp4.get_id()))) {
                 mp4.setImg(stringRedisTemplate.opsForValue().get(Utils.Mp4ImgRedisKey + mp4.get_id()));
@@ -81,10 +81,10 @@ public class Mp4Service {
                 return mp4.getImgStr();
             }
 //            log.info("start:{}", url);
-            String data = HttpUtil.get(url, 1000);
+            String data = HttpUtil.get(url, 5000);
             if (data != null && !"".equals(data)) {
-                stringRedisTemplate.opsForValue().set(Utils.Mp4ImgRedisKey + mp4.get_id(), data, 1, TimeUnit.DAYS);
-                mp4Dao.updateImgStr(mp4.get_id(), data);
+                stringRedisTemplate.opsForValue().set(Utils.Mp4ImgRedisKey + mp4.get_id(), data, 30, TimeUnit.DAYS);
+//                mp4Dao.updateImgStr(mp4.get_id(), data);
                 return data;
             }
         } catch (Exception e) {
