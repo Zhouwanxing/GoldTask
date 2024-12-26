@@ -128,13 +128,9 @@ public class Mp4Service {
                 return false;
             }
             String mp4Href;
-            int count = 0;
             for (Element channel : channels) {
                 mp4Href = channel.getElementsByTag("a").attr("href");
                 if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(Utils.Mp4RedisKey + mp4Href))) {
-                    if (count++ > 4) {
-                        break;
-                    }
                     continue;
                 }
                 stringRedisTemplate.opsForValue().set(Utils.Mp4RedisKey + mp4Href, menuHref, 200, TimeUnit.DAYS);
@@ -150,7 +146,9 @@ public class Mp4Service {
     }
 
     private boolean oneType(String url, String menuHref) {
-        return oneType(url, menuHref, 1);
+        boolean b = oneType(url, menuHref, 1);
+        oneType(url, menuHref, 2);
+        return b;
     }
 
     private void handleOneLast(String url, String date, String img, String menuHref) {
