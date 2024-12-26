@@ -1,6 +1,6 @@
 # GoldTask
 
-GoldTask 是一个 Java 项目，主要涉及以下技术栈：
+GoldTask 是一个可以直接部署到render.com中的 Java 项目，主要涉及以下技术栈：
 
 - Java
 - Dockerfile
