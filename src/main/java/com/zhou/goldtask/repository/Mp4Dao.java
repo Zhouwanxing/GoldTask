@@ -22,6 +22,8 @@ public class Mp4Dao {
     @Resource
     private MongoTemplate mongoTemplate;
     @Resource
+    private MongoTemplate secondMongoTemplate;
+    @Resource
     private EnvConfig envConfig;
     @Resource
     private UrlRepository urlRepository;
@@ -74,7 +76,15 @@ public class Mp4Dao {
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(id));
         Update like = new Update().set("imgStr", imgStr);
-        mongoTemplate.updateFirst(query, like, Mp4Entity.class);
+        secondMongoTemplate.upsert(query, like, Mp4Entity.class);
+    }
+
+
+    public String getImgStr(String id) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(id));
+        Mp4Entity one = secondMongoTemplate.findOne(query, Mp4Entity.class);
+        return one == null ? null : one.getImgStr();
     }
 
     public List<String> getAllPath() {

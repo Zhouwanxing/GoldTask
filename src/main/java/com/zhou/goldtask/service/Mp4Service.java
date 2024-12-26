@@ -80,11 +80,15 @@ public class Mp4Service {
             if (StrUtil.isNotEmpty(mp4.getImgStr())) {
                 return mp4.getImgStr();
             }
-//            log.info("start:{}", url);
-            String data = HttpUtil.get(url, 5000);
+            String data = mp4Dao.getImgStr(mp4.get_id());
+            if (data == null) {
+                data = HttpUtil.get(url, 5000);
+                if (data != null && !"".equals(data)) {
+                    mp4Dao.updateImgStr(mp4.get_id(), data);
+                }
+            }
             if (data != null && !"".equals(data)) {
                 stringRedisTemplate.opsForValue().set(Utils.Mp4ImgRedisKey + mp4.get_id(), data, 30, TimeUnit.DAYS);
-//                mp4Dao.updateImgStr(mp4.get_id(), data);
                 return data;
             }
         } catch (Exception e) {
