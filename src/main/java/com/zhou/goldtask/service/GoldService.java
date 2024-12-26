@@ -4,6 +4,7 @@ package com.zhou.goldtask.service;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
@@ -14,6 +15,9 @@ import com.zhou.goldtask.repository.GoldRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -29,6 +33,8 @@ public class GoldService {
     private GoldRepository goldRepository;
     @Resource
     private MongoTemplate mongoTemplate;
+    @Resource
+    private MongoTemplate secondMongoTemplate;
     @Resource
     private ITaskService taskService;
 
@@ -57,9 +63,10 @@ public class GoldService {
             log.warn("", e);
         }
         log.info("{}", gold.toString());
-        gold.setCcb(getCcb());
+//        gold.setCcb(getCcb());
         goldRepository.save(gold);
-        taskService.remindTask(now, "周生生:" + gold.getZss() + ";周大福:" + gold.getZdf() + ";建设银行:" + gold.getCcb() + ";占用:" + getMongoUse(), true);
+        taskService.remindTask(now, "周生生:" + gold.getZss() + ";周大福:" + gold.getZdf() + ";黄金延期:" + getOther(now)
+                + ";占用1:" + getMongoUse(mongoTemplate) + ";占用2:" + getMongoUse(secondMongoTemplate), true);
     }
 
     public int getCcb() {
@@ -81,6 +88,40 @@ public class GoldService {
         return 0;
     }
 
+    public int getOther(String now) {
+        String body = null;
+        int price = 0;
+        JSONObject object = null;
+        JSONArray gn = null;
+        try {
+            body = HttpRequest.get("https://api.goldprice.fun/domesticGoldApiUrl").header("origin", "https://goldprice.fun").execute().body();
+            gn = JSONUtil.parseObj(body).getJSONArray("gn");
+            for (int i = 0; i < gn.size(); i++) {
+                object = gn.getJSONObject(i);
+                if ("daygold".equals(object.get("dir"))) {
+                    price = object.getInt("price");
+                }
+            }
+        } catch (Exception ignored) {
+
+        }
+        try {
+            body = HttpRequest.get("https://api.goldprice.fun/brandsApiUrl").header("origin", "https://goldprice.fun").execute().body();
+            gn = JSONUtil.parseObj(body).getJSONArray("brand");
+            Query query = new Query();
+            query.addCriteria(Criteria.where("_id").is(now));
+            Update update = new Update();
+            for (int i = 0; i < gn.size(); i++) {
+                object = gn.getJSONObject(i);
+                update.set(object.getStr("title"), object.getInt("gold"));
+            }
+            mongoTemplate.updateFirst(query, update, GoldEntity.class);
+        } catch (Exception ignored) {
+
+        }
+        return price;
+    }
+
     public int getCcbNew() {
         HttpResponse execute = HttpRequest.get("https://gold2.ccb.com/chn/home/gold_new/cpjs/index.shtml").execute();
         Map<String, List<String>> headers = execute.headers();
@@ -92,9 +133,9 @@ public class GoldService {
         return 0;
     }
 
-    private String getMongoUse() {
+    private String getMongoUse(MongoTemplate t) {
         try {
-            Document document = mongoTemplate.executeCommand("{ dbStats: 1 }");
+            Document document = t.executeCommand("{ dbStats: 1 }");
             long totalSize = document.getLong("dataSize") + document.getLong("indexSize");
             double mb = (double) totalSize / 1024 / 1024;
             DecimalFormat decimalFormat = new DecimalFormat("#.00");
