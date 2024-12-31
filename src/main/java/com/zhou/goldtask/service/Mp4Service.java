@@ -50,11 +50,12 @@ public class Mp4Service {
 
     public List<Mp4Entity> handleList(List<Mp4Entity> list) {
         for (Mp4Entity mp4 : list) {
-            if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(Utils.Mp4ImgRedisKey + mp4.get_id()))) {
+            /*if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(Utils.Mp4ImgRedisKey + mp4.get_id()))) {
                 mp4.setImg(stringRedisTemplate.opsForValue().get(Utils.Mp4ImgRedisKey + mp4.get_id()));
             } else {
                 mp4.setImg(setMp4Url(mp4));
-            }
+            }*/
+            mp4.setImg(setMp4Url(mp4));
         }
         return list;
     }
@@ -88,7 +89,7 @@ public class Mp4Service {
                 }
             }
             if (data != null && !"".equals(data)) {
-                stringRedisTemplate.opsForValue().set(Utils.Mp4ImgRedisKey + mp4.get_id(), data, 30, TimeUnit.DAYS);
+//                stringRedisTemplate.opsForValue().set(Utils.Mp4ImgRedisKey + mp4.get_id(), data, 30, TimeUnit.DAYS);
                 return data;
             }
         } catch (Exception e) {
