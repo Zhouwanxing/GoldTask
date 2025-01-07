@@ -30,7 +30,7 @@ public class HeartTask {
         }
         LocalDateTime now = LocalDateTime.now();
         try {
-            HttpUtil.get(Utils.HeartbeatUrl, 3000);
+            HttpUtil.get("https://" + envConfig.getHostName() + Utils.HeartbeatUrl, 3000);
 //            log.info();
 //            log.info(HttpUtil.get(Utils.HeartbeatNginxUrl, 3000));
 //            webSocketServer.sendToAllClient(DateUtil.now());

@@ -6,7 +6,7 @@ public class Utils {
     public static String UrlRedisKey = "url-data";
     public static String Mp4RedisKey = "mp4-data:";
     public static String Mp4ImgRedisKey = "mp4-img-data:";
-    public static String HeartbeatUrl = "https://goldtask-1.onrender.com/page/user/heartbeat";
+    public static String HeartbeatUrl = "/page/user/heartbeat";
     public static String HeartbeatNginxUrl = "https://zwx-router.onrender.com/heartbeat";
     public static int goldMaxSize = 1000;
     public static String localhost = "localhost";
