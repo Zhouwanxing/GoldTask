@@ -55,7 +55,7 @@ public class Mp4Service {
             } else {
                 mp4.setImg(setMp4Url(mp4));
             }*/
-            mp4.setImg(setMp4Url(mp4));
+//            mp4.setImg(setMp4Url(mp4));
         }
         return list;
     }
