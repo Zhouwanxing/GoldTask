@@ -1,7 +1,6 @@
 package com.zhou.goldtask.service;
 
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import com.zhou.goldtask.entity.Mp4Entity;
 import com.zhou.goldtask.entity.Mp4LikeDto;
@@ -48,20 +47,8 @@ public class Mp4Service {
 //        return handleList(mp4Dao.findByPage(page, isShowLike));
     }
 
-    public List<Mp4Entity> handleList(List<Mp4Entity> list) {
-        for (Mp4Entity mp4 : list) {
-            /*if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(Utils.Mp4ImgRedisKey + mp4.get_id()))) {
-                mp4.setImg(stringRedisTemplate.opsForValue().get(Utils.Mp4ImgRedisKey + mp4.get_id()));
-            } else {
-                mp4.setImg(setMp4Url(mp4));
-            }*/
-//            mp4.setImg(setMp4Url(mp4));
-        }
-        return list;
-    }
-
     public List<Mp4Entity> searchLike(Mp4LikeDto dto) {
-        return handleList(mp4Dao.findByDto(dto));
+        return mp4Dao.findByDto(dto);
     }
 
     public long searchLikeCount(Mp4LikeDto dto) {
@@ -70,32 +57,6 @@ public class Mp4Service {
 
     public long count(boolean isShowLike, String path) {
         return mp4Dao.count(isShowLike, path);
-    }
-
-    private String setMp4Url(Mp4Entity mp4) {
-        String url = mp4.getImg();
-        try {
-            if (url == null || "".equals(url)) {
-                return "";
-            }
-            if (StrUtil.isNotEmpty(mp4.getImgStr())) {
-                return mp4.getImgStr();
-            }
-            String data = mp4Dao.getImgStr(mp4.get_id());
-            if (data == null) {
-                data = HttpUtil.get(url, 5000);
-                if (data != null && !"".equals(data)) {
-                    mp4Dao.updateImgStr(mp4.get_id(), data);
-                }
-            }
-            if (data != null && !"".equals(data)) {
-//                stringRedisTemplate.opsForValue().set(Utils.Mp4ImgRedisKey + mp4.get_id(), data, 30, TimeUnit.DAYS);
-                return data;
-            }
-        } catch (Exception e) {
-            log.warn("", e);
-        }
-        return url;
     }
 
     public void genNew(List<String> urls) {

@@ -21,7 +21,6 @@ public class Mp4Entity {
     private String date;
     private String img;
     private String insertTime;
-    private String imgStr;
 
     public Mp4Entity urlToId() {
         if (url != null) {

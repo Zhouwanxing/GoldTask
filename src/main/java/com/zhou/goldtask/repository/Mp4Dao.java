@@ -72,21 +72,6 @@ public class Mp4Dao {
         mongoTemplate.updateFirst(query, like, Mp4Entity.class);
     }
 
-    public void updateImgStr(String id, String imgStr) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("_id").is(id));
-        Update like = new Update().set("imgStr", imgStr);
-        secondMongoTemplate.upsert(query, like, Mp4Entity.class);
-    }
-
-
-    public String getImgStr(String id) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("_id").is(id));
-        Mp4Entity one = secondMongoTemplate.findOne(query, Mp4Entity.class);
-        return one == null ? null : one.getImgStr();
-    }
-
     public List<String> getAllPath() {
         return mongoTemplate.findDistinct("path", Mp4Entity.class, String.class);
     }
