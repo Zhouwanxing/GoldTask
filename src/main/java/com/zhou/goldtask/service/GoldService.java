@@ -63,9 +63,10 @@ public class GoldService {
             log.warn("", e);
         }
         log.info("{}", gold.toString());
-//        gold.setCcb(getCcb());
+        int ccb = getOther(now);
+        gold.setCcb(ccb);
         goldRepository.save(gold);
-        taskService.remindTask(now, "周生生:" + gold.getZss() + ";周大福:" + gold.getZdf() + ";黄金延期:" + getOther(now)
+        taskService.remindTask(now, "周生生:" + gold.getZss() + ";周大福:" + gold.getZdf() + ";黄金延期:" + ccb
                 + ";占用1:" + getMongoUse(mongoTemplate) + ";占用2:" + getMongoUse(secondMongoTemplate), true);
     }
 
