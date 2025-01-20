@@ -63,9 +63,10 @@ public class GoldService {
             log.warn("", e);
         }
         log.info("{}", gold.toString());
-        int ccb = getOther(now);
+        int ccb = getOther();
         gold.setCcb(ccb);
         goldRepository.save(gold);
+        setOther(now);
         taskService.remindTask(now, "周生生:" + gold.getZss() + ";周大福:" + gold.getZdf() + ";黄金延期:" + ccb
                 + ";占用1:" + getMongoUse(mongoTemplate) + ";占用2:" + getMongoUse(secondMongoTemplate), true);
     }
@@ -89,7 +90,25 @@ public class GoldService {
         return 0;
     }
 
-    public int getOther(String now) {
+    private void setOther(String now){
+        try {
+            String body = HttpRequest.get("https://api.goldprice.fun/brandsApiUrl").header("origin", "https://goldprice.fun").execute().body();
+            JSONArray gn = JSONUtil.parseObj(body).getJSONArray("brand");
+            JSONObject object = null;
+            Query query = new Query();
+            query.addCriteria(Criteria.where("_id").is(now));
+            Update update = new Update();
+            for (int i = 0; i < gn.size(); i++) {
+                object = gn.getJSONObject(i);
+                update.set(object.getStr("title"), object.getInt("gold"));
+            }
+            mongoTemplate.updateFirst(query, update, GoldEntity.class);
+        } catch (Exception ignored) {
+
+        }
+    }
+
+    public int getOther() {
         String body = null;
         int price = 0;
         JSONObject object = null;
@@ -103,20 +122,6 @@ public class GoldService {
                     price = object.getInt("price");
                 }
             }
-        } catch (Exception ignored) {
-
-        }
-        try {
-            body = HttpRequest.get("https://api.goldprice.fun/brandsApiUrl").header("origin", "https://goldprice.fun").execute().body();
-            gn = JSONUtil.parseObj(body).getJSONArray("brand");
-            Query query = new Query();
-            query.addCriteria(Criteria.where("_id").is(now));
-            Update update = new Update();
-            for (int i = 0; i < gn.size(); i++) {
-                object = gn.getJSONObject(i);
-                update.set(object.getStr("title"), object.getInt("gold"));
-            }
-            mongoTemplate.updateFirst(query, update, GoldEntity.class);
         } catch (Exception ignored) {
 
         }
