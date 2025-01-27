@@ -42,9 +42,9 @@ public class UrlService {
             addUrl(addUrl);
             urls.add(0, addUrl);
         }
-        if (isDown) {
+//        if (isDown) {
             mp4Service.genNew(urls);
-        }
+//        }
     }
 
     public void deleteUrl(String url) {
