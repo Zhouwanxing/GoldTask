@@ -49,8 +49,8 @@ public class HtmlController {
         cookie.setMaxAge(0);  // 删除 Cookie
         response.addCookie(cookie);
         response.addHeader("Set-Cookie",
-                String.format("%s=%s; HttpOnly; Secure; SameSite=None",
-                        cookie.getName(), cookie.getValue()));
+                String.format("%s=; HttpOnly; Secure; SameSite=None",
+                        cookie.getName()));
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         response.setHeader("Pragma", "no-cache");
         response.setDateHeader("Expires", 0);
