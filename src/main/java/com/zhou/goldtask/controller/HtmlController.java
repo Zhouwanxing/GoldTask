@@ -48,6 +48,9 @@ public class HtmlController {
         Cookie cookie = new Cookie("username", null);
         cookie.setMaxAge(0);  // 删除 Cookie
         response.addCookie(cookie);
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
+        response.setDateHeader("Expires", 0);
         return "redirect:/login";
     }
 }
