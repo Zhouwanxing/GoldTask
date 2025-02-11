@@ -96,8 +96,8 @@ public class Mp4Service {
             return;
         }
         List<Integer> num = new ArrayList<>();
-        String[] split = null, split1 = null;
-        String last = null;
+        String[] split, split1;
+        String last;
         for (String key : keys) {
             try {
                 split = key.split("/");
