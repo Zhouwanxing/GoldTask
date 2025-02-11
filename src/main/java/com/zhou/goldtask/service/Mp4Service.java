@@ -16,8 +16,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -78,7 +81,40 @@ public class Mp4Service {
                 isIn = true;
             }
         }
+        if(isIn && DateUtil.thisDayOfMonth() == 28){
+            startCheckNo(url);
+        }
         return isIn;
+    }
+
+    public void startCheckNo(String url) {
+        int m = DateUtil.thisMonth() + 1;
+        String mon = m > 10 ? "" + m : "0" + m;
+        String start = "/html/" + DateUtil.thisYear() + mon + "/";
+        Set<String> keys = stringRedisTemplate.keys(Utils.Mp4RedisKey + start + "*");
+        if (keys == null) {
+            return;
+        }
+        List<Integer> num = new ArrayList<>();
+        String[] split = null, split1 = null;
+        String last = null;
+        for (String key : keys) {
+            try {
+                split = key.split("/");
+                last = split[split.length - 1];
+                split1 = last.split("\\.");
+                num.add(Integer.parseInt(split1[0]));
+            } catch (Exception ignored) {
+
+            }
+        }
+        List<Integer> collect = num.stream().sorted().collect(Collectors.toList());
+        log.info("{}", collect.size());
+        for (int i = collect.get(0); i < collect.get(collect.size() - 1); i++) {
+            if (!num.contains(i)) {
+                handleOneLast(url + start + i + ".html", "", "", "");
+            }
+        }
     }
 
     public boolean oneType(String url, String menuHref, int page) {
