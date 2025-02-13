@@ -144,6 +144,9 @@ public class Mp4Service {
     }
 
     private boolean oneType(String url, String menuHref) {
+        if (menuHref == null || "".equals(menuHref)) {
+            return false;
+        }
         boolean b = oneType(url, menuHref, 1);
         oneType(url, menuHref, 2);
         return b;
