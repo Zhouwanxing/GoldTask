@@ -97,6 +97,7 @@ public class Mp4Controller {
 
     @PostMapping("/getLikeList")
     public SaResult getLikeList(@RequestBody Mp4LikeDto data) {
+        log.info("{}", data);
         SaResult ok = SaResult.ok();
         ok.setData(mp4Service.searchLike(data));
         ok.set("count", mp4Service.searchLikeCount(data));

@@ -6,6 +6,7 @@ import com.zhou.goldtask.entity.Mp4Entity;
 import com.zhou.goldtask.entity.Mp4LikeDto;
 import com.zhou.goldtask.entity.UrlEntity;
 import com.zhou.goldtask.utils.Utils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class Mp4Dao {
     @Resource
     private MongoTemplate mongoTemplate;
@@ -84,7 +86,9 @@ public class Mp4Dao {
         if (Utils.localhost.equals(envConfig.getHostName())) {
             query.fields().exclude("name", "img");
         }
-        return mongoTemplate.find(query, Mp4Entity.class);
+        List<Mp4Entity> list = mongoTemplate.find(query, Mp4Entity.class);
+        log.info("{}\n{}", query, list.size());
+        return list;
     }
 
     private Query searchLikeQuery(Mp4LikeDto dto) {
