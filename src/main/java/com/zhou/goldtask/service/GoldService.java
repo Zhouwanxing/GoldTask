@@ -42,6 +42,9 @@ public class GoldService {
         String now = LocalDate.now().toString();
         GoldEntity item = goldRepository.findItemById(now);
         if (item != null && now.equals(item.get_id())) {
+            if (item.getCcb() == 0) {
+                setOther(now);
+            }
             return;
         }
         //周生生
