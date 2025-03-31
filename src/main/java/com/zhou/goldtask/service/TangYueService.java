@@ -64,6 +64,9 @@ public class TangYueService {
                 home.setPrice((int) Double.parseDouble(ocrService.getUrlText(host + "/" + element.getElementsByTag("img").get(0).attr("src"))));
             }
         }
+        if (home.get_id() == null) {
+            return null;
+        }
         return home;
     }
 }
