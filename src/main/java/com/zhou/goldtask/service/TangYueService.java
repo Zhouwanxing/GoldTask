@@ -1,7 +1,9 @@
 package com.zhou.goldtask.service;
 
 import cn.hutool.http.HttpUtil;
+import com.zhou.goldtask.entity.TangYueEntity;
 import com.zhou.goldtask.entity.TangYueOneHome;
+import com.zhou.goldtask.repository.TangYueDao;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -18,6 +20,12 @@ import java.util.List;
 public class TangYueService {
     @Autowired
     private OcrService ocrService;
+    @Autowired
+    private TangYueDao tangYueDao;
+
+    public List<TangYueEntity> getList(TangYueEntity data) {
+        return tangYueDao.findList(data);
+    }
 
 
     public List<String> getOneAs(String url) {
