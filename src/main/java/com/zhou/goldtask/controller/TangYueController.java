@@ -17,17 +17,15 @@ import javax.annotation.Resource;
 @RequestMapping("/page/tangyue")
 @CrossOrigin
 @SaCheckLogin
-//@SaCheckRole("tangyue")
+@SaCheckRole("tangyue")
 public class TangYueController {
     @Resource
     private TangYueService tangYueService;
 
     @PostMapping("/getList")
     public SaResult getLikeList(@RequestBody TangYueEntity data) {
-        log.info("{}", data);
         SaResult ok = SaResult.ok();
         ok.setData(tangYueService.getList(data));
         return ok;
     }
-
 }

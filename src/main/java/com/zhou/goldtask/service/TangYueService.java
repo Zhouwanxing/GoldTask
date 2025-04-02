@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -23,8 +25,55 @@ public class TangYueService {
     @Autowired
     private TangYueDao tangYueDao;
 
-    public List<TangYueEntity> getList(TangYueEntity data) {
-        return tangYueDao.findList(data);
+    public List<List<Object>> getList(TangYueEntity data) {
+        List<TangYueEntity> list = tangYueDao.findList(data);
+        List<List<Object>> table = new ArrayList<>();
+        List<Object> oneRow = new ArrayList<>();
+        oneRow.add("楼层");
+        Optional<TangYueEntity> first;
+        for (int i = 0; i < 8; i++) {
+            int finalI = i;
+            first = list.stream().filter(t -> ((finalI + 1) + "").equals(t.getRoom())).findFirst();
+            if (first.isPresent()) {
+                oneRow.add(first.get().getAreaReal());
+            } else {
+                break;
+            }
+        }
+        if (oneRow.size() == 1) {
+            return table;
+        }
+        table.add(oneRow);
+        for (int i = 0; i < 50; i++) {
+            List<Object> floor = getOneFloor(i + 1, list, oneRow.size() - 1);
+            if (floor == null) {
+                if (i < 10) {
+                    continue;
+                }
+                break;
+            }
+            table.add(floor);
+        }
+        return table;
+    }
+
+    private List<Object> getOneFloor(int i, List<TangYueEntity> list, int roomCount) {
+        Stream<TangYueEntity> stream = list.stream().filter(t -> t.getFloor().equals((i < 10 ? "0" : "") + i));
+        if (!stream.findAny().isPresent()) {
+            return null;
+        }
+        List<Object> oneRow = new ArrayList<>();
+        oneRow.add(i);
+        for (int j = 0; j < roomCount; j++) {
+            int finalJ = j;
+            Optional<TangYueEntity> first = list.stream().filter(t -> t.getFloor().equals((i < 10 ? "0" : "") + i)).filter(t -> ((finalJ + 1) + "").equals(t.getRoom())).findFirst();
+            if (first.isPresent()) {
+                oneRow.add(first.get().getPrice());
+            } else {
+                oneRow.add(0);
+            }
+        }
+        return oneRow;
     }
 
 

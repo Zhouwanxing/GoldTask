@@ -1,7 +1,6 @@
 package com.zhou.goldtask.repository;
 
 import com.zhou.goldtask.entity.TangYueEntity;
-import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Sort;
@@ -36,7 +35,8 @@ public class TangYueDao {
         } else {
             query.addCriteria(Criteria.where("xq").is("ty"));
         }
-        query.with(Sort.by(Sort.Direction.DESC, "date", "path", "_id"));
+        query.with(Sort.by(Sort.Direction.ASC, "floor", "room"));
+        query.fields().exclude("_id", "areaPredict", "xq");
         return secondMongoTemplate.find(query, TangYueEntity.class);
     }
 }
