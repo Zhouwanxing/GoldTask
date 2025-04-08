@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.http.HttpUtil;
 import com.zhou.goldtask.entity.Mp4Entity;
 import com.zhou.goldtask.entity.Mp4LikeDto;
+import com.zhou.goldtask.entity.PathCountEntity;
 import com.zhou.goldtask.repository.Mp4Dao;
 import com.zhou.goldtask.repository.Mp4Repository;
 import com.zhou.goldtask.utils.Utils;
@@ -215,5 +216,9 @@ public class Mp4Service {
 
     public List<String> getAllPath() {
         return mp4Dao.getAllPath();
+    }
+
+    public List<PathCountEntity> getAllCountAndPath(){
+        return mp4Dao.getAllCountAndPath();
     }
 }

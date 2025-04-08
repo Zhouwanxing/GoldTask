@@ -1,20 +1,19 @@
 package com.zhou.goldtask.repository;
 
 import cn.hutool.core.util.StrUtil;
-import com.zhou.goldtask.entity.EnvConfig;
-import com.zhou.goldtask.entity.Mp4Entity;
-import com.zhou.goldtask.entity.Mp4LikeDto;
-import com.zhou.goldtask.entity.UrlEntity;
+import com.zhou.goldtask.entity.*;
 import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -116,5 +115,23 @@ public class Mp4Dao {
 
     public List<String> getUrls() {
         return urlRepository.findAllSort().stream().map(UrlEntity::get_id).collect(Collectors.toList());
+    }
+
+    public List<PathCountEntity> getAllCountAndPath() {
+        try {
+            Aggregation aggregation = Aggregation.newAggregation(
+                    Aggregation.match(Criteria.where("like").isNull()),
+                    Aggregation.group("path").count().as("count"),
+                    Aggregation.sort(Sort.Direction.DESC, "count")
+            );
+            return mongoTemplate.aggregate(
+                    aggregation,
+                    Mp4Entity.class,
+                    PathCountEntity.class
+            ).getMappedResults();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
     }
 }

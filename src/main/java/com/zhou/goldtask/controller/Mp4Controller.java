@@ -95,6 +95,11 @@ public class Mp4Controller {
         return SaResult.data(mp4Service.getAllPath());
     }
 
+    @GetMapping("/getAllCountAndPath")
+    public SaResult getAllCountAndPath() {
+        return SaResult.data(mp4Service.getAllCountAndPath());
+    }
+
     @PostMapping("/getLikeList")
     public SaResult getLikeList(@RequestBody Mp4LikeDto data) {
         log.info("{}", data);
