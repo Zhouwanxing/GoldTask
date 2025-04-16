@@ -18,6 +18,10 @@ public class TangYueDao {
     @Resource
     private MongoTemplate secondMongoTemplate;
 
+    public void countTest(){
+        secondMongoTemplate.count(new Query(), TangYueEntity.class);
+    }
+
     public List<TangYueEntity> findList(TangYueEntity con) {
         Query query = new Query();
         if (StringUtils.isNotBlank(con.getBuilding())) {

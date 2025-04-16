@@ -2,6 +2,7 @@ package com.zhou.goldtask.service;
 
 import com.zhou.goldtask.entity.SwingConfig;
 import com.zhou.goldtask.entity.UserEntity;
+import com.zhou.goldtask.repository.TangYueDao;
 import com.zhou.goldtask.repository.UserRepository;
 import com.zhou.goldtask.utils.RuntimeData;
 import com.zhou.goldtask.utils.aes.AESUtil;
@@ -23,9 +24,12 @@ public class UserService {
     private UserRepository userRepository;
     @Resource
     private MongoTemplate mongoTemplate;
+    @Resource
+    private TangYueDao tangYueDao;
 
     public void mongoTest() {
         userRepository.count();
+        tangYueDao.countTest();
     }
 
 
