@@ -105,6 +105,10 @@ public class GoldService {
                 object = gn.getJSONObject(i);
                 update.set(object.getStr("title"), object.getInt("gold"));
             }
+            int ccb = getOther();
+            if (ccb != 0) {
+                update.set("ccb", ccb);
+            }
             mongoTemplate.updateFirst(query, update, GoldEntity.class);
         } catch (Exception ignored) {
 
