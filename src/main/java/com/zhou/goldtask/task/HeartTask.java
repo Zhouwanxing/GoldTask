@@ -22,6 +22,8 @@ public class HeartTask {
     private OnlineService onlineService;
     @Resource
     private EnvConfig envConfig;
+    @Resource
+    private AJKService ajkService;
 
     @Scheduled(cron = "${heartTask.cron:0 * * * * ?}")
     public void remindTaskRun() {
@@ -43,6 +45,9 @@ public class HeartTask {
             }
             if (now.getHour() > 11) {
                 goldService.genToDayGold();
+            }
+            if (now.getHour() > 10 && now.getHour() < 19) {
+                ajkService.startAjk();
             }
         }
         if (now.getSecond() == 0) {

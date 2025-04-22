@@ -20,6 +20,7 @@ public class ErSFEntity {
     private String priceStr;
     private double price;
     private double area;
+    private String lastTime;
 
 
     public void makeOther() {
