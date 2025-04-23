@@ -113,6 +113,7 @@ public class AJKService {
         query.addCriteria(Criteria.where("title").is(ersfEntity.getTitle()));
         query.addCriteria(Criteria.where("area").is(ersfEntity.getArea()));
         query.addCriteria(Criteria.where("info").is(ersfEntity.getInfo()));
+        query.addCriteria(Criteria.where("_id").ne(ersfEntity.get_id()));
         ErSFEntity one = secondMongoTemplate.findOne(query, ErSFEntity.class);
         return one == null ? null : one.get_id();
     }
