@@ -1,6 +1,8 @@
 package com.zhou.goldtask.service;
 
 import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONObject;
+import com.zhou.goldtask.entity.ErSFHistoryEntity;
 import com.zhou.goldtask.entity.TangYueEntity;
 import com.zhou.goldtask.entity.TangYueOneHome;
 import com.zhou.goldtask.repository.TangYueDao;
@@ -10,6 +12,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,6 +30,26 @@ public class TangYueService {
     private OcrService ocrService;
     @Autowired
     private TangYueDao tangYueDao;
+    @Autowired
+    private MongoTemplate secondMongoTemplate;
+
+    public List<JSONObject> getAJK() {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("area").gte(100));
+        query.with(Sort.by(Sort.Direction.DESC, "price"));
+        List<JSONObject> list = secondMongoTemplate.find(query, JSONObject.class, "my_ersf");
+        String id = null;
+        Query hisQuery;
+        for (JSONObject one : list) {
+            id = one.getStr("_id");
+            hisQuery = new Query();
+            hisQuery.with(Sort.by(Sort.Direction.DESC, "time"));
+            hisQuery.fields().exclude("homeId", "_id");
+            hisQuery.addCriteria(Criteria.where("homeId").is(id));
+            one.putOpt("histories", secondMongoTemplate.find(hisQuery, ErSFHistoryEntity.class));
+        }
+        return list;
+    }
 
     public List<List<Object>> getList(TangYueEntity data) {
         List<TangYueEntity> list = tangYueDao.findList(data);

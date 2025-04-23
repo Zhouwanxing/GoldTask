@@ -80,7 +80,7 @@ public class AJKService {
         if (!isTy(element)) {
             return;
         }
-        ErSFEntity ersfEntity = ErSFEntity.builder()._id(getHomeId(element)).title(getTitle(element)).info(getInfo(element)).lastTime(DateUtil.now()).priceStr(getPrice(element)).build();
+        ErSFEntity ersfEntity = ErSFEntity.builder()._id(getHomeId(element)).title(getTitle(element)).info(getInfo(element)).linkUrl(getLinkUrl(element)).lastTime(DateUtil.now()).priceStr(getPrice(element)).build();
         ersfEntity.makeOther();
         System.out.println(ersfEntity);
         if (ersfEntity.get_id() != null) {
@@ -97,6 +97,14 @@ public class AJKService {
                 taskService.remindTask(DateUtil.now(), ersfEntity.toString(), true);
             }
             secondMongoTemplate.save(ersfEntity);
+        }
+    }
+
+    private String getLinkUrl(Element element) {
+        try {
+            return element.getElementsByTag("a").get(0).attr("href");
+        } catch (Exception e) {
+            return null;
         }
     }
 

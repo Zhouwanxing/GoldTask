@@ -21,6 +21,7 @@ public class ErSFEntity {
     private double price;
     private double area;
     private String lastTime;
+    private String linkUrl;
 
 
     public void makeOther() {

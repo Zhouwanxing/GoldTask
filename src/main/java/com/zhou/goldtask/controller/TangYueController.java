@@ -28,4 +28,11 @@ public class TangYueController {
         ok.setData(tangYueService.getList(data));
         return ok;
     }
+
+    @PostMapping("/getAJK")
+    public SaResult getAJK() {
+        SaResult ok = SaResult.ok();
+        ok.setData(tangYueService.getAJK());
+        return ok;
+    }
 }
