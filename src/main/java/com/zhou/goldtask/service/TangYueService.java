@@ -36,14 +36,14 @@ public class TangYueService {
     public List<JSONObject> getAJK() {
         Query query = new Query();
         query.addCriteria(Criteria.where("area").gte(100));
-        query.with(Sort.by(Sort.Direction.DESC, "price"));
+        query.with(Sort.by(Sort.Direction.ASC, "price"));
         List<JSONObject> list = secondMongoTemplate.find(query, JSONObject.class, "my_ersf");
         String id = null;
         Query hisQuery;
         for (JSONObject one : list) {
             id = one.getStr("_id");
             hisQuery = new Query();
-            hisQuery.with(Sort.by(Sort.Direction.DESC, "time"));
+            hisQuery.with(Sort.by(Sort.Direction.ASC, "time"));
             hisQuery.fields().exclude("homeId", "_id");
             hisQuery.addCriteria(Criteria.where("homeId").is(id));
             one.putOpt("histories", secondMongoTemplate.find(hisQuery, ErSFHistoryEntity.class));
