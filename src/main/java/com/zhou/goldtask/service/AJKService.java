@@ -44,12 +44,16 @@ public class AJKService {
         if (ajkInfo == null) {
             return;
         }
-        String cookie = ajkInfo.getStr("cookie");
-        List<String> urls = ajkInfo.getJSONArray("value").toList(String.class);
-        for (String url : urls) {
-            String body = HttpRequest.get(url).cookie(cookie).execute().body();
-            log.info("{}\n{}", url, body);
-            handleOneContent(body);
+        try {
+            String cookie = ajkInfo.getStr("cookie");
+            List<String> urls = ajkInfo.getJSONArray("value").toList(String.class);
+            for (String url : urls) {
+                String body = HttpRequest.get(url).cookie(cookie).execute().body();
+                log.info("{}\n{}", url, body);
+                handleOneContent(body);
+            }
+        } catch (Exception e) {
+            log.warn("", e);
         }
     }
 
