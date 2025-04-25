@@ -28,7 +28,7 @@ public class HeartTask {
     @Scheduled(cron = "${heartTask.cron:0 * * * * ?}")
     public void remindTaskRun() {
         LocalDateTime now = LocalDateTime.now();
-        log.info("心跳任务,{}", now);
+        log.info("心跳任务,{},{}", now, envConfig.getHostName());
         if (Utils.localhost.equals(envConfig.getHostName())) {
             return;
         }
