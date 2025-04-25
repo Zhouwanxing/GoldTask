@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -43,7 +44,8 @@ public class TangYueService {
         hisQuery.fields().exclude("_id");
         List<ErSFHistoryEntity> ts = secondMongoTemplate.find(hisQuery, ErSFHistoryEntity.class);
         for (JSONObject one : list) {
-            one.putOpt("histories", ts.stream().filter(t -> one.getStr("_id").equals(t.getHomeId())));
+            one.putOpt("histories", ts.stream().filter(t -> one.getStr("_id").equals(t.getHomeId()))
+                    .collect(Collectors.toList()));
         }
         return list;
     }
