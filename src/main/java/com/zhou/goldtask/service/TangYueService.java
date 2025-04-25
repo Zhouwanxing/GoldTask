@@ -38,15 +38,12 @@ public class TangYueService {
         query.addCriteria(Criteria.where("area").gte(100));
         query.with(Sort.by(Sort.Direction.ASC, "price"));
         List<JSONObject> list = secondMongoTemplate.find(query, JSONObject.class, "my_ersf");
-        String id = null;
-        Query hisQuery;
+        Query hisQuery = new Query();
+        hisQuery.with(Sort.by(Sort.Direction.ASC, "time"));
+        hisQuery.fields().exclude("_id");
+        List<ErSFHistoryEntity> ts = secondMongoTemplate.find(hisQuery, ErSFHistoryEntity.class);
         for (JSONObject one : list) {
-            id = one.getStr("_id");
-            hisQuery = new Query();
-            hisQuery.with(Sort.by(Sort.Direction.ASC, "time"));
-            hisQuery.fields().exclude("homeId", "_id");
-            hisQuery.addCriteria(Criteria.where("homeId").is(id));
-            one.putOpt("histories", secondMongoTemplate.find(hisQuery, ErSFHistoryEntity.class));
+            one.putOpt("histories", ts.stream().filter(t -> one.getStr("_id").equals(t.getHomeId())));
         }
         return list;
     }
