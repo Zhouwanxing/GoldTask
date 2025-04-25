@@ -27,10 +27,11 @@ public class HeartTask {
 
     @Scheduled(cron = "${heartTask.cron:0 * * * * ?}")
     public void remindTaskRun() {
+        LocalDateTime now = LocalDateTime.now();
+        log.info("心跳任务,{}", now);
         if (Utils.localhost.equals(envConfig.getHostName())) {
             return;
         }
-        LocalDateTime now = LocalDateTime.now();
         try {
             HttpUtil.get("https://" + envConfig.getHostName() + Utils.HeartbeatUrl, 3000);
 //            log.info();
