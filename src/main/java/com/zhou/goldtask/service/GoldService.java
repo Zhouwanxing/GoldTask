@@ -51,7 +51,7 @@ public class GoldService {
         String oneP = "", twoP = "", body = "";
         GoldEntity gold = GoldEntity.builder()._id(now).build();
         try {
-            body = HttpUtil.get("https://ws.chowsangsang.com/goldpriceapi/goldprice-poss/openapi/v1/list?region=CHN");
+            body = HttpUtil.get("https://ws.chowsangsang.com/goldpriceapi/goldprice-poss/openapi/v1/list?region=CHN",5000);
             oneP = JSONUtil.parseObj(body).getJSONArray("data").stream().filter(one -> "G_JW_SELL".equals(((JSONObject) one).getStr("type"))).map(one -> ((JSONObject) one).getStr("price")).findFirst().get();
             gold.setZss((int) Double.parseDouble(oneP));
         } catch (Exception e) {
@@ -59,7 +59,7 @@ public class GoldService {
         }
         //周大福
         try {
-            body = HttpUtil.get("https://api.ctfmall.com/wxmini/api/common/todayGoldPrice?action=gettodayprice");
+            body = HttpUtil.get("https://api.ctfmall.com/wxmini/api/common/todayGoldPrice?action=gettodayprice",5000);
             twoP = JSONUtil.parseObj(body).getJSONObject("data").getStr("todayPriceHK");
             gold.setZdf((int) Double.parseDouble(twoP));
         } catch (Exception e) {
@@ -95,7 +95,7 @@ public class GoldService {
 
     private void setOther(String now){
         try {
-            String body = HttpRequest.get("https://api.goldprice.fun/brandsApiUrl").header("origin", "https://goldprice.fun").execute().body();
+            String body = HttpRequest.get("https://api.goldprice.fun/brandsApiUrl").timeout(5000).header("origin", "https://goldprice.fun").execute().body();
             JSONArray gn = JSONUtil.parseObj(body).getJSONArray("brand");
             JSONObject object = null;
             Query query = new Query();
@@ -121,7 +121,7 @@ public class GoldService {
         JSONObject object = null;
         JSONArray gn = null;
         try {
-            body = HttpRequest.get("https://api.goldprice.fun/domesticGoldApiUrl").header("origin", "https://goldprice.fun").execute().body();
+            body = HttpRequest.get("https://api.goldprice.fun/domesticGoldApiUrl").timeout(5000).header("origin", "https://goldprice.fun").execute().body();
             gn = JSONUtil.parseObj(body).getJSONArray("gn");
             for (int i = 0; i < gn.size(); i++) {
                 object = gn.getJSONObject(i);
@@ -136,7 +136,7 @@ public class GoldService {
     }
 
     public int getCcbNew() {
-        HttpResponse execute = HttpRequest.get("https://gold2.ccb.com/chn/home/gold_new/cpjs/index.shtml").execute();
+        HttpResponse execute = HttpRequest.get("https://gold2.ccb.com/chn/home/gold_new/cpjs/index.shtml").timeout(5000).execute();
         Map<String, List<String>> headers = execute.headers();
         for (String s : headers.keySet()) {
             System.out.println(s + "=" + headers.get(s));
