@@ -48,6 +48,7 @@ public class AJKService {
             String cookie = ajkInfo.getStr("cookie");
             List<String> urls = ajkInfo.getJSONArray("value").toList(String.class);
             for (String url : urls) {
+                log.info("{}", url);
                 String body = HttpRequest.get(url).cookie(cookie).timeout(10000).execute().body();
                 log.info("{}\n{}", url, body);
                 handleOneContent(body);
