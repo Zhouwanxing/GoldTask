@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -47,12 +48,18 @@ public class AJKService {
         try {
             String cookie = ajkInfo.getStr("cookie");
             List<String> urls = ajkInfo.getJSONArray("value").toList(String.class);
-            for (String url : urls) {
+            /*for (String url : urls) {
                 log.info("{}", url);
                 String body = HttpRequest.get(url).cookie(cookie).timeout(10000).execute().body();
                 log.info("{}\n{}", url, body);
                 handleOneContent(body);
-            }
+            }*/
+            int hour = LocalDateTime.now().getHour();
+            String url = urls.get(hour % 2);
+            log.info("{}", url);
+            String body = HttpRequest.get(url).cookie(cookie).timeout(10000).execute().body();
+            log.info("{}\n{}", url, body);
+            handleOneContent(body);
         } catch (Exception e) {
             log.warn("", e);
         }
