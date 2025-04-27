@@ -46,20 +46,20 @@ public class AJKService {
             return;
         }
         try {
-            String cookie = ajkInfo.getStr("cookie");
-            List<String> urls = ajkInfo.getJSONArray("value").toList(String.class);
-            /*for (String url : urls) {
+            List<JSONObject> urls = ajkInfo.getJSONArray("value").toList(JSONObject.class);
+            for (JSONObject urlObj : urls) {
+                String url = urlObj.getStr("url");
                 log.info("{}", url);
-                String body = HttpRequest.get(url).cookie(cookie).timeout(10000).execute().body();
+                String body = HttpRequest.get(url).cookie(urlObj.getStr("cookie")).timeout(10000).execute().body();
                 log.info("{}\n{}", url, body);
                 handleOneContent(body);
-            }*/
-            int hour = LocalDateTime.now().getHour();
+            }
+           /* int hour = LocalDateTime.now().getHour();
             String url = urls.get(hour % 2);
             log.info("{}", url);
             String body = HttpRequest.get(url).cookie(cookie).timeout(10000).execute().body();
             log.info("{}\n{}", url, body);
-            handleOneContent(body);
+            handleOneContent(body);*/
         } catch (Exception e) {
             log.warn("", e);
         }
