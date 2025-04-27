@@ -37,6 +37,7 @@ public class TangYueService {
     public List<JSONObject> getAJK() {
         Query query = new Query();
         query.addCriteria(Criteria.where("area").gte(100));
+        query.addCriteria(Criteria.where("price").lt(300));
         query.with(Sort.by(Sort.Direction.ASC, "price"));
         List<JSONObject> list = secondMongoTemplate.find(query, JSONObject.class, "my_ersf");
         Query hisQuery = new Query();
