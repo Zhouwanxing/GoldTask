@@ -151,6 +151,9 @@ public class AJKService {
     }
 
     private String getRepeatHomeId(ErSFEntity ersfEntity) {
+        if ("lj".equals(ersfEntity.getFrom())) {
+            return null;
+        }
         Query query = new Query();
         query.addCriteria(Criteria.where("title").is(ersfEntity.getTitle()));
         query.addCriteria(Criteria.where("area").is(ersfEntity.getArea()));

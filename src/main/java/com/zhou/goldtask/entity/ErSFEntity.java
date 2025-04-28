@@ -44,7 +44,7 @@ public class ErSFEntity {
         try {
             String attr = element.getElementsByClass("noresultRecommend").get(0).attr("href");
             String[] split = attr.split("/");
-            _id = split[split.length - 1].split("\\.")[1];
+            _id = split[split.length - 1].split("\\.")[0];
             title = element.getElementsByClass("lj-lazy").get(0).attr("alt");
             info = element.getElementsByClass("houseInfo").text();
             lastTime = DateUtil.now();
