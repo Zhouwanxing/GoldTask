@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -38,6 +37,15 @@ public class AJKService {
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is("ajk"));
         return mongoTemplate.findOne(query, JSONObject.class, "system_config");
+    }
+
+    public void check() {
+        List<ErSFEntity> list = secondMongoTemplate.find(new Query(), ErSFEntity.class);
+        for (ErSFEntity erSFEntity : list) {
+            if (!erSFEntity.getLinkUrl().contains(erSFEntity.get_id())) {
+                System.out.println(erSFEntity);
+            }
+        }
     }
 
     public void startAjk() {
@@ -75,8 +83,26 @@ public class AJKService {
             content = getContent(oneRow);
             if (content != null && !"".equals(content)) {
                 System.out.println(oneRow.getJSONObject("request").getStr("url"));
-                handleOneContent(content);
+//                handleOneContent(content);
+                handleLJContent(content);
             }
+        }
+    }
+
+    private void handleLJContent(String content) {
+        try {
+            Document parse = Jsoup.parse(content);
+            Element ul = parse.getElementsByClass("sellListContent").get(0);
+            Elements li = ul.getElementsByTag("li");
+            ErSFEntity lj = null;
+            for (Element element : li) {
+                lj = ErSFEntity.builder().build();
+                lj.handLJ(element);
+                System.out.println(lj);
+                saveToDB(lj);
+            }
+        } catch (Exception e) {
+
         }
     }
 
@@ -95,6 +121,10 @@ public class AJKService {
         ErSFEntity ersfEntity = ErSFEntity.builder()._id(getHomeId(element)).title(getTitle(element)).info(getInfo(element)).linkUrl(getLinkUrl(element)).lastTime(DateUtil.now()).priceStr(getPrice(element)).build();
         ersfEntity.makeOther();
         System.out.println(ersfEntity);
+        saveToDB(ersfEntity);
+    }
+
+    private void saveToDB(ErSFEntity ersfEntity) {
         if (ersfEntity.get_id() != null) {
             String repeatId = getRepeatHomeId(ersfEntity);
             if (repeatId != null) {
