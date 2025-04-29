@@ -10,6 +10,7 @@ import cn.hutool.json.JSONUtil;
 import com.zhou.goldtask.entity.ErSFEntity;
 import com.zhou.goldtask.entity.ErSFHistoryEntity;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -48,26 +50,35 @@ public class AJKService {
         }
     }
 
+    private String getCookie(String baseUrl) {
+        try {
+            Map<String, List<String>> headers = HttpRequest.get(baseUrl).timeout(5000).execute().headers();
+            List<String> cookies = headers.get("Set-Cookie");
+            return String.join(";", cookies);
+        } catch (Exception ignored) {
+
+        }
+        return null;
+    }
+
     public void startAjk() {
         JSONObject ajkInfo = ajkInfo();
         if (ajkInfo == null) {
             return;
         }
         try {
+            String cookie = getCookie(ajkInfo.getStr("baseUrl"));
+            if (StringUtils.isBlank(cookie)) {
+                return;
+            }
             List<JSONObject> urls = ajkInfo.getJSONArray("value").toList(JSONObject.class);
             for (JSONObject urlObj : urls) {
                 String url = urlObj.getStr("url");
                 log.info("{}", url);
-                String body = HttpRequest.get(url).cookie(urlObj.getStr("cookie")).timeout(10000).execute().body();
+                String body = HttpRequest.get(url).cookie(cookie).timeout(10000).execute().body();
                 log.info("{}\n{}", url, body);
                 handleOneContent(body);
             }
-           /* int hour = LocalDateTime.now().getHour();
-            String url = urls.get(hour % 2);
-            log.info("{}", url);
-            String body = HttpRequest.get(url).cookie(cookie).timeout(10000).execute().body();
-            log.info("{}\n{}", url, body);
-            handleOneContent(body);*/
         } catch (Exception e) {
             log.warn("", e);
         }
