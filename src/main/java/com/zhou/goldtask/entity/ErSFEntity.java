@@ -25,6 +25,7 @@ public class ErSFEntity {
     private String lastTime;
     private String linkUrl;
     private String from;
+    private String floor;
 
 
     public void makeOther() {
@@ -32,6 +33,7 @@ public class ErSFEntity {
         if (info != null) {
             String s = info.substring(info.lastIndexOf(" ", info.indexOf("㎡")) + 1, info.indexOf("㎡"));
             this.area = Double.parseDouble(s);
+            this.floor = String.valueOf(info.charAt(info.indexOf("层") - 1));
         }
         if (priceStr != null) {
             String s = priceStr.substring(0, priceStr.indexOf(" "));
@@ -47,6 +49,7 @@ public class ErSFEntity {
             _id = split[split.length - 1].split("\\.")[0];
             title = element.getElementsByClass("lj-lazy").get(0).attr("alt");
             info = element.getElementsByClass("houseInfo").text();
+            floor = String.valueOf(info.charAt(info.indexOf("楼层") - 1));
             lastTime = DateUtil.now();
             linkUrl = attr;
             priceStr = element.getElementsByClass("priceInfo").get(0).text();
@@ -56,5 +59,10 @@ public class ErSFEntity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) {
+        String info = "3室2厅 | 120.05平米 | 东南 | 精装 | 中层(共48层) | 板楼";
+        System.out.println(info.charAt(info.indexOf("层") - 1));
     }
 }

@@ -35,6 +35,20 @@ public class AJKService {
     @Resource
     private ITaskService taskService;
 
+    public void cut() {
+        List<ErSFEntity> list = secondMongoTemplate.find(new Query(), ErSFEntity.class);
+        String floor = null;
+        for (ErSFEntity one : list) {
+            if (one.getInfo().contains("楼层")) {
+                floor = String.valueOf(one.getInfo().charAt(one.getInfo().indexOf("楼层") - 1));
+            } else {
+                floor = String.valueOf(one.getInfo().charAt(one.getInfo().indexOf("层") - 1));
+            }
+            one.setFloor(floor);
+            secondMongoTemplate.save(one);
+        }
+    }
+
     private JSONObject ajkInfo() {
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is("ajk"));
