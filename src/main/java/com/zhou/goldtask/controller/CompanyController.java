@@ -4,14 +4,13 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.util.SaResult;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.json.JSONObject;
 import com.zhou.goldtask.entity.OnePerson;
-import com.zhou.goldtask.entity.TangYueEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,5 +36,15 @@ public class CompanyController {
         update.set(data.getName(), data.getDress());
         mongoTemplate.upsert(query, update, "my_company");
         return ok;
+    }
+
+
+    @GetMapping("/findToday")
+    public SaResult findToday() {
+        SaResult ok = SaResult.ok();
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(DateUtil.today()));
+        JSONObject one = mongoTemplate.findOne(query, JSONObject.class, "my_company");
+        return ok.setData(one);
     }
 }
