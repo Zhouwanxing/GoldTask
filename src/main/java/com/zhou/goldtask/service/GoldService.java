@@ -42,9 +42,9 @@ public class GoldService {
         String now = LocalDate.now().toString();
         GoldEntity item = goldRepository.findItemById(now);
         if (item != null && now.equals(item.get_id())) {
-            if (item.getCcb() == 0) {
+            /*if (item.getCcb() == 0) {
                 setOther(now);
-            }
+            }*/
             return;
         }
         //周生生
@@ -66,11 +66,13 @@ public class GoldService {
             log.warn("", e);
         }
         log.info("{}", gold.toString());
-        int ccb = getOther();
-        gold.setCcb(ccb);
+//        int ccb = getOther();
+//        gold.setCcb(ccb);
         goldRepository.save(gold);
-        setOther(now);
-        taskService.remindTask(now, "周生生:" + gold.getZss() + ";周大福:" + gold.getZdf() + ";黄金延期:" + ccb
+//        setOther(now);
+        /*taskService.remindTask(now, "周生生:" + gold.getZss() + ";周大福:" + gold.getZdf() + ";黄金延期:" + ccb
+                + ";占用1:" + getMongoUse(mongoTemplate) + ";占用2:" + getMongoUse(secondMongoTemplate), true); */
+        taskService.remindTask(now, "周生生:" + gold.getZss() + ";周大福:" + gold.getZdf()
                 + ";占用1:" + getMongoUse(mongoTemplate) + ";占用2:" + getMongoUse(secondMongoTemplate), true);
     }
 

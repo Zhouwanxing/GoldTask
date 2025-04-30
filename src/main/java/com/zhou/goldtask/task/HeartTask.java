@@ -47,7 +47,7 @@ public class HeartTask {
             if (now.getHour() > 11) {
                 goldService.genToDayGold();
             }
-            if (now.getHour() > 5 && now.getHour() < 19) {
+            if (now.getHour() > 11 && now.getHour() < 19) {
                 ajkService.startAjk();
             }
         }
