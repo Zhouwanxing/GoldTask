@@ -86,13 +86,18 @@ public class AJKService {
                 return;
             }
             List<JSONObject> urls = ajkInfo.getJSONArray("value").toList(JSONObject.class);
-            for (JSONObject urlObj : urls) {
+            /*for (JSONObject urlObj : urls) {
                 String url = urlObj.getStr("url");
                 log.info("{}", url);
                 String body = HttpRequest.get(url).cookie(cookie).timeout(10000).execute().body();
                 log.info("{}\n{}", url, body);
                 handleOneContent(body);
-            }
+            }*/
+            String url = urls.get(DateUtil.thisHour(true) % 2).getStr("url");
+            log.info("{}", url);
+            String body = HttpRequest.get(url).cookie(cookie).timeout(10000).execute().body();
+            log.info("{}\n{}", url, body);
+            handleOneContent(body);
         } catch (Exception e) {
             log.warn("", e);
         }
