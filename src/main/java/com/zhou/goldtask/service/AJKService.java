@@ -9,6 +9,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.zhou.goldtask.entity.ErSFEntity;
 import com.zhou.goldtask.entity.ErSFHistoryEntity;
+import com.zhou.goldtask.utils.RuntimeData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -64,17 +65,7 @@ public class AJKService {
         }
     }
 
-    private String getCookie(String baseUrl) {
-        try {
-            Map<String, List<String>> headers = HttpRequest.get(baseUrl).timeout(5000).execute().headers();
-            log.info("{}", headers);
-            List<String> cookies = headers.get("Set-Cookie");
-            return String.join(";", cookies);
-        } catch (Exception e) {
-            log.warn("", e);
-        }
-        return null;
-    }
+
 
     public void startAjk() {
         JSONObject ajkInfo = ajkInfo();
@@ -82,7 +73,7 @@ public class AJKService {
             return;
         }
         try {
-            String cookie = getCookie(ajkInfo.getStr("baseUrl"));
+            String cookie = RuntimeData.getInstance().getAjkCookie(ajkInfo.getStr("baseUrl"));
             if (StringUtils.isBlank(cookie)) {
                 return;
             }
