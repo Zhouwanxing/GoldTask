@@ -67,10 +67,11 @@ public class AJKService {
     private String getCookie(String baseUrl) {
         try {
             Map<String, List<String>> headers = HttpRequest.get(baseUrl).timeout(5000).execute().headers();
+            log.info("{}", headers);
             List<String> cookies = headers.get("Set-Cookie");
             return String.join(";", cookies);
-        } catch (Exception ignored) {
-
+        } catch (Exception e) {
+            log.warn("", e);
         }
         return null;
     }
@@ -119,7 +120,7 @@ public class AJKService {
         }
     }
 
-    private void handleLJContent(String content) {
+    public void handleLJContent(String content) {
         try {
             Document parse = Jsoup.parse(content);
             Element ul = parse.getElementsByClass("sellListContent").get(0);
