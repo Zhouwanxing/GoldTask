@@ -159,6 +159,12 @@ public class Mp4Service {
             String[] textLinks = doc.getElementsByClass("textlink").get(0).html().split("&nbsp;&nbsp;");
             String textLink = textLinks[textLinks.length - 1];
             String download = doc.getElementsByClass("download").get(0).getElementsByTag("a").get(0).attr("href");
+            String href = url;
+            try {
+                href = url.split(".com")[1];
+            } catch (Exception ignored) {
+
+            }
             if (textLink == null || "".equals(textLink) || "".equals(download)) {
                 log.info("{}\n{}", url, doc.body());
             } else {
@@ -168,6 +174,7 @@ public class Mp4Service {
                         .url(download)
                         .date(date)
                         .img(img)
+                        .href(href)
                         .insertTime(DateUtil.now())
                         .build().urlToId().dateToDate();
                 if (idNotExists(entity)) {
