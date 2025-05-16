@@ -5,10 +5,13 @@ import cn.hutool.http.HttpUtil;
 import com.zhou.goldtask.entity.Mp4Entity;
 import com.zhou.goldtask.entity.Mp4LikeDto;
 import com.zhou.goldtask.entity.PathCountEntity;
+import com.zhou.goldtask.entity.UrlEntity;
 import com.zhou.goldtask.repository.Mp4Dao;
 import com.zhou.goldtask.repository.Mp4Repository;
+import com.zhou.goldtask.repository.UrlRepository;
 import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -34,6 +37,8 @@ public class Mp4Service {
     private Mp4Dao mp4Dao;
     @Resource
     private FileService fileService;
+    @Resource
+    private UrlRepository urlRepository;
 
     public void saveOne() {
         Mp4Entity entity = Mp4Entity.builder()
@@ -227,5 +232,19 @@ public class Mp4Service {
 
     public List<PathCountEntity> getAllCountAndPath(){
         return mp4Dao.getAllCountAndPath();
+    }
+
+    public String getInXxUrl(String id) {
+        Mp4Entity mp4 = mp4Repository.findById(id).orElse(null);
+        if (mp4 != null) {
+            String href = mp4.getHref();
+            if (StringUtils.isNotBlank(href)) {
+                UrlEntity oneSort = urlRepository.findOneSort();
+                if (oneSort != null) {
+                    return oneSort.get_id() + "/" + href;
+                }
+            }
+        }
+        return null;
     }
 }

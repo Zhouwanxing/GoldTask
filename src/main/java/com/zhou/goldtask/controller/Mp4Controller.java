@@ -72,6 +72,13 @@ public class Mp4Controller {
         return SaResult.ok();
     }
 
+    @GetMapping("/getInXxUrl")
+    public SaResult getInXxUrl(@RequestParam(value = "id") String id) {
+        SaResult ok = SaResult.ok();
+        ok.setData(mp4Service.getInXxUrl(id));
+        return ok;
+    }
+
     @PostMapping("/saveUrl")
     public SaResult initData(@RequestBody JSONObject data) {
         log.info("{}", data);
