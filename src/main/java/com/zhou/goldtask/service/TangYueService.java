@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ public class TangYueService {
         Query query = new Query();
         query.addCriteria(Criteria.where("area").gte(100));
         query.addCriteria(Criteria.where("price").lt(250));
+        query.addCriteria(Criteria.where("like").isNull());
         query.with(Sort.by(Sort.Direction.ASC, "price"));
         List<JSONObject> list = secondMongoTemplate.find(query, JSONObject.class, "my_ersf");
         Query hisQuery = new Query();
@@ -49,6 +51,18 @@ public class TangYueService {
                     .collect(Collectors.toList()));
         }
         return list;
+    }
+
+    public void updateHome(JSONObject updateData) {
+        String id = updateData.getStr("id");
+        String type = updateData.getStr("type");
+        if ("delete".equals(type)) {
+            secondMongoTemplate.remove(new Query(Criteria.where("_id").is(id)), "my_ersf");
+            secondMongoTemplate.remove(new Query(Criteria.where("homeId").is(id)), "my_ersf_history");
+            return;
+        }
+        secondMongoTemplate.updateFirst(new Query(Criteria.where("_id").is(id)),
+                new Update().set("like", false), "my_ersf");
     }
 
     public List<List<Object>> getList(TangYueEntity data) {

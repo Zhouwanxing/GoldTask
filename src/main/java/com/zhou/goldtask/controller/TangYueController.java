@@ -3,6 +3,7 @@ package com.zhou.goldtask.controller;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.util.SaResult;
+import cn.hutool.json.JSONObject;
 import com.zhou.goldtask.entity.TangYueEntity;
 import com.zhou.goldtask.service.TangYueService;
 import lombok.extern.slf4j.Slf4j;
@@ -34,5 +35,11 @@ public class TangYueController {
         SaResult ok = SaResult.ok();
         ok.setData(tangYueService.getAJK());
         return ok;
+    }
+
+    @PostMapping("/updateErSF")
+    public SaResult updateHome(@RequestBody JSONObject updateData) {
+        tangYueService.updateHome(updateData);
+        return SaResult.ok();
     }
 }
