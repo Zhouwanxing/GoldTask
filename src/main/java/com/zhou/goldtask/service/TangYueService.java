@@ -37,7 +37,6 @@ public class TangYueService {
 
     public List<JSONObject> getAJK() {
         Query query = new Query();
-
         query.addCriteria(Criteria.where("area").gte(100));
         query.addCriteria(Criteria.where("price").lt(250));
         query.addCriteria(Criteria.where("like").isNull());
