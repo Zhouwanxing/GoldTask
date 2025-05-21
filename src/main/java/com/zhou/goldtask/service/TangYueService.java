@@ -40,6 +40,7 @@ public class TangYueService {
         query.addCriteria(Criteria.where("area").gte(100));
         query.addCriteria(Criteria.where("price").lt(250));
         query.addCriteria(Criteria.where("like").isNull());
+        query.addCriteria(Criteria.where("floor").in("低", "中"));
         query.with(Sort.by(Sort.Direction.ASC, "price"));
         List<JSONObject> list = secondMongoTemplate.find(query, JSONObject.class, "my_ersf");
         Query hisQuery = new Query();
