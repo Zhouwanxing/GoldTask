@@ -16,6 +16,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -79,7 +80,7 @@ public class Mp4Service {
         }
     }
 
-    private boolean handleOther(String url) {
+    public boolean handleOther(String url) {
         List<String> paths = mp4Dao.distinctPath();
         boolean isIn = false;
         for (String path : paths) {
@@ -239,9 +240,9 @@ public class Mp4Service {
         if (mp4 != null) {
             String href = mp4.getHref();
             if (StringUtils.isNotBlank(href)) {
-                UrlEntity oneSort = urlRepository.findOneSort();
+                UrlEntity oneSort = urlRepository.findSort(Pageable.ofSize(1)).getContent().get(0);
                 if (oneSort != null) {
-                    return oneSort.get_id() + "/" + href;
+                    return oneSort.get_id() + href;
                 }
             }
         }

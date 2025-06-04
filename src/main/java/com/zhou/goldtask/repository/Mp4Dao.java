@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.zhou.goldtask.entity.*;
 import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -114,7 +115,9 @@ public class Mp4Dao {
     }
 
     public List<String> getUrls() {
-        return urlRepository.findAllSort().stream().map(UrlEntity::get_id).collect(Collectors.toList());
+        return urlRepository.findAllSort(Pageable.ofSize(20))
+                .getContent().stream().map(UrlEntity::get_id).collect(Collectors.toList());
+//        return urlRepository.findAllSort().stream().map(UrlEntity::get_id).collect(Collectors.toList());
     }
 
     public List<PathCountEntity> getAllCountAndPath() {
