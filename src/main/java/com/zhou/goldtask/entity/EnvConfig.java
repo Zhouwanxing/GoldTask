@@ -23,4 +23,6 @@ public class EnvConfig {
     private String mongoUri;
     @Value("${HOST_NAME:}")
     private String hostName;
+    @Value("${MY_KEY:}")
+    private String myKey;
 }
