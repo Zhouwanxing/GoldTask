@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -155,11 +154,13 @@ public class AJKService {
                 ersfEntity.set_id(repeatId);
             }*/
             ErSFEntity old = secondMongoTemplate.findOne(new Query().addCriteria(Criteria.where("_id").is(ersfEntity.get_id())), ErSFEntity.class);
-            if (old != null && old.getPrice() != ersfEntity.getPrice()) {
-                ErSFHistoryEntity his = ErSFHistoryEntity.builder()._id(UUID.fastUUID().toString()).price(old.getPrice()).homeId(ersfEntity.get_id()).time(DateUtil.now()).build();
-                secondMongoTemplate.save(his);
-            }
-            if (old == null) {
+            if (old != null) {
+                if (old.getPrice() != ersfEntity.getPrice()) {
+                    ErSFHistoryEntity his = ErSFHistoryEntity.builder()._id(UUID.fastUUID().toString()).price(old.getPrice()).homeId(ersfEntity.get_id()).time(DateUtil.now()).build();
+                    secondMongoTemplate.save(his);
+                }
+                ersfEntity.setLike(old.getLike());
+            } else {
                 taskService.remindTask(DateUtil.now(), ersfEntity.toString(), true);
             }
             secondMongoTemplate.save(ersfEntity);

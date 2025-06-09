@@ -26,6 +26,7 @@ public class ErSFEntity {
     private String linkUrl;
     private String from;
     private String floor;
+    private Boolean like;
 
 
     public void makeOther() {
