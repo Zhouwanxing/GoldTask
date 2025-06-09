@@ -88,7 +88,6 @@ public class AJKService {
             String url = urls.get(DateUtil.thisHour(true) % 2).getStr("url");
             log.info("{}", url);
             String body = HttpRequest.get(url).cookie(cookie).timeout(10000).execute().body();
-            log.info("{}\n{}", url, body);
             handleOneContent(body);
         } catch (Exception e) {
             log.warn("", e);
@@ -131,6 +130,9 @@ public class AJKService {
     private void handleOneContent(String content) {
         Document parse = Jsoup.parse(content);
         Elements elements = parse.getElementsByAttributeValue("tongji_tag", "fcpc_ersflist_gzcount");
+        if (elements.size() == 0) {
+            log.info("{}", content);
+        }
         for (Element element : elements) {
             handleOneRow(element);
         }
@@ -148,10 +150,10 @@ public class AJKService {
 
     private void saveToDB(ErSFEntity ersfEntity) {
         if (ersfEntity.get_id() != null) {
-            String repeatId = getRepeatHomeId(ersfEntity);
+            /*String repeatId = getRepeatHomeId(ersfEntity);
             if (repeatId != null) {
                 ersfEntity.set_id(repeatId);
-            }
+            }*/
             ErSFEntity old = secondMongoTemplate.findOne(new Query().addCriteria(Criteria.where("_id").is(ersfEntity.get_id())), ErSFEntity.class);
             if (old != null && old.getPrice() != ersfEntity.getPrice()) {
                 ErSFHistoryEntity his = ErSFHistoryEntity.builder()._id(UUID.fastUUID().toString()).price(old.getPrice()).homeId(ersfEntity.get_id()).time(DateUtil.now()).build();
@@ -222,7 +224,7 @@ public class AJKService {
             Element a = element.getElementsByAttributeValue("data-action", "esf_list").get(0);
             String attr = a.attr("data-ep");
             JSONObject obj = JSONUtil.parseObj(attr);
-            String str = obj.getJSONObject("exposure").getStr("owner_house_id");
+            String str = obj.getJSONObject("exposure").getStr("vpid");
             if (str == null) {
                 str = JSONUtil.parseObj(a.attr("data-lego")).getStr("entity_id");
             }
