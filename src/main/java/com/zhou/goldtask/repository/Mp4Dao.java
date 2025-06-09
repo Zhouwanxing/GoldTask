@@ -37,7 +37,7 @@ public class Mp4Dao {
         } else {
             query.addCriteria(Criteria.where("like").isNull());
         }
-        if (path != null && !"".equals(path)) {
+        if (!(path == null || "all".equals(path))) {
             query.addCriteria(Criteria.where("path").is(path));
         }
         return query;
@@ -99,7 +99,7 @@ public class Mp4Dao {
         if (!StrUtil.isEmptyIfStr(dto.getBeforeMonth())) {
             query.addCriteria(Criteria.where("date").lt(dto.getBeforeMonth()));
         }
-        if (!StrUtil.isEmptyIfStr(dto.getPath())) {
+        if (!(dto.getPath() == null || "all".equals(dto.getPath()))) {
             query.addCriteria(Criteria.where("path").is(dto.getPath()));
         }
         return query;
