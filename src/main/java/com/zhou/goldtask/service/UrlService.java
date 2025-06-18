@@ -22,6 +22,7 @@ public class UrlService {
     @Resource
     private Mp4Dao mp4Dao;
 
+
     public void checkNewUrl(boolean isDown) {
         List<String> urls = mp4Dao.getUrls();
         Set<String> addUrls = new HashSet<>();
