@@ -5,6 +5,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.util.SaResult;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import com.zhou.goldtask.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,17 @@ public class UserController {
     private ChromeService chromeService;
     @Resource
     private AJKService ajkService;
+
+
+    @GetMapping("/v1/client/subscribe")
+    public String subscribe(@RequestParam(required = false, defaultValue = "0") String token) {
+        return HttpUtil.get("https://feiniaoyun.top/api/v1/client/subscribe?token=" + token, 5000);
+    }
+
+    @GetMapping("/v1/client/subscribe2")
+    public String subscribe2(@RequestParam(required = false, defaultValue = "0") String token) {
+        return HttpUtil.get("https://feiniaoyun.xyz/api/v1/client/subscribe?token=" + token, 5000);
+    }
 
     @PostMapping("/mz")
     public SaResult mz(@RequestBody JSONObject data) {
