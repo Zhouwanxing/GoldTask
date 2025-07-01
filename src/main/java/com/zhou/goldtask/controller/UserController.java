@@ -30,15 +30,22 @@ public class UserController {
     private Mp4Service mp4Service;
     @Resource
     private ChromeService chromeService;
+    @Resource
+    private AJKService ajkService;
 
     @PostMapping("/mz")
     public SaResult mz(@RequestBody JSONObject data) {
-//        log.info("{}", data);
         JSONObject resData = data.getJSONObject("data");
 //        log.info("{}", resData.get("url"));
 //        log.info("{}", resData.get("cookie"));
-        String body = HttpRequest.get(resData.getStr("url")).cookie(resData.getStr("cookie")).execute().body();
+        String url = resData.getStr("url");
+        if (!(url.contains("lianjia.com") && url.contains("ershoufang"))) {
+            return SaResult.ok();
+        }
+        log.info("{}\n{}", "", url);
+        String body = HttpRequest.get(url).cookie(resData.getStr("cookie")).execute().body();
         System.out.println(body);
+        ajkService.handleLJContent(body);
         /*for (String s : body.split("\n")) {
             if (s != null && s.contains("window.__PRELOADED_STATE__")) {
                 System.out.println(s);
