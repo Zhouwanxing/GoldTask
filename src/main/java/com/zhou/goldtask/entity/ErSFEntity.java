@@ -23,6 +23,7 @@ public class ErSFEntity {
     private double price;
     private double area;
     private String lastTime;
+    private String createTime;
     private String linkUrl;
     private String from;
     private String floor;

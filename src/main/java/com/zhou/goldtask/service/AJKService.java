@@ -160,7 +160,9 @@ public class AJKService {
                     secondMongoTemplate.save(his);
                 }
                 ersfEntity.setLike(old.getLike());
+                ersfEntity.setCreateTime(old.getCreateTime());
             } else {
+                ersfEntity.setCreateTime(DateUtil.now());
                 taskService.remindTask(DateUtil.now(), ersfEntity.toString(), true);
             }
             secondMongoTemplate.save(ersfEntity);
