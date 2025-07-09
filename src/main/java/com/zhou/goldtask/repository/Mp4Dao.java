@@ -1,5 +1,6 @@
 package com.zhou.goldtask.repository;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.zhou.goldtask.entity.*;
 import com.zhou.goldtask.utils.Utils;
@@ -69,6 +70,7 @@ public class Mp4Dao {
             like.unset("insertTime");
             like.unset("name");
         } else {
+            like.set("lut", DateUtil.now());
             like.set("flag", flag);
         }
         mongoTemplate.updateFirst(query, like, Mp4Entity.class);
@@ -80,7 +82,7 @@ public class Mp4Dao {
 
     public List<Mp4Entity> findByDto(Mp4LikeDto dto) {
         Query query = searchLikeQuery(dto);
-        query.with(Sort.by(Sort.Direction.DESC, "date", "path", "_id"));
+        query.with(Sort.by(Sort.Direction.DESC, "lut", "date", "path", "_id"));
         query.skip((dto.getPage() - 1) * 10L);
         query.limit(10);
         if (Utils.localhost.equals(envConfig.getHostName())) {

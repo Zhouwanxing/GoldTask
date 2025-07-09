@@ -4,6 +4,7 @@ server:
     threads:
       min-spare: 1
       max: 10
+  max-http-header-size: 100KB
 # 数据监控配置
 management:
   endpoints:
