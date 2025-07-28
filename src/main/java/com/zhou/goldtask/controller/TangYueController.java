@@ -31,9 +31,9 @@ public class TangYueController {
     }
 
     @PostMapping("/getAJK")
-    public SaResult getAJK() {
+    public SaResult getAJK(@RequestBody JSONObject data) {
         SaResult ok = SaResult.ok();
-        ok.setData(tangYueService.getAJK());
+        ok.setData(tangYueService.getAJK(data.getInt("area"),data.getInt("price")));
         return ok;
     }
 

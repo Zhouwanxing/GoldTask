@@ -35,10 +35,10 @@ public class TangYueService {
     @Autowired
     private MongoTemplate secondMongoTemplate;
 
-    public List<JSONObject> getAJK() {
+    public List<JSONObject> getAJK(int area, int price) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("area").gte(100));
-        query.addCriteria(Criteria.where("price").lt(250));
+        query.addCriteria(Criteria.where("area").gte(area));
+        query.addCriteria(Criteria.where("price").lt(price));
         query.addCriteria(Criteria.where("like").isNull());
         query.addCriteria(Criteria.where("floor").in("低", "中"));
         query.with(Sort.by(Sort.Direction.ASC, "price"));
