@@ -22,6 +22,8 @@ public class ErSFEntity {
     private String priceStr;
     private double price;
     private double area;
+    //单价
+    private int unitPrice;
     private String lastTime;
     private String createTime;
     private String linkUrl;
@@ -41,6 +43,7 @@ public class ErSFEntity {
             String s = priceStr.substring(0, priceStr.indexOf(" "));
             this.price = Double.parseDouble(s);
         }
+        this.handleUintPrice();
     }
 
     public void handLJ(Element element) {
@@ -58,13 +61,27 @@ public class ErSFEntity {
             this.price = Double.parseDouble(element.getElementsByClass("priceInfo").get(0).getElementsByTag("span").get(0).text());
             String[] infoSp = info.split("\\|");
             area = Double.parseDouble(infoSp[1].trim().replace("平米", ""));
+            this.handleUintPrice();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void handleUintPrice() {
+        if (priceStr != null && priceStr.contains("万") && priceStr.contains("元")) {
+            try {
+                String replace = priceStr.substring(priceStr.indexOf("万") + 1, priceStr.indexOf("元")).replace(" ", "").replace(",", "");
+                this.unitPrice = Integer.parseInt(replace);
+            } catch (Exception ignored) {
+            }
         }
     }
 
     public static void main(String[] args) {
         String info = "3室2厅 | 120.05平米 | 东南 | 精装 | 中层(共48层) | 板楼";
         System.out.println(info.charAt(info.indexOf("层") - 1));
+        ErSFEntity one = ErSFEntity.builder().info(info).priceStr("398万 20,534元/平").build();
+        one.handleUintPrice();
+        System.out.println(one.getUnitPrice());
     }
 }
