@@ -108,8 +108,8 @@ public class UserController {
     }
 
     @GetMapping("/getNewStart")
-    public SaResult getNewStart() {
-        urlService.checkNewUrl(false);
+    public SaResult getNewStart(@RequestParam(defaultValue = "no") String down) {
+        urlService.checkNewUrl("yes".equals(down));
         return SaResult.ok();
     }
 
