@@ -7,6 +7,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
+import com.zhou.goldtask.entity.ErSFEntity;
 import com.zhou.goldtask.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -137,6 +138,13 @@ public class UserController {
     @GetMapping("/sendToMq")
     public SaResult sendToMq(String message, @RequestParam(required = false, defaultValue = "0") int qos) {
         userService.sendToMqtt(message, qos);
+        return SaResult.ok();
+    }
+
+    @PostMapping("/syncLj")
+    public SaResult syncLj(@RequestBody ErSFEntity entity) {
+        log.info("{}", entity);
+        ajkService.syncLj(entity);
         return SaResult.ok();
     }
 }

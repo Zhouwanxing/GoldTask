@@ -126,6 +126,14 @@ public class AJKService {
         }
     }
 
+    public void syncLj(ErSFEntity entity) {
+        try {
+            entity.syncLj();
+            saveToDB(entity);
+        } catch (Exception ignored) {
+        }
+    }
+
     private void handleOneContent(String content) {
         Document parse = Jsoup.parse(content);
         Elements elements = parse.getElementsByAttributeValue("tongji_tag", "fcpc_ersflist_gzcount");

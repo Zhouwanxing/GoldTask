@@ -67,6 +67,20 @@ public class ErSFEntity {
         }
     }
 
+    public void syncLj() {
+        from = "lj";
+        try {
+            floor = String.valueOf(info.charAt(info.indexOf("楼层") - 1));
+            lastTime = DateUtil.now();
+            String[] sp = priceStr.split("万");
+            this.price = Double.parseDouble(sp[0].trim());
+            String[] infoSp = info.split("\\|");
+            area = Double.parseDouble(infoSp[1].trim().replace("平米", ""));
+            this.handleUintPrice();
+        } catch (Exception ignored) {
+        }
+    }
+
     private void handleUintPrice() {
         if (priceStr != null && priceStr.contains("万") && priceStr.contains("元")) {
             try {
