@@ -139,4 +139,10 @@ public class Mp4Dao {
         }
         return new ArrayList<>();
     }
+
+    public Mp4ConfigEntity getMp4Config() {
+        return mongoTemplate.findOne(
+                new Query().addCriteria(Criteria.where("_id").is("mp4_config")),
+                Mp4ConfigEntity.class, "system_config");
+    }
 }
