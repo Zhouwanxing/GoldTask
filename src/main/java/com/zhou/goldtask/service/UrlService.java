@@ -43,7 +43,7 @@ public class UrlService {
             urls.add(0, addUrl);
         }
         if (isDown) {
-//            mp4Service.genNew(urls);
+            mp4Service.genNew(urls);
         }
     }
 

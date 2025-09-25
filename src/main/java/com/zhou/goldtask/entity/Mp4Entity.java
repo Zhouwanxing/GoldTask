@@ -3,6 +3,7 @@ package com.zhou.goldtask.entity;
 import com.zhou.goldtask.annotation.TableName;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 @Builder
 @TableName("my_mp4")
 @Document("my_mp4")
+@Slf4j
 public class Mp4Entity {
     @Id
     private String _id;
@@ -25,8 +27,12 @@ public class Mp4Entity {
 
     public Mp4Entity urlToId() {
         if (url != null) {
-            String[] split = url.split("/");
-            this._id = split[split.length - 3] + "/" + split[split.length - 2];
+            try {
+                String[] split = url.split("/");
+                this._id = split[split.length - 3] + "/" + split[split.length - 2];
+            } catch (Exception e) {
+                log.warn("{}", url, e);
+            }
         }
         return this;
     }
