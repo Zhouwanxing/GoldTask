@@ -6,4 +6,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface Mp4NewRepository extends MongoRepository<Mp4NewEntity, String> {
     long countByClassid(int classid);
+    boolean existsBy_id(String _id);
 }

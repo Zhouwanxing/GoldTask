@@ -2,6 +2,7 @@ package com.zhou.goldtask.repository;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import com.mongodb.client.result.UpdateResult;
 import com.zhou.goldtask.entity.*;
 import com.zhou.goldtask.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
@@ -144,5 +145,25 @@ public class Mp4Dao {
         return mongoTemplate.findOne(
                 new Query().addCriteria(Criteria.where("_id").is("mp4_config")),
                 Mp4ConfigEntity.class, "system_config");
+    }
+
+
+    public List<String> notExistIds(List<String> ids) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").in(ids));
+        List<String> list = mongoTemplate.findDistinct(query, "_id", "my_new_mp4", String.class);
+        List<String> notExist = new ArrayList<>();
+        for (String id : ids) {
+            if (!list.contains(id)) {
+                notExist.add(id);
+            }
+        }
+        return notExist;
+    }
+
+    public void updateBatchPath(int classId, String path) {
+        UpdateResult result = mongoTemplate.updateMulti(new Query().addCriteria(Criteria.where("classid").is(classId)),
+                new Update().set("path", path), "my_new_mp4");
+        System.out.println(path + "=" + result.getMatchedCount() + "=" + result.getModifiedCount());
     }
 }
