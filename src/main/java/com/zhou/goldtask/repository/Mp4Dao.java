@@ -45,7 +45,7 @@ public class Mp4Dao {
         return query;
     }
 
-    public List<Mp4Entity> findByPage(int page, boolean isShowLike, String path) {
+    public List<Mp4NewEntity> findByPage(int page, boolean isShowLike, String path) {
         Query query = findBaseQuery(isShowLike, path);
         query.with(Sort.by(Sort.Direction.DESC, "date", "path", "_id"));
         query.skip((page - 1) * 10L);
@@ -53,11 +53,11 @@ public class Mp4Dao {
         if (Utils.localhost.equals(envConfig.getHostName())) {
             query.fields().exclude("name", "img");
         }
-        return mongoTemplate.find(query, Mp4Entity.class);
+        return mongoTemplate.find(query, Mp4NewEntity.class);
     }
 
     public long count(boolean isShowLike, String path) {
-        return mongoTemplate.count(findBaseQuery(isShowLike, path), Mp4Entity.class);
+        return mongoTemplate.count(findBaseQuery(isShowLike, path), Mp4NewEntity.class);
     }
 
     public void updateLike(String id, String flag) {
@@ -74,14 +74,14 @@ public class Mp4Dao {
             like.set("lut", DateUtil.now());
             like.set("flag", flag);
         }
-        mongoTemplate.updateFirst(query, like, Mp4Entity.class);
+        mongoTemplate.updateFirst(query, like, Mp4NewEntity.class);
     }
 
     public List<String> getAllPath() {
-        return mongoTemplate.findDistinct("path", Mp4Entity.class, String.class);
+        return mongoTemplate.findDistinct("path", Mp4NewEntity.class, String.class);
     }
 
-    public List<Mp4Entity> findByDto(Mp4LikeDto dto) {
+    public List<Mp4NewEntity> findByDto(Mp4LikeDto dto) {
         Query query = searchLikeQuery(dto);
         query.with(Sort.by(Sort.Direction.DESC, "lut", "date", "path", "_id"));
         query.skip((dto.getPage() - 1) * 10L);
@@ -89,7 +89,7 @@ public class Mp4Dao {
         if (Utils.localhost.equals(envConfig.getHostName())) {
             query.fields().exclude("name", "img");
         }
-        List<Mp4Entity> list = mongoTemplate.find(query, Mp4Entity.class);
+        List<Mp4NewEntity> list = mongoTemplate.find(query, Mp4NewEntity.class);
         log.info("{}\n{}", query, list.size());
         return list;
     }
@@ -110,7 +110,7 @@ public class Mp4Dao {
 
     public long searchLikeCount(Mp4LikeDto dto) {
         Query query = searchLikeQuery(dto);
-        return mongoTemplate.count(query, Mp4Entity.class);
+        return mongoTemplate.count(query, Mp4NewEntity.class);
     }
 
     public List<String> distinctPath() {
@@ -132,7 +132,7 @@ public class Mp4Dao {
             );
             return mongoTemplate.aggregate(
                     aggregation,
-                    Mp4Entity.class,
+                    Mp4NewEntity.class,
                     PathCountEntity.class
             ).getMappedResults();
         } catch (Exception e) {
@@ -165,5 +165,24 @@ public class Mp4Dao {
         UpdateResult result = mongoTemplate.updateMulti(new Query().addCriteria(Criteria.where("classid").is(classId)),
                 new Update().set("path", path), "my_new_mp4");
         System.out.println(path + "=" + result.getMatchedCount() + "=" + result.getModifiedCount());
+    }
+
+    public boolean isUpdate(String url) {
+        Query query = new Query().addCriteria(Criteria.where("url").regex(url));
+        UpdateResult result = mongoTemplate.updateMulti(query, new Update().set("flag", false), "my_new_mp4");
+        return result.getMatchedCount() > 0;
+    }
+
+    public List<Mp4Entity> findAll() {
+        Query query = new Query();
+        query.fields().include("url", "flag");
+        return mongoTemplate.find(query, Mp4Entity.class);
+    }
+
+    public boolean isUpdate(String url, String flag) {
+        Query query = new Query().addCriteria(Criteria.where("url").is(url));
+        UpdateResult result = mongoTemplate.updateMulti(query, new Update()
+                .set("like", true).set("flag", flag), "my_new_mp4");
+        return result.getMatchedCount() > 0 || result.getModifiedCount() > 0;
     }
 }

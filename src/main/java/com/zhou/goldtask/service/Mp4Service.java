@@ -22,6 +22,10 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.text.DateFormat;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,6 +49,35 @@ public class Mp4Service {
     @Resource
     private UrlRepository urlRepository;
 
+    public void test0927() {
+        LocalDate today = LocalDate.now();
+        YearMonth currentYearMonth = YearMonth.from(today);
+
+        DateTimeFormatter yyyyMM = DateTimeFormatter.ofPattern("yyyyMM");
+        String yearMonth = null;
+        List<String> list = null;
+        for (int i = 0; i < 80; i++) {
+            yearMonth = currentYearMonth.minusMonths(i).format(yyyyMM);
+            list = fileService.getFileContentList(yearMonth);
+            for (String key : list) {
+                if (!mp4Dao.isUpdate(key)) {
+                    System.out.println(key);
+                }
+            }
+        }
+    }
+
+    public void test0927_1() {
+        List<Mp4Entity> all = mp4Dao.findAll();
+        System.out.println(all.size());
+        for (Mp4Entity one : all) {
+            if (mp4Dao.isUpdate(one.getUrl(), one.getFlag())) {
+                mp4Repository.deleteById(one.get_id());
+            }
+        }
+    }
+
+
     public void saveOne() {
         Mp4Entity entity = Mp4Entity.builder()
                 .name("textLink")
@@ -56,12 +89,12 @@ public class Mp4Service {
         mp4Repository.save(entity);
     }
 
-    public List<Mp4Entity> pageShowList(Integer page, boolean isShowLike, String path) {
+    public List<Mp4NewEntity> pageShowList(Integer page, boolean isShowLike, String path) {
         return mp4Dao.findByPage(page, isShowLike, path);
 //        return handleList(mp4Dao.findByPage(page, isShowLike));
     }
 
-    public List<Mp4Entity> searchLike(Mp4LikeDto dto) {
+    public List<Mp4NewEntity> searchLike(Mp4LikeDto dto) {
         return mp4Dao.findByDto(dto);
     }
 
