@@ -66,10 +66,7 @@ public class Mp4Dao {
         boolean isLike = !"delete".equals(flag);
         Update like = new Update().set("like", isLike);
         if (!isLike) {
-            like.unset("url");
-            like.unset("date");
-            like.unset("insertTime");
-            like.unset("name");
+            like.unset("flag");
         } else {
             like.set("lut", DateUtil.now());
             like.set("flag", flag);
