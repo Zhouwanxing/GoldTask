@@ -232,6 +232,10 @@ public class Mp4Service {
     }
 
     private int handleOneMp4(String url, Mp4JsonItemEntity one, String classpath, Mp4ConfigEntity config) {
+        if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(Utils.Mp4RedisKey + one.getId()))) {
+            return 1;
+        }
+        stringRedisTemplate.opsForValue().set(Utils.Mp4RedisKey + one.getId(), one.getId() + "", 200, TimeUnit.DAYS);
         String urlString = url + "/json/video/" + one.getId() + ".json";
         String body = null;
         Mp4JsonItemEntity newOne = null;
