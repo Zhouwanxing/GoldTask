@@ -125,9 +125,15 @@ public class Mp4Service {
         } catch (Exception e) {
             return;
         }
-        for (String url : urls) {
-            if (handleOtherNew(url, config, list.stream().filter(item -> "movie".equals(item.getTbname())).collect(Collectors.toList()))) {
-                break;
+        boolean isDown = false;
+        if (StringUtils.isNotBlank(config.getApiUrl())) {
+            isDown = handleOtherNew(config.getApiUrl(), config, list.stream().filter(item -> "movie".equals(item.getTbname())).collect(Collectors.toList()));
+        }
+        if (!isDown) {
+            for (String url : urls) {
+                if (handleOtherNew(url, config, list.stream().filter(item -> "movie".equals(item.getTbname())).collect(Collectors.toList()))) {
+                    break;
+                }
             }
         }
     }

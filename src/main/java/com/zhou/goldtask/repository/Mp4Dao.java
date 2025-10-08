@@ -32,6 +32,10 @@ public class Mp4Dao {
     @Resource
     private UrlRepository urlRepository;
 
+    public MongoTemplate getMongoTemplate() {
+        return mongoTemplate;
+    }
+
     private Query findBaseQuery(boolean isShowLike, String path) {
         Query query = new Query();
         if (isShowLike) {

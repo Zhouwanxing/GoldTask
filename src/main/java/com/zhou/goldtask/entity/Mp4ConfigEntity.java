@@ -8,4 +8,5 @@ public class Mp4ConfigEntity {
     private String key;
     private String iv;
     private String baseUrl;
+    private String apiUrl;
 }
