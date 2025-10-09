@@ -220,7 +220,7 @@ public class Mp4Service {
         if ("av".equals(item.getClasspath())) {
             return;
         }
-        while (errorCount < 20) {
+        while (errorCount < 15) {
             list = getJsonItem(url, config, item.getClassid(), count++);
             if (list == null || list.size() == 0) {
                 break;
