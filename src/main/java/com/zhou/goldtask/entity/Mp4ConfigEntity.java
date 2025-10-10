@@ -9,4 +9,5 @@ public class Mp4ConfigEntity {
     private String iv;
     private String baseUrl;
     private String apiUrl;
+    private int count;
 }

@@ -48,6 +48,8 @@ public class Mp4Service {
     private FileService fileService;
     @Resource
     private UrlRepository urlRepository;
+    @Resource
+    private ITaskService taskService;
 
     public void test0927() {
         LocalDate today = LocalDate.now();
@@ -126,6 +128,7 @@ public class Mp4Service {
             return;
         }
         boolean isDown = false;
+        config.setCount(0);
         if (StringUtils.isNotBlank(config.getApiUrl())) {
             isDown = handleOtherNew(config.getApiUrl(), config, list.stream().filter(item -> "movie".equals(item.getTbname())).collect(Collectors.toList()));
         }
@@ -136,6 +139,7 @@ public class Mp4Service {
                 }
             }
         }
+        taskService.remindTask("xz", "新增" + config.getCount() + "个视频", false);
     }
 
     public void updatePath(){
@@ -258,6 +262,7 @@ public class Mp4Service {
         System.out.println(entity.get_id() + "==");
         try {
             mp4NewRepository.insert(entity);
+            config.setCount(config.getCount() + 1);
         } catch (Exception ignored) {
             return 1;
         }
