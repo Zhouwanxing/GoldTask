@@ -17,7 +17,7 @@ import java.util.List;
 public class Mp4NewEntity {
     @Id
     private String _id;
-    private int classid;
+    private Integer classid;
     private String date;
     private String name;
     private String img;
