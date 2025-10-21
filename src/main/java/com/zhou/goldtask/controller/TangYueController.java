@@ -4,6 +4,7 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.util.SaResult;
 import cn.hutool.json.JSONObject;
+import com.zhou.goldtask.entity.ErPageFormEntity;
 import com.zhou.goldtask.entity.TangYueEntity;
 import com.zhou.goldtask.service.TangYueService;
 import lombok.extern.slf4j.Slf4j;
@@ -31,9 +32,9 @@ public class TangYueController {
     }
 
     @PostMapping("/getAJK")
-    public SaResult getAJK(@RequestBody JSONObject data) {
+    public SaResult getAJK(@RequestBody ErPageFormEntity data) {
         SaResult ok = SaResult.ok();
-        ok.setData(tangYueService.getAJK(data.getInt("area"),data.getInt("price")));
+        ok.setData(tangYueService.getAJK(data));
         return ok;
     }
 

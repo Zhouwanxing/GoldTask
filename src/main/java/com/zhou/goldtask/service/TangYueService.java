@@ -2,6 +2,7 @@ package com.zhou.goldtask.service;
 
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
+import com.zhou.goldtask.entity.ErPageFormEntity;
 import com.zhou.goldtask.entity.ErSFHistoryEntity;
 import com.zhou.goldtask.entity.TangYueEntity;
 import com.zhou.goldtask.entity.TangYueOneHome;
@@ -35,13 +36,14 @@ public class TangYueService {
     @Autowired
     private MongoTemplate secondMongoTemplate;
 
-    public List<JSONObject> getAJK(int area, int price) {
+    public List<JSONObject> getAJK(ErPageFormEntity data) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("area").gte(area));
-        query.addCriteria(Criteria.where("price").lt(price));
+        query.addCriteria(Criteria.where("area").gte(data.getAreaMin()).lte(data.getAreaMax()));
+        query.addCriteria(Criteria.where("price").gte(data.getPriceMin()).lte(data.getPriceMax()));
         query.addCriteria(Criteria.where("like").isNull());
         query.addCriteria(Criteria.where("floor").in("低", "中"));
-        query.with(Sort.by(Sort.Direction.ASC, "price"));
+        query.with(Sort.by(data.getSortValue() == 1 ? Sort.Direction.ASC : Sort.Direction.DESC, data.getSortKey()));
+        log.info("{}", query);
         List<JSONObject> list = secondMongoTemplate.find(query, JSONObject.class, "my_ersf");
         Query hisQuery = new Query();
         hisQuery.with(Sort.by(Sort.Direction.ASC, "time"));
