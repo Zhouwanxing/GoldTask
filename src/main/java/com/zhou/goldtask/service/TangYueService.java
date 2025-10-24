@@ -40,8 +40,16 @@ public class TangYueService {
         Query query = new Query();
         query.addCriteria(Criteria.where("area").gte(data.getAreaMin()).lte(data.getAreaMax()));
         query.addCriteria(Criteria.where("price").gte(data.getPriceMin()).lte(data.getPriceMax()));
-        query.addCriteria(Criteria.where("like").isNull());
-        query.addCriteria(Criteria.where("floor").in("低", "中"));
+        if (data.getShowFloor() == 1) {
+            query.addCriteria(Criteria.where("floor").is("低"));
+        } else if (data.getShowFloor() == 2) {
+            query.addCriteria(Criteria.where("floor").is("中"));
+        } else if (data.getShowFloor() == 3) {
+            query.addCriteria(Criteria.where("floor").is("高"));
+        }
+        if (data.getShowLike() == 1) {
+            query.addCriteria(Criteria.where("like").isNull());
+        }
         query.with(Sort.by(data.getSortValue() == 1 ? Sort.Direction.ASC : Sort.Direction.DESC, data.getSortKey()));
         log.info("{}", query);
         List<JSONObject> list = secondMongoTemplate.find(query, JSONObject.class, "my_ersf");

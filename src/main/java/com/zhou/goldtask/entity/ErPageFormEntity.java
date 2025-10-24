@@ -15,4 +15,6 @@ public class ErPageFormEntity {
     private Integer priceMax;
     private String sortKey;
     private Integer sortValue;
+    private Integer showFloor;
+    private Integer showLike;
 }
