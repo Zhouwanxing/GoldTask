@@ -37,6 +37,7 @@ public class TangYueService {
     private MongoTemplate secondMongoTemplate;
 
     public List<JSONObject> getAJK(ErPageFormEntity data) {
+
         Query query = new Query();
         query.addCriteria(Criteria.where("area").gte(data.getAreaMin()).lte(data.getAreaMax()));
         query.addCriteria(Criteria.where("price").gte(data.getPriceMin()).lte(data.getPriceMax()));
