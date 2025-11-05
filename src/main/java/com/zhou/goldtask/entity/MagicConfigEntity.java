@@ -14,4 +14,5 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class MagicConfigEntity {
     private String file_path;
     private String file_content;
+    
 }
