@@ -1,9 +1,11 @@
 package com.zhou.goldtask.utils;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.http.HttpRequest;
 import com.zhou.goldtask.entity.SwingConfig;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +15,16 @@ public class RuntimeData {
     private SwingConfig swingConfig;
 
     private String ajkCookie;
+    private final List<String> onlineDay = new ArrayList<>();
+
+
+    public void online() {
+        onlineDay.add(DateUtil.today() + (DateUtil.thisHour(true) < 10 ? "0" : "1"));
+    }
+
+    public boolean isOnline() {
+        return onlineDay.contains(DateUtil.today() + (DateUtil.thisHour(true) < 10 ? "0" : "1"));
+    }
 
     private RuntimeData() {
         instance = this;

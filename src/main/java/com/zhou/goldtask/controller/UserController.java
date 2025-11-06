@@ -119,15 +119,6 @@ public class UserController {
         return SaResult.data(fileService.getFileContentList(fileName));
     }
 
-
-    @GetMapping("/genOtherPage")
-    public SaResult genOtherPage(String url, String menuHref, @RequestParam(defaultValue = "1") int page) {
-        if (StrUtil.isAllNotBlank(url, menuHref)) {
-            mp4Service.oneType(url, menuHref, page);
-        }
-        return SaResult.ok();
-    }
-
     @GetMapping("/runChrome")
     public SaResult runChrome(String url) {
         chromeService.runChromeUrl(url);

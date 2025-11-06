@@ -5,15 +5,14 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.zhou.goldtask.entity.AttendanceInfo;
+import com.zhou.goldtask.utils.RuntimeData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -22,11 +21,9 @@ public class OnlineService {
     private MongoTemplate mongoTemplate;
     @Resource
     private ITaskService taskService;
-    @Resource
-    private StringRedisTemplate stringRedisTemplate;
 
     public void taskOnline() {
-        if (Boolean.TRUE.equals(stringRedisTemplate.hasKey("online"))) {
+        if (RuntimeData.getInstance().isOnline()) {
             return;
         }
         AttendanceInfo info = getAttendanceInfo();
@@ -37,13 +34,13 @@ public class OnlineService {
             if (info.getRecord().size() == 0) {
                 taskService.remindTask("打卡", "上班打卡", false);
             } else {
-                stringRedisTemplate.opsForValue().set("online", "1", 30, TimeUnit.MINUTES);
+                RuntimeData.getInstance().online();
             }
         } else {
             if (info.getRecord().size() != 2) {
                 taskService.remindTask("打卡", "下班打卡", false);
             } else {
-                stringRedisTemplate.opsForValue().set("online", "1", 30, TimeUnit.MINUTES);
+                RuntimeData.getInstance().online();
             }
         }
     }
