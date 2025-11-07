@@ -19,20 +19,15 @@ import java.util.Date;
 @Setter
 @Getter
 public class SaTokenMongoData {
-
     @Id
     private String id;
-
     // token
     @Indexed(unique = true)
     private String key;
-
     // sa-token 的 session
     private SaSession session;
-
     // sa-token 的 token string
     private String string;
-
     //使用 @SuppressWarnings("removal") 的目的是，防止IDEA报错，因为 expireAfterSeconds是不在支持的属性。
     // 给 expireAt 添加 `@Indexed(expireAfterSeconds = 0)` 注解，当过期时MongoDB会自动帮我删除过期的数据
     @Indexed(expireAfterSeconds = 0)
