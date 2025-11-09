@@ -239,9 +239,7 @@ public class SaTokenMongoDao implements SaTokenDao {
      */
     @Override
     public List<String> searchData(String prefix, String keyword, int start, int size, boolean sortType) {
-
         List<Criteria> criteriaList = new ArrayList<>();
-
         if (StringUtils.hasText(prefix)) {
             criteriaList.add(Criteria.where("key").regex(Pattern.compile("^" + Pattern.quote(prefix))));
         }
@@ -249,20 +247,13 @@ public class SaTokenMongoDao implements SaTokenDao {
             Pattern keywordPattern = Pattern.compile(Pattern.quote(keyword), Pattern.CASE_INSENSITIVE);
             criteriaList.add(Criteria.where("key").regex(keywordPattern));
         }
-
-
         Criteria criteria = new Criteria();
-
         if (!criteriaList.isEmpty()) {
             criteria.andOperator(criteriaList);
         }
-
         long skip = (long) Math.max(start, 0) * Math.max(size, 1);
-
         Query query = Query.query(criteria).skip(skip).limit(size);
-
         query.fields().include("key").exclude("_id");
-
         return mongoTemplate.find(query, SaTokenMongoData.class).stream().map(SaTokenMongoData::getKey).collect(Collectors.toList());
     }
 }
