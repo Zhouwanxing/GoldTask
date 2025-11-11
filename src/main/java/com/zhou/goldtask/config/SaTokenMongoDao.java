@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class SaTokenMongoDao implements SaTokenDao {
-
     private final MongoTemplate mongoTemplate;
 
     public SaTokenMongoDao(MongoTemplate mongoTemplate) {
