@@ -22,9 +22,9 @@ public class BarkTaskService implements ITaskService {
     private EnvConfig envConfig;
 
     @Override
-    public void remindTask(String title, String body, boolean isAutoSave) {
+    public void remindTask(String title, String body, String group, boolean isAutoSave) {
         String urlString = "https://api.day.app/" + envConfig.getBarkId();
-        String data = JSONUtil.toJsonStr(new JSONObject().putOpt("body", body).putOpt("title", title).putOpt("isArchive", isAutoSave ? "1" : ""));
+        String data = JSONUtil.toJsonStr(new JSONObject().putOpt("body", body).putOpt("group", group).putOpt("title", title).putOpt("isArchive", isAutoSave ? "1" : ""));
         try {
             log.info("{},{},{}", HttpUtil.post(urlString, data), urlString, data);
         } catch (Exception e) {

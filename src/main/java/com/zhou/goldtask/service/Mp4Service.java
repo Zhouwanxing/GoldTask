@@ -130,7 +130,7 @@ public class Mp4Service {
                 }
             }
         }
-        taskService.remindTask("xz", "新增" + config.getCount() + "个视频", false);
+        taskService.remindTask("xz", "新增" + config.getCount() + "个视频", "sp", false);
     }
 
     public void updatePath(){

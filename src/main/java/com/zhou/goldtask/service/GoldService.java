@@ -73,7 +73,7 @@ public class GoldService {
         /*taskService.remindTask(now, "周生生:" + gold.getZss() + ";周大福:" + gold.getZdf() + ";黄金延期:" + ccb
                 + ";占用1:" + getMongoUse(mongoTemplate) + ";占用2:" + getMongoUse(secondMongoTemplate), true); */
         taskService.remindTask(now, "周生生:" + gold.getZss() + ";周大福:" + gold.getZdf()
-                + ";占用1:" + getMongoUse(mongoTemplate) + ";占用2:" + getMongoUse(secondMongoTemplate), true);
+                + ";占用1:" + getMongoUse(mongoTemplate) + ";占用2:" + getMongoUse(secondMongoTemplate), "jj", true);
     }
 
     public int getCcb() {

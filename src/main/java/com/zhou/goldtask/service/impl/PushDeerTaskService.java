@@ -17,7 +17,7 @@ public class PushDeerTaskService implements ITaskService {
     private EnvConfig envConfig;
 
     @Override
-    public void remindTask(String title, String body, boolean isAutoSave) {
+    public void remindTask(String title, String body, String group, boolean isAutoSave) {
         String urlString = "https://api2.pushdeer.com/message/push?pushkey=" + envConfig.getPushDeerId() + "&text=" + title + body;
         try {
             log.info("{},{}", HttpUtil.get(urlString), urlString);
