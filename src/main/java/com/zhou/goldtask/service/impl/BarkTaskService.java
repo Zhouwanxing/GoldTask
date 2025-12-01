@@ -6,6 +6,7 @@ import cn.hutool.json.JSONUtil;
 import com.zhou.goldtask.entity.EnvConfig;
 import com.zhou.goldtask.service.ITaskService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +23,13 @@ public class BarkTaskService implements ITaskService {
     private EnvConfig envConfig;
 
     @Override
-    public void remindTask(String title, String body, String group, boolean isAutoSave) {
+    public void remindTask(String title, String body, String group, String url, boolean isAutoSave) {
         String urlString = "https://api.day.app/" + envConfig.getBarkId();
-        String data = JSONUtil.toJsonStr(new JSONObject().putOpt("body", body).putOpt("group", group).putOpt("title", title).putOpt("isArchive", isAutoSave ? "1" : ""));
+        JSONObject json = new JSONObject().putOpt("body", body).putOpt("group", group).putOpt("title", title).putOpt("isArchive", isAutoSave ? "1" : "");
+        if (StringUtils.isNotBlank(url)) {
+            json.putOpt("url", url);
+        }
+        String data = JSONUtil.toJsonStr(json);
         try {
             log.info("{},{},{}", HttpUtil.post(urlString, data), urlString, data);
         } catch (Exception e) {

@@ -32,13 +32,13 @@ public class OnlineService {
         }
         if (DateUtil.thisHour(true) < 9) {
             if (info.getRecord().size() == 0) {
-                taskService.remindTask("打卡", "上班打卡", "dk", false);
+                taskService.remindTask("打卡", "上班打卡", "dk", null, false);
             } else {
                 RuntimeData.getInstance().online();
             }
         } else {
             if (info.getRecord().size() != 2) {
-                taskService.remindTask("打卡", "下班打卡", "dk", false);
+                taskService.remindTask("打卡", "下班打卡", "dk", null, false);
             } else {
                 RuntimeData.getInstance().online();
             }

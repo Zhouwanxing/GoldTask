@@ -171,7 +171,7 @@ public class AJKService {
                 ersfEntity.setCreateTime(old.getCreateTime());
             } else {
                 ersfEntity.setCreateTime(DateUtil.now());
-                taskService.remindTask(DateUtil.now(), ersfEntity.toString(), "esf", true);
+                taskService.remindTask(ersfEntity.getInfo(), ersfEntity.getPriceStr(), ersfEntity.getFrom(), ersfEntity.getLinkUrl(), true);
             }
             secondMongoTemplate.save(ersfEntity);
         }
