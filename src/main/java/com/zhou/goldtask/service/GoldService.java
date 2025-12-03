@@ -10,6 +10,7 @@ import cn.hutool.json.JSONUtil;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.zhou.goldtask.entity.ErSFEntity;
 import com.zhou.goldtask.entity.GoldEntity;
 import com.zhou.goldtask.repository.GoldRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -72,8 +73,20 @@ public class GoldService {
 //        setOther(now);
         /*taskService.remindTask(now, "周生生:" + gold.getZss() + ";周大福:" + gold.getZdf() + ";黄金延期:" + ccb
                 + ";占用1:" + getMongoUse(mongoTemplate) + ";占用2:" + getMongoUse(secondMongoTemplate), true); */
-        taskService.remindTask(now, "周生生:" + gold.getZss() + ";周大福:" + gold.getZdf()
-                + ";占用1:" + getMongoUse(mongoTemplate) + ";占用2:" + getMongoUse(secondMongoTemplate), "jj", null, true);
+        taskService.remindTask(now, String.format("周生生:%s;周大福:%s;占用1:%s;占用2:%s,均价:%s",
+                gold.getZss(), gold.getZdf(), getMongoUse(mongoTemplate), getMongoUse(secondMongoTemplate), getUnit()), "jj", null, true);
+    }
+
+
+    private int getUnit() {
+        Query query = new Query();
+        query.fields().include("unitPrice").exclude("_id");
+        List<ErSFEntity> list = secondMongoTemplate.find(query, ErSFEntity.class);
+        int all = 0;
+        for (ErSFEntity one : list) {
+            all += one.getUnitPrice();
+        }
+        return all / list.size();
     }
 
     public int getCcb() {
