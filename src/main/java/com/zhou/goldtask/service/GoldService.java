@@ -80,6 +80,7 @@ public class GoldService {
 
     private int getUnit() {
         Query query = new Query();
+        query.addCriteria(Criteria.where("area").gte(100).lt(130));
         query.fields().include("unitPrice").exclude("_id");
         List<ErSFEntity> list = secondMongoTemplate.find(query, ErSFEntity.class);
         int all = 0;
