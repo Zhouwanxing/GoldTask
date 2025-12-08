@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -90,6 +91,35 @@ public class AJKService {
             handleOneContent(body);
         } catch (Exception e) {
             log.warn("", e);
+        }
+    }
+
+    public void handleFtx() {
+        JSONObject ajkInfo = ajkInfo();
+        if (ajkInfo == null) {
+            return;
+        }
+        String ftxValue = ajkInfo.getStr("ftxValue");
+        String body = HttpUtil.get(ftxValue + "/house/kw%E5%94%90%E6%A8%BE/?refer=sy_seach", 5000);
+        handleOneFtx(body, ftxValue);
+        Elements pageBox = Jsoup.parse(body).getElementsByClass("page_al").get(0).getElementsByTag("span");
+        Elements a = null;
+        for (Element box : pageBox) {
+            a = box.getElementsByTag("a");
+            if (a.size() == 1) {
+                body = HttpUtil.get(ftxValue + a.get(0).attr("href"), 5000);
+                handleOneFtx(body, ftxValue);
+            }
+        }
+    }
+
+    private void handleOneFtx(String body, String ftxValue) {
+        Elements dl = Jsoup.parse(body).getElementsByClass("shop_list shop_list_4").get(0).getElementsByTag("dl");
+        ErSFEntity one = null;
+        for (Element element : dl) {
+            one = new ErSFEntity();
+            one.syncFtx(element, ftxValue);
+            saveToDB(one);
         }
     }
 

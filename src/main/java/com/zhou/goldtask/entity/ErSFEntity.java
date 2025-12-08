@@ -91,6 +91,24 @@ public class ErSFEntity {
         }
     }
 
+    public void syncFtx(Element one, String ftxValue) {
+        from = "ftx";
+        try {
+            _id = one.getElementsByClass("floatl").get(0).getElementsByTag("a").get(0).attr("href").split("/")[2].replace(".htm", "");
+            title = one.getElementsByTag("h4").text();
+            info = one.getElementsByTag("dd").get(0).getElementsByTag("p").get(0).text();
+            priceStr = one.getElementsByClass("price_right").get(0).text();
+            linkUrl = ftxValue + one.getElementsByClass("floatl").get(0).getElementsByTag("a").get(0).attr("href");
+            price = Double.parseDouble(priceStr.substring(0, priceStr.indexOf("万")));
+            unitPrice = Integer.parseInt(priceStr.substring(priceStr.indexOf("万") + 1, priceStr.indexOf("元")));
+            area = Double.parseDouble(info.substring(info.indexOf("|") + 1, info.indexOf("㎡")).replace(" ", ""));
+            floor = info.substring(info.indexOf("层") - 1, info.indexOf("层"));
+            lastTime = DateUtil.now();
+        } catch (Exception ignored) {
+
+        }
+    }
+
     public static void main(String[] args) {
         String info = "3室2厅 | 120.05平米 | 东南 | 精装 | 中层(共48层) | 板楼";
         System.out.println(info.charAt(info.indexOf("层") - 1));

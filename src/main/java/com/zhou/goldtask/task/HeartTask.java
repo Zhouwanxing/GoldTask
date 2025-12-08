@@ -49,6 +49,7 @@ public class HeartTask {
             }
             if (now.getHour() > 6 && now.getHour() < 20) {
                 ajkService.startAjk();
+                ajkService.handleFtx();
             }
         }
         if (now.getSecond() == 0) {
