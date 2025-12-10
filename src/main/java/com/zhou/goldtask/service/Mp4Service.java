@@ -99,6 +99,17 @@ public class Mp4Service {
         return mp4Dao.count(isShowLike, path);
     }
 
+    public void handleNoNum() {
+        Mp4ConfigEntity config = mp4Dao.getMp4Config();
+        if (config == null) {
+            return;
+        }
+        int start = 132262;
+        while (start-- > 132261) {
+            handleOneMp4(config.getApiUrl(), start, null, config);
+        }
+    }
+
     public void genNew(List<String> urls) {
         if (urls == null || urls.size() == 0) {
             urls = mp4Dao.getUrls();
@@ -232,15 +243,11 @@ public class Mp4Service {
         }
     }
 
-    private int handleOneMp4(String url, Mp4JsonItemEntity one, String classpath, Mp4ConfigEntity config) {
-        /*if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(Utils.Mp4RedisKey + one.getId()))) {
+    private int handleOneMp4(String url, int id, String classpath, Mp4ConfigEntity config) {
+        if (mp4NewRepository.existsBy_id(id + "")) {
             return 1;
         }
-        stringRedisTemplate.opsForValue().set(Utils.Mp4RedisKey + one.getId(), one.getId() + "", 200, TimeUnit.DAYS);*/
-        if (mp4NewRepository.existsBy_id(one.getId() + "")) {
-            return 1;
-        }
-        String urlString = url + "/json/video/" + one.getId() + ".json";
+        String urlString = url + "/json/video/" + id + ".json";
         String body = null;
         Mp4JsonItemEntity newOne = null;
         try {
@@ -252,7 +259,7 @@ public class Mp4Service {
         }
         Mp4NewEntity entity = Mp4NewEntity.builder()._id(newOne.getId() + "").classid(newOne.getClassid())
                 .date(newOne.newSTimeToDate()).name(newOne.getTitle()).img(newOne.getTitlepic()).yulan(newOne.getYulan())
-                .m3u8(newOne.getM3u8()).url(newOne.getMp4()).path("/" + classpath + "/").tags(newOne.handleKeyboard()).build();
+                .m3u8(newOne.getM3u8()).url(newOne.getMp4()).path("/" + (StringUtils.isBlank(classpath) ? newOne.getClassid() : classpath) + "/").tags(newOne.handleKeyboard()).build();
         System.out.println(entity.get_id() + "==");
         try {
             mp4NewRepository.insert(entity);
@@ -261,6 +268,10 @@ public class Mp4Service {
             return 1;
         }
         return 0;
+    }
+
+    private int handleOneMp4(String url, Mp4JsonItemEntity one, String classpath, Mp4ConfigEntity config) {
+        return handleOneMp4(url, one.getId(), classpath, config);
     }
 
     private List<Mp4JsonItemEntity> getJsonItem(String url, Mp4ConfigEntity config, int classId, int page) {
