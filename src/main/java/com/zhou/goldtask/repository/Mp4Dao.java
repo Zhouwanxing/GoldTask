@@ -2,6 +2,7 @@ package com.zhou.goldtask.repository;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
 import com.mongodb.client.result.UpdateResult;
 import com.zhou.goldtask.entity.*;
 import com.zhou.goldtask.utils.Utils;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -17,7 +19,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -185,5 +189,18 @@ public class Mp4Dao {
         UpdateResult result = mongoTemplate.updateMulti(query, new Update()
                 .set("like", true).set("flag", flag), "my_new_mp4");
         return result.getMatchedCount() > 0 || result.getModifiedCount() > 0;
+    }
+
+    public Map<Integer, String> getClassIdPathMap() {
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.group("path", "classid")
+        );
+        Map<Integer, String> map = new HashMap<>();
+        AggregationResults<JSONObject> aggregate = mongoTemplate.aggregate(aggregation, Mp4NewEntity.class, JSONObject.class);
+        aggregate.getMappedResults().forEach(one -> {
+            Mp4NewEntity cu = one.get("_id", Mp4NewEntity.class);
+            map.put(cu.getClassid(), cu.getPath());
+        });
+        return map;
     }
 }

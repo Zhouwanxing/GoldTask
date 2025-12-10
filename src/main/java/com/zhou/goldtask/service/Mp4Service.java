@@ -22,13 +22,12 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class Mp4Service {
-//    @Resource
-//    private StringRedisTemplate stringRedisTemplate;
     @Resource
     private Mp4Repository mp4Repository;
     @Resource
@@ -104,9 +103,10 @@ public class Mp4Service {
         if (config == null) {
             return;
         }
+        Map<Integer, String> map = mp4Dao.getClassIdPathMap();
         int start = 132263;
         while (start-- > 132261) {
-            handleOneMp4(config.getApiUrl(), start, null, config);
+            handleOneMp4(config.getApiUrl(), start, null, config, map);
         }
     }
 
@@ -129,14 +129,15 @@ public class Mp4Service {
         } catch (Exception e) {
             return;
         }
+        Map<Integer, String> map = mp4Dao.getClassIdPathMap();
         boolean isDown = false;
         config.setCount(0);
         if (StringUtils.isNotBlank(config.getApiUrl())) {
-            isDown = handleOtherNew(config.getApiUrl(), config, list.stream().filter(item -> "movie".equals(item.getTbname())).collect(Collectors.toList()));
+            isDown = handleOtherNew(config.getApiUrl(), config, list.stream().filter(item -> "movie".equals(item.getTbname())).collect(Collectors.toList()), map);
         }
         if (!isDown) {
             for (String url : urls) {
-                if (handleOtherNew(url, config, list.stream().filter(item -> "movie".equals(item.getTbname())).collect(Collectors.toList()))) {
+                if (handleOtherNew(url, config, list.stream().filter(item -> "movie".equals(item.getTbname())).collect(Collectors.toList()), map)) {
                     break;
                 }
             }
@@ -170,7 +171,6 @@ public class Mp4Service {
     }
 
     public void testNew() {
-        String url = mp4Dao.getUrls().get(0);
         Mp4ConfigEntity config = mp4Dao.getMp4Config();
         if (config == null) {
             return;
@@ -179,15 +179,14 @@ public class Mp4Service {
         List<String> ids = new ArrayList<>();
         List<String> notExistIds = null;
 //        for (int i = 56725; i > 10000; i--) {
+        Map<Integer, String> map = mp4Dao.getClassIdPathMap();
         for (int i = 1; i < 120000; i++) {
             ids.add(i + "");
             if (ids.size() % 500 == 0) {
                 notExistIds = mp4Dao.notExistIds(ids);
                 for (String id : notExistIds) {
                     System.out.println(id);
-                    entity = new Mp4JsonItemEntity();
-                    entity.setId(Integer.parseInt(id));
-                    handleOneMp4(url, entity, "", config);
+                    handleOneMp4(config.getApiUrl(), Integer.parseInt(id), null, config, map);
                 }
                 ids.clear();
             }
@@ -205,7 +204,7 @@ public class Mp4Service {
         }
     }
 
-    private boolean handleOtherNew(String url, Mp4ConfigEntity config, List<Mp4BaseEntity> list) {
+    private boolean handleOtherNew(String url, Mp4ConfigEntity config, List<Mp4BaseEntity> list, Map<Integer, String> map) {
         if (checkIsNo(url)) {
             return false;
         }
@@ -213,13 +212,13 @@ public class Mp4Service {
         for (Mp4BaseEntity one : list) {
             items = one.getItems();
             for (Mp4BaseItemEntity item : items) {
-                handOneItem(url, item, config);
+                handOneItem(url, item, config, map);
             }
         }
         return true;
     }
 
-    private void handOneItem(String url, Mp4BaseItemEntity item, Mp4ConfigEntity config) {
+    private void handOneItem(String url, Mp4BaseItemEntity item, Mp4ConfigEntity config, Map<Integer, String> map) {
         int count = 1;
         int errorCount = 0;
         List<Mp4JsonItemEntity> list = null;
@@ -234,7 +233,7 @@ public class Mp4Service {
             log.info("{},{},{}", count, item.getClasspath(), list.size());
             for (Mp4JsonItemEntity one : list) {
                 try {
-                    errorCount += handleOneMp4(url, one, item.getClasspath(), config);
+                    errorCount += handleOneMp4(url, one, item.getClasspath(), config,map);
                 } catch (Exception e) {
                     errorCount++;
                 }
@@ -243,7 +242,7 @@ public class Mp4Service {
         }
     }
 
-    private int handleOneMp4(String url, int id, String classpath, Mp4ConfigEntity config) {
+    private int handleOneMp4(String url, int id, String classpath, Mp4ConfigEntity config, Map<Integer, String> map) {
         if (mp4NewRepository.existsBy_id(id + "")) {
             return 1;
         }
@@ -259,7 +258,8 @@ public class Mp4Service {
         }
         Mp4NewEntity entity = Mp4NewEntity.builder()._id(newOne.getId() + "").classid(newOne.getClassid())
                 .date(newOne.newSTimeToDate()).name(newOne.getTitle()).img(newOne.getTitlepic()).yulan(newOne.getYulan())
-                .m3u8(newOne.getM3u8()).url(newOne.getMp4()).path("/" + (StringUtils.isBlank(classpath) ? newOne.getClassid() : classpath) + "/").tags(newOne.handleKeyboard()).build();
+                .m3u8(newOne.getM3u8()).url(newOne.getMp4())
+                .path(getPath(classpath, newOne.getClassid(), map)).tags(newOne.handleKeyboard()).build();
         System.out.println(entity.get_id() + "==");
         try {
             mp4NewRepository.insert(entity);
@@ -270,8 +270,12 @@ public class Mp4Service {
         return 0;
     }
 
-    private int handleOneMp4(String url, Mp4JsonItemEntity one, String classpath, Mp4ConfigEntity config) {
-        return handleOneMp4(url, one.getId(), classpath, config);
+    private String getPath(String classpath, int classid, Map<Integer, String> map) {
+        return map.getOrDefault(classid, (StringUtils.isBlank(classpath) ? "/" + classid + "/" : classpath));
+    }
+
+    private int handleOneMp4(String url, Mp4JsonItemEntity one, String classpath, Mp4ConfigEntity config,Map<Integer, String> map) {
+        return handleOneMp4(url, one.getId(), classpath, config,map);
     }
 
     private List<Mp4JsonItemEntity> getJsonItem(String url, Mp4ConfigEntity config, int classId, int page) {
