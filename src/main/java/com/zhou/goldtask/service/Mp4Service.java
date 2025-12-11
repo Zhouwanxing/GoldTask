@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -308,6 +309,7 @@ public class Mp4Service {
         }
     }
 
+    @Async("myExecutor")
     public void updateLike(String id, String flag) {
         mp4Dao.updateLike(id, flag);
     }
