@@ -3,7 +3,6 @@ package com.zhou.goldtask.controller;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.util.SaResult;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
@@ -99,7 +98,12 @@ public class UserController {
 
     @RequestMapping("/isLogin")
     public SaResult isLogin() {
-        return StpUtil.isLogin() ? SaResult.data(getUserInfo("")) : SaResult.error();
+        if(StpUtil.isLogin()){
+            return SaResult.data(getUserInfo(""));
+        }
+        SaResult error = SaResult.error();
+        error.setData(userService.getHostInfo());
+        return error;
     }
 
     @RequestMapping("/logout")

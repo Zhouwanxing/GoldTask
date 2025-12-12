@@ -1,5 +1,6 @@
 package com.zhou.goldtask.service;
 
+import com.zhou.goldtask.entity.SaTokenMongoData;
 import com.zhou.goldtask.entity.SwingConfig;
 import com.zhou.goldtask.entity.UserEntity;
 import com.zhou.goldtask.repository.UserRepository;
@@ -15,6 +16,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -25,6 +27,13 @@ public class UserService {
     private MongoTemplate mongoTemplate;
     @Resource
     private MongoTemplate secondMongoTemplate;
+
+    public List<SaTokenMongoData> getHostInfo() {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("string").is("host"));
+        query.fields().include("key");
+        return mongoTemplate.find(query, SaTokenMongoData.class);
+    }
 
     public void mongoTest() {
         //数据库心跳检测
