@@ -26,4 +26,5 @@ public class Mp4NewEntity {
     private String url;
     private String path;
     private List<String> tags;
+    private Double duration;
 }
