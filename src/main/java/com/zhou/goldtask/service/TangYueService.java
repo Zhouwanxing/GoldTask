@@ -50,6 +50,7 @@ public class TangYueService {
         if (data.getShowLike() == 1) {
             query.addCriteria(Criteria.where("like").isNull());
         }
+        query.fields().exclude("title", "createTime");
         query.with(Sort.by(data.getSortValue() == 1 ? Sort.Direction.ASC : Sort.Direction.DESC, data.getSortKey()));
         log.info("{}", query);
         List<JSONObject> list = secondMongoTemplate.find(query, JSONObject.class, "my_ersf");
