@@ -314,6 +314,10 @@ public class Mp4Service {
         mp4Dao.updateLike(id, flag);
     }
 
+    @Async("myExecutor")
+    public void updateDuration(String id, Double duration) {
+        mp4Dao.updateDuration(id, duration);
+    }
     public List<String> getAllPath() {
         return mp4Dao.getAllPath();
     }

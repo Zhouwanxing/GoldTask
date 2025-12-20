@@ -72,6 +72,16 @@ public class Mp4Controller {
         return SaResult.ok();
     }
 
+    @GetMapping("/updateLike")
+    public SaResult updateDuration(@RequestParam(value = "id") String id,
+                                   @RequestParam(value = "duration", defaultValue = "0", required = false) Double duration) {
+        if (duration == null || duration < 0) {
+            return SaResult.ok();
+        }
+        mp4Service.updateDuration(id, duration);
+        return SaResult.ok();
+    }
+
     @GetMapping("/getInXxUrl")
     public SaResult getInXxUrl(@RequestParam(value = "id") String id) {
         SaResult ok = SaResult.ok();
