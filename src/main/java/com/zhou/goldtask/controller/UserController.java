@@ -3,6 +3,7 @@ package com.zhou.goldtask.controller;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.util.SaResult;
+import cn.hutool.core.net.Ipv4Util;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 
 @Controller
@@ -33,6 +35,28 @@ public class UserController {
     private ChromeService chromeService;
     @Resource
     private AJKService ajkService;
+
+    private static final String[] HEADERS_TO_TRY = {
+            "X-Forwarded-For",
+            "X-Real-IP",
+            "Proxy-Client-IP",
+            "WL-Proxy-Client-IP",
+            "HTTP_CLIENT_IP",
+            "HTTP_X_FORWARDED_FOR"
+    };
+
+    public String getRealIp(HttpServletRequest request) {
+        // 1. 优先从代理头里拿
+        for (String header : HEADERS_TO_TRY) {
+            String value = request.getHeader(header);
+            if (value != null && !value.isEmpty() && !"unknown".equalsIgnoreCase(value)) {
+                // 多级代理时，X-Forwarded-For 可能是 “客户端, 代理1, 代理2”
+                return value.split(",")[0].trim();
+            }
+        }
+        // 2. 兜底
+        return request.getRemoteAddr();
+    }
 
 
     @GetMapping("/v1/client/subscribe")
@@ -82,6 +106,11 @@ public class UserController {
             return SaResult.data(getUserInfo(dev));
         }
         return SaResult.error();
+    }
+
+    @GetMapping("/ip")
+    public SaResult ip(HttpServletRequest request) {
+        return SaResult.data(getRealIp(request));
     }
 
     private JSONObject getUserInfo(String dev) {
