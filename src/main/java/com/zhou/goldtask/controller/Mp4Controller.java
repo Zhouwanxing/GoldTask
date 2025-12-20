@@ -73,6 +73,7 @@ public class Mp4Controller {
     }
 
     @GetMapping("/updateDuration")
+
     public SaResult updateDuration(@RequestParam(value = "id") String id,
                                    @RequestParam(value = "duration", defaultValue = "0", required = false) Double duration) {
         if (duration == null || duration < 0) {
