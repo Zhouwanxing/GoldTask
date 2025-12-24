@@ -14,6 +14,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +49,8 @@ public class Mp4Service {
     private UrlRepository urlRepository;
     @Resource
     private ITaskService taskService;
+    @Resource
+    private MongoTemplate mongoTemplate;
 
     public void test0927() {
         LocalDate today = LocalDate.now();
@@ -341,5 +348,135 @@ public class Mp4Service {
             }
         }
         return null;
+    }
+
+    public void handleDu() {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("duration").isNull());
+        query.addCriteria(Criteria.where("like").isNull());
+        query.fields().include("url");
+        query.with(Sort.by("date").ascending());
+
+        Update duration = new Update().set("duration", -2);
+        Mp4NewEntity one = null;
+        double time;
+        while (true) {
+            if (isNotDown()) {
+                continue;
+            }
+            one = mongoTemplate.findAndModify(query, duration, Mp4NewEntity.class);
+            if (one == null) {
+                break;
+            }
+            long startT = System.currentTimeMillis();
+            log.info("{}=start", one.get_id());
+            time = saveTime(one.get_id(), one.getUrl());
+            log.info("{}=end.duration:{},cost:{}", one.get_id(), time, System.currentTimeMillis() - startT);
+            mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("_id").is(one.get_id())),
+                    new Update().set("duration", time), Mp4NewEntity.class);
+        }
+    }
+
+    private boolean isNotDown() {
+        if (isNeedDown()) {
+            return false;
+        }
+        try {
+            Thread.sleep(10 * 60 * 1000);
+        } catch (Exception ignored) {
+
+        }
+        return true;
+    }
+
+    private boolean isNeedDown() {
+        LocalDateTime now = LocalDateTime.now();
+        int hour = now.getHour(); // 0-23
+        DayOfWeek dayOfWeek = now.getDayOfWeek();
+
+        // 1. 每天 23:00 - 07:00 可以下载
+        if (hour == 23 || hour < 7) {
+            return true;
+        }
+
+        // 2. 周一到周五 09:00 - 18:00 可以下载
+        if (dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY) {
+            return hour >= 9 && hour < 18;
+        }
+
+        // 3. 其他情况不可下载
+        return false;
+    }
+
+    public Double getTime(String url) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(
+                    "D:\\zhouwx\\ffmpeg-8.0.1-essentials_build\\bin\\ffprobe.exe",
+                    "-v", "error",
+                    "-user_agent", "Mozilla/5.0",
+                    "-rw_timeout", "30000000",
+                    "-timeout", "30000000",
+                    "-tls_verify", "0",
+                    "-show_entries", "format=duration",
+                    "-of", "default=noprint_wrappers=1:nokey=1",
+                    url
+            );
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String s = reader.readLine();
+            return Double.parseDouble(s);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public double saveTime(String id, String url) {
+        String dir = ".\\";
+        String[] split = url.split("/");
+        String pathname = dir + id + split[split.length - 1];
+        try {
+            File file = new File(pathname);
+            HttpUtil.downloadFile(url, file);
+            System.gc();
+            double duration = getVideoDuration(pathname);
+            Thread.sleep(200);
+            file.delete();
+            System.gc();
+            return duration;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        } finally {
+            System.gc();
+            new File(pathname).delete();
+        }
+    }
+    public double getVideoDuration(String videoPath) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(
+                    ".\\ffmpeg-8.0.1-essentials_build\\bin\\ffprobe.exe",
+                    "-v", "error",
+                    "-show_entries", "format=duration",
+                    "-of", "default=noprint_wrappers=1:nokey=1",
+                    videoPath
+            );
+            pb.redirectErrorStream(true);
+
+            Process process = pb.start();
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream())
+            );
+
+            String line = reader.readLine();
+            process.waitFor();
+
+            if (line != null) {
+                return Double.parseDouble(line);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
     }
 }
