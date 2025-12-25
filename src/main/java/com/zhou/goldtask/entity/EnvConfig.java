@@ -16,6 +16,7 @@ public class EnvConfig {
     @Value("${BARK_ID:z}")
     private String barkId;
 
+
     @Value("${CHECK_KEY:z}")
     private String checkKey;
 
