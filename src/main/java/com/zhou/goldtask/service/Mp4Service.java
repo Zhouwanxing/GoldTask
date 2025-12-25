@@ -479,4 +479,32 @@ public class Mp4Service {
         }
         return -1;
     }
+
+    public Mp4NewEntity findOneNeedDown() {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("duration").isNull());
+        query.addCriteria(Criteria.where("like").isNull());
+        query.fields().include("url");
+        query.with(Sort.by("date").ascending());
+        return mongoTemplate.findAndModify(query, new Update().set("duration", -2), Mp4NewEntity.class);
+    }
+
+    public void updateOneDuration(Mp4NewEntity one) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(one.get_id()));
+        Update set = new Update();
+        boolean isUp = false;
+        if (one.getDuration() != null) {
+            set.set("duration", one.getDuration());
+            isUp = true;
+        }
+        if (one.getFileSize() != null) {
+            set.set("fileSize", one.getFileSize());
+            isUp = true;
+        }
+        if (!isUp) {
+            return;
+        }
+        mongoTemplate.updateFirst(query, set, Mp4NewEntity.class);
+    }
 }

@@ -10,12 +10,15 @@ import java.util.Base64;
 public class MyCrypto {
     @Resource
     private EnvConfig envConfig;
+    private byte[] getKeyBytes() {
+        return envConfig.getBarkId().getBytes();
+    }
 
     public String encrypt(String input) {
         if (input == null || "".equals(input)) {
             return "";
         }
-        byte[] keyBytes = envConfig.getMyKey().getBytes();
+        byte[] keyBytes = getKeyBytes();
         byte[] inputBytes = input.getBytes();
         byte[] result = new byte[inputBytes.length];
 
@@ -27,7 +30,7 @@ public class MyCrypto {
     }
 
     public String decrypt(String base64Input) {
-        byte[] keyBytes = envConfig.getMyKey().getBytes();
+        byte[] keyBytes = getKeyBytes();
         byte[] inputBytes = Base64.getDecoder().decode(base64Input);
         byte[] result = new byte[inputBytes.length];
 

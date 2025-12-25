@@ -8,7 +8,9 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import com.zhou.goldtask.entity.ErSFEntity;
+import com.zhou.goldtask.entity.Mp4NewEntity;
 import com.zhou.goldtask.service.*;
+import com.zhou.goldtask.utils.MyCrypto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +37,8 @@ public class UserController {
     private ChromeService chromeService;
     @Resource
     private AJKService ajkService;
+    @Resource
+    private MyCrypto myCrypto;
 
     private static final String[] HEADERS_TO_TRY = {
             "X-Forwarded-For",
@@ -169,6 +173,18 @@ public class UserController {
     public SaResult syncLj(@RequestBody ErSFEntity entity) {
         log.info("{}", entity);
         ajkService.syncLj(entity);
+        return SaResult.ok();
+    }
+
+    @GetMapping("/findOneNeedDown")
+    public SaResult findOneNeedDown() {
+        Mp4NewEntity need = mp4Service.findOneNeedDown();
+        return SaResult.data(myCrypto.encrypt(need.get_id())).set("url", myCrypto.encrypt(need.getUrl()));
+    }
+
+    @PostMapping("/updateOneDuration")
+    public SaResult updateOneDuration(@RequestBody Mp4NewEntity entity) {
+        mp4Service.updateOneDuration(entity);
         return SaResult.ok();
     }
 }

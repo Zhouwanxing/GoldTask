@@ -1,8 +1,10 @@
 package com.zhou.goldtask.entity;
 
 import com.zhou.goldtask.annotation.TableName;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -14,6 +16,8 @@ import java.util.List;
 @TableName("my_new_mp4")
 @Document("my_new_mp4")
 @Slf4j
+@NoArgsConstructor
+@AllArgsConstructor
 public class Mp4NewEntity {
     @Id
     private String _id;
@@ -27,4 +31,5 @@ public class Mp4NewEntity {
     private String path;
     private List<String> tags;
     private Double duration;
+    private Long fileSize;
 }
