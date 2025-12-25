@@ -75,7 +75,7 @@ public class Mp4Dao {
         mongoTemplate.updateFirst(query, like, Mp4NewEntity.class);
     }
 
-    public void updateLike(String id, String flag) {
+    public void updateLike(String id, String flag, Long duration) {
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(id));
         boolean isLike = !"delete".equals(flag);
@@ -85,6 +85,9 @@ public class Mp4Dao {
         } else {
             like.set("lut", DateUtil.now());
             like.set("flag", flag);
+        }
+        if (duration != null && duration > 0) {
+            like.set("duration", duration);
         }
         mongoTemplate.updateFirst(query, like, Mp4NewEntity.class);
     }

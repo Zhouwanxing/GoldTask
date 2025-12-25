@@ -61,14 +61,17 @@ public class Mp4Controller {
 
     @GetMapping("/toNotLike")
     public SaResult toNotLike(@RequestParam(value = "id") String id) {
-        mp4Service.updateLike(id, "delete");
+        mp4Service.updateLike(id, "delete", 0L);
         return SaResult.ok();
     }
 
 
     @GetMapping("/updateLike")
-    public SaResult updateLike(@RequestParam(value = "id") String id, @RequestParam(value = "flag",defaultValue = "good",required = false) String flag) {
-        mp4Service.updateLike(id, flag);
+    public SaResult updateLike(@RequestParam(value = "id") String id,
+                               @RequestParam(value = "flag", defaultValue = "good", required = false) String flag,
+                               @RequestParam(value = "duration", defaultValue = "0", required = false) Long duration
+    ) {
+        mp4Service.updateLike(id, flag, duration);
         return SaResult.ok();
     }
 
