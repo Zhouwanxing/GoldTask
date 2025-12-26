@@ -320,7 +320,7 @@ public class Mp4Service {
     }
 
     @Async("myExecutor")
-    public void updateLike(String id, String flag, Long duration) {
+    public void updateLike(String id, String flag, Double duration) {
         mp4Dao.updateLike(id, flag, duration);
     }
 

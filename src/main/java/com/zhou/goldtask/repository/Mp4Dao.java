@@ -75,7 +75,7 @@ public class Mp4Dao {
         mongoTemplate.updateFirst(query, like, Mp4NewEntity.class);
     }
 
-    public void updateLike(String id, String flag, Long duration) {
+    public void updateLike(String id, String flag, Double duration) {
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(id));
         boolean isLike = !"delete".equals(flag);
