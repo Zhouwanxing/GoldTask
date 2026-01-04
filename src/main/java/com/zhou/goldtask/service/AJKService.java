@@ -114,12 +114,15 @@ public class AJKService {
     }
 
     private void handleOneFtx(String body, String ftxValue) {
-        Elements dl = Jsoup.parse(body).getElementsByClass("shop_list shop_list_4").get(0).getElementsByTag("dl");
-        ErSFEntity one = null;
-        for (Element element : dl) {
-            one = new ErSFEntity();
-            one.syncFtx(element, ftxValue);
-            saveToDB(one);
+        try {
+            Elements dl = Jsoup.parse(body).getElementsByClass("shop_list shop_list_4").get(0).getElementsByTag("dl");
+            ErSFEntity one = null;
+            for (Element element : dl) {
+                one = new ErSFEntity();
+                one.syncFtx(element, ftxValue);
+                saveToDB(one);
+            }
+        } catch (Exception ignored) {
         }
     }
 
