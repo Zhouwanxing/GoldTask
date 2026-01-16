@@ -20,10 +20,12 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.ssssssss.magicapi.core.service.MagicAPIService;
 
 import javax.annotation.Resource;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +40,8 @@ public class GoldService {
     private MongoTemplate secondMongoTemplate;
     @Resource
     private ITaskService taskService;
+    @Resource
+    private MagicAPIService magicAPIService;
 
     public void genToDayGold() {
         String now = LocalDate.now().toString();
@@ -68,13 +72,21 @@ public class GoldService {
         }
         log.info("{}", gold.toString());
 //        int ccb = getOther();
-//        gold.setCcb(ccb);
+        gold.setCcb(getCommonGold());
         goldRepository.save(gold);
 //        setOther(now);
         /*taskService.remindTask(now, "周生生:" + gold.getZss() + ";周大福:" + gold.getZdf() + ";黄金延期:" + ccb
                 + ";占用1:" + getMongoUse(mongoTemplate) + ";占用2:" + getMongoUse(secondMongoTemplate), true); */
-        taskService.remindTask(now, String.format("周生生:%s;周大福:%s;占用1:%s;占用2:%s,均价:%s",
-                gold.getZss(), gold.getZdf(), getMongoUse(mongoTemplate), getMongoUse(secondMongoTemplate), getUnit()), "jj", null, true);
+        taskService.remindTask(now, String.format("周生生:%s;周大福:%s;黄金延期:%s;占用1:%s;占用2:%s,均价:%s",
+                gold.getZss(), gold.getZdf(), gold.getCcb(), getMongoUse(mongoTemplate), getMongoUse(secondMongoTemplate), getUnit()), "jj", null, true);
+    }
+
+    private int getCommonGold() {
+        try {
+            return magicAPIService.invoke("/gold/ccb", new HashMap<>());
+        } catch (Exception ignored) {
+            return 0;
+        }
     }
 
 
