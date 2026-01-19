@@ -83,7 +83,11 @@ public class GoldService {
 
     private int getCommonGold() {
         try {
-            return magicAPIService.invoke("/gold/ccb", new HashMap<>());
+            String num = magicAPIService.invoke("/gold/ccb", new HashMap<>());
+            if (num.contains(".")) {
+                num = num.substring(0, num.indexOf("."));
+            }
+            return Integer.parseInt(num);
         } catch (Exception ignored) {
             return 0;
         }
