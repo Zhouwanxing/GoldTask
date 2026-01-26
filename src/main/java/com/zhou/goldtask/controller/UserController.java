@@ -73,24 +73,44 @@ public class UserController {
         return HttpUtil.get("https://feiniaoyun.xyz/api/v1/client/subscribe?token=" + token, 5000);
     }
 
-    @PostMapping("/mz")
+//    @PostMapping("/mz")
     public SaResult mz(@RequestBody JSONObject data) {
         JSONObject resData = data.getJSONObject("data");
 //        log.info("{}", resData.get("url"));
 //        log.info("{}", resData.get("cookie"));
         String url = resData.getStr("url");
-        if (!(url.contains("lianjia.com") && url.contains("ershoufang"))) {
+        if(!url.contains("lianjia.com")){
+            return SaResult.ok();
+        }
+        if (!(url.contains("ershoufang") || url.contains("chengjiao"))) {
             return SaResult.ok();
         }
         log.info("{}\n{}", "", url);
         String body = HttpRequest.get(url).cookie(resData.getStr("cookie")).execute().body();
-        System.out.println(body);
-        ajkService.handleLJContent(body);
+//        System.out.println(body);
+        if (url.contains("chengjiao")) {
+            ajkService.handleLJCJ(url, body);
+        } else {
+//            ajkService.handleLJContent(body);
+        }
         /*for (String s : body.split("\n")) {
             if (s != null && s.contains("window.__PRELOADED_STATE__")) {
                 System.out.println(s);
             }
         }*/
+        return SaResult.ok();
+    }
+
+    @PostMapping("/urlBody")
+    public SaResult urlBody(@RequestBody JSONObject data) {
+//        log.info("{}", data);
+        String url = data.getStr("url");
+        log.info("{}", url);
+        if (url.contains("chengjiao")) {
+            ajkService.handleLJCJ(url, data.getStr("body"));
+        } else if (url.contains("ershoufang")) {
+            ajkService.handleLJContent(data.getStr("body"));
+        }
         return SaResult.ok();
     }
 

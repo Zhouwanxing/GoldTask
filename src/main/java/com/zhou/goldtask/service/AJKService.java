@@ -8,6 +8,7 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.zhou.goldtask.entity.CJEntity;
 import com.zhou.goldtask.entity.ErSFEntity;
 import com.zhou.goldtask.entity.ErSFHistoryEntity;
 import com.zhou.goldtask.utils.RuntimeData;
@@ -157,6 +158,55 @@ public class AJKService {
         } catch (Exception e) {
 
         }
+    }
+
+    public void handleLJCJ(String url, String body) {
+        if (!url.contains("%E4%B8%87%E7%A7%91%E6%B1%89%E5%8F%A3%E4%BC%A0%E5%A5%87%E5%94%90%E6%A8%BE")) {
+            log.warn("{}", url);
+            return;
+        }
+        double price = 10000.0;
+        if (url.contains("ep")) {
+            try {
+                price = Double.parseDouble(url.substring(url.indexOf("ep") + 2, url.indexOf("ep") + 6));
+            } catch (Exception e) {
+                try {
+                    price = Double.parseDouble(url.substring(url.indexOf("ep") + 2, url.indexOf("ep") + 5));
+                } catch (Exception e1) {
+                    price = Double.parseDouble(url.substring(url.indexOf("ep") + 2, url.indexOf("ep") + 4));
+                }
+            }
+        }
+//        log.info("price:{}", price);
+//        System.out.println(body);
+        try {
+            Document bo = Jsoup.parse(body);
+            Elements listContent = bo.getElementsByClass("listContent");
+            Element element = listContent.get(0);
+            Elements li = element.getElementsByTag("li");
+            for (Element one : li) {
+                cjHandle(one,price);
+            }
+            System.out.println("=="+li.size());
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void cjHandle(Element one, double price) {
+        CJEntity entity = CJEntity.builder().build();
+        boolean success = entity.parseCJ(one);
+        if (!success) {
+            return;
+        }
+        CJEntity old = secondMongoTemplate.findOne(new Query().addCriteria(Criteria.where("_id").is(entity.get_id())), CJEntity.class);
+        if (old != null) {
+            if (old.getPrice() < price) {
+                return;
+            }
+        }
+        entity.handlePrice(price);
+        secondMongoTemplate.save(entity);
+        log.info("{}", entity);
     }
 
     public void syncLj(ErSFEntity entity) {
