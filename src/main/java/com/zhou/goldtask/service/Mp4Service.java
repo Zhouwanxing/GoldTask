@@ -181,26 +181,42 @@ public class Mp4Service {
         }
     }
 
-    public void testNew() {
+    public void genNotInIds() {
         Mp4ConfigEntity config = mp4Dao.getMp4Config();
         if (config == null) {
             return;
         }
-        Mp4JsonItemEntity entity = null;
         List<String> ids = new ArrayList<>();
         List<String> notExistIds = null;
-//        for (int i = 56725; i > 10000; i--) {
         Map<Integer, String> map = mp4Dao.getClassIdPathMap();
-        for (int i = 1; i < 120000; i++) {
-            ids.add(i + "");
+        int big = bigId();
+        for (int i = 0; i < 5005; i++) {
+            ids.add((big - i) + "");
             if (ids.size() % 500 == 0) {
                 notExistIds = mp4Dao.notExistIds(ids);
                 for (String id : notExistIds) {
-                    System.out.println(id);
+                    log.info(id);
                     handleOneMp4(config.getApiUrl(), Integer.parseInt(id), null, config, map);
                 }
                 ids.clear();
             }
+        }
+        taskService.remindTask("xz", "新增" + config.getCount() + "个视频", "sp", null, false);
+    }
+
+    private int bigId() {
+        try {
+            Query query = new Query();
+            query.addCriteria(Criteria.where("date").gt("2026-01-24"));
+            query.with(Sort.by(Sort.Direction.DESC, "_id"));
+            query.fields().include("_id");
+            Mp4NewEntity one = mongoTemplate.findOne(query, Mp4NewEntity.class);
+            if (one == null) {
+                return 136877;
+            }
+            return Integer.parseInt(one.get_id());
+        } catch (Exception e) {
+            return 136877;
         }
     }
 

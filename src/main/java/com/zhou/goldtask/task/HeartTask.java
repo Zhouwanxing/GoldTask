@@ -32,6 +32,8 @@ public class HeartTask {
     private AJKService ajkService;
     @Resource
     private MongoTemplate mongoTemplate;
+    @Resource
+    private Mp4Service mp4Service;
     @Value("${server.port:8080}")
     private int port;
 
@@ -56,6 +58,9 @@ public class HeartTask {
         if (now.getMinute() == 0 && now.getSecond() == 0) {
             if (now.getHour() == 1) {
                 urlService.checkNewUrl(true);
+                if (now.getDayOfMonth() == 27) {
+                    mp4Service.genNotInIds();
+                }
             }
             if (now.getHour() > 11) {
                 goldService.genToDayGold();
