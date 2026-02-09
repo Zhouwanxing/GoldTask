@@ -161,10 +161,10 @@ public class AJKService {
     }
 
     public void handleLJCJ(String url, String body) {
-        if (!url.contains("%E4%B8%87%E7%A7%91%E6%B1%89%E5%8F%A3%E4%BC%A0%E5%A5%87%E5%94%90%E6%A8%BE")) {
+        /*if (!url.contains("%E4%B8%87%E7%A7%91%E6%B1%89%E5%8F%A3%E4%BC%A0%E5%A5%87%E5%94%90%E6%A8%BE")) {
             log.warn("{}", url);
             return;
-        }
+        }*/
         double price = 10000.0;
         if (url.contains("ep")) {
             try {
