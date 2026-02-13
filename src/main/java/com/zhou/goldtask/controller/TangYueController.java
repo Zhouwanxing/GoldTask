@@ -38,6 +38,13 @@ public class TangYueController {
         return ok;
     }
 
+    @PostMapping("/getCj")
+    public SaResult getCj(@RequestBody ErPageFormEntity data) {
+        SaResult ok = SaResult.ok();
+        ok.setData(tangYueService.getCj(data));
+        return ok;
+    }
+
     @PostMapping("/updateErSF")
     public SaResult updateHome(@RequestBody JSONObject updateData) {
         tangYueService.updateHome(updateData);
