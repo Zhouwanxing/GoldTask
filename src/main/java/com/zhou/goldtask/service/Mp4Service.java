@@ -353,16 +353,16 @@ public class Mp4Service {
     }
 
     public String getInXxUrl(String id) {
-        Mp4Entity mp4 = mp4Repository.findById(id).orElse(null);
-        if (mp4 != null) {
-            String href = mp4.getHref();
-            if (StringUtils.isNotBlank(href)) {
-                UrlEntity oneSort = urlRepository.findSort(Pageable.ofSize(1)).getContent().get(0);
-                if (oneSort != null) {
-                    return oneSort.get_id() + href;
-                }
-            }
+//        Mp4Entity mp4 = mp4Repository.findById(id).orElse(null);
+//        if (mp4 != null) {
+//            String href = mp4.getHref();
+//            if (StringUtils.isNotBlank(href)) {
+        UrlEntity oneSort = urlRepository.findSort(Pageable.ofSize(1)).getContent().get(0);
+        if (oneSort != null) {
+            return oneSort.get_id() + "video/" +id;
         }
+//            }
+//        }
         return null;
     }
 
@@ -471,7 +471,7 @@ public class Mp4Service {
     public double getVideoDuration(String videoPath) {
         try {
             ProcessBuilder pb = new ProcessBuilder(
-                    ".\\ffmpeg-8.0.1-essentials_build\\bin\\ffprobe.exe",
+                    "D:\\zhouwx\\myDemo\\ffmpeg-8.0.1-essentials_build\\bin\\ffprobe.exe",
                     "-v", "error",
                     "-show_entries", "format=duration",
                     "-of", "default=noprint_wrappers=1:nokey=1",
