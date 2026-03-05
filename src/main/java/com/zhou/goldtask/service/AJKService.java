@@ -217,7 +217,7 @@ public class AJKService {
         }
     }
 
-    private void handleOneContent(String content) {
+    public void handleOneContent(String content) {
         Document parse = Jsoup.parse(content);
         Elements elements = parse.getElementsByAttributeValue("tongji_tag", "fcpc_ersflist_gzcount");
         if (elements.size() == 0) {

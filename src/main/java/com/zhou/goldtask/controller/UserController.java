@@ -110,6 +110,8 @@ public class UserController {
             ajkService.handleLJCJ(url, data.getStr("body"));
         } else if (url.contains("ershoufang")) {
             ajkService.handleLJContent(data.getStr("body"));
+        } else if (url.contains("anjuke")) {
+            ajkService.handleOneContent(data.getStr("body"));
         }
         return SaResult.ok();
     }
