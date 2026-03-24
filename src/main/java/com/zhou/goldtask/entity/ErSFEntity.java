@@ -27,6 +27,7 @@ public class ErSFEntity {
     private String lastTime;
     private String createTime;
     private String linkUrl;
+    private String imgUrl;
     private String from;
     private String floor;
     private Boolean like;
@@ -52,7 +53,9 @@ public class ErSFEntity {
             String attr = element.getElementsByClass("noresultRecommend").get(0).attr("href");
             String[] split = attr.split("/");
             _id = split[split.length - 1].split("\\.")[0];
-            title = element.getElementsByClass("lj-lazy").get(0).attr("alt");
+            Element ljLazy = element.getElementsByClass("lj-lazy").get(0);
+            title = ljLazy.attr("alt");
+            imgUrl = ljLazy.attr("src");
             info = element.getElementsByClass("houseInfo").text();
             floor = String.valueOf(info.charAt(info.indexOf("楼层") - 1));
             lastTime = DateUtil.now();
@@ -104,6 +107,10 @@ public class ErSFEntity {
             area = Double.parseDouble(info.substring(info.indexOf("|") + 1, info.indexOf("㎡")).replace(" ", ""));
             floor = info.substring(info.indexOf("层") - 1, info.indexOf("层"));
             lastTime = DateUtil.now();
+            try {
+                imgUrl = "https:" + one.getElementsByClass("loadimg").get(0).attr("src");
+            } catch (Exception ignored) {
+            }
         } catch (Exception ignored) {
 
         }
