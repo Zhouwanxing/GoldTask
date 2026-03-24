@@ -66,6 +66,8 @@ public class TangYueService {
         }
         if (data.getShowLike() == 1) {
             query.addCriteria(Criteria.where("like").isNull());
+        } else if (data.getShowLike() == 2) {
+            query.addCriteria(Criteria.where("like").is(true));
         }
         query.fields().exclude("title", "createTime");
         query.with(Sort.by(data.getSortValue() == 1 ? Sort.Direction.ASC : Sort.Direction.DESC, data.getSortKey()));
