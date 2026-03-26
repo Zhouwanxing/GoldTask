@@ -235,7 +235,10 @@ public class AJKService {
         ErSFEntity ersfEntity = ErSFEntity.builder()._id(getHomeId(element)).title(getTitle(element)).info(getInfo(element)).linkUrl(getLinkUrl(element)).lastTime(DateUtil.now()).priceStr(getPrice(element)).build();
         ersfEntity.makeOther();
         try {
-            ersfEntity.setImgUrl(element.getElementsByClass("lazy-img").get(0).attr("data-src"));
+            String url = element.getElementsByClass("lazy-img").get(0).attr("data-src");
+            if (StringUtils.isNotBlank(url)) {
+                ersfEntity.setImgUrl(url);
+            }
         } catch (Exception ignored) {
 
         }

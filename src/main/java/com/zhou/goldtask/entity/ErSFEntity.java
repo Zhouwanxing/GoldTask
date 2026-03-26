@@ -2,6 +2,7 @@ package com.zhou.goldtask.entity;
 
 import cn.hutool.core.date.DateUtil;
 import lombok.*;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -55,7 +56,9 @@ public class ErSFEntity {
             _id = split[split.length - 1].split("\\.")[0];
             Element ljLazy = element.getElementsByClass("lj-lazy").get(0);
             title = ljLazy.attr("alt");
-            imgUrl = ljLazy.attr("src");
+            if (StringUtils.isNotBlank(ljLazy.attr("src"))) {
+                imgUrl = ljLazy.attr("src");
+            }
             info = element.getElementsByClass("houseInfo").text();
             floor = String.valueOf(info.charAt(info.indexOf("楼层") - 1));
             lastTime = DateUtil.now();
@@ -108,7 +111,10 @@ public class ErSFEntity {
             floor = info.substring(info.indexOf("层") - 1, info.indexOf("层"));
             lastTime = DateUtil.now();
             try {
-                imgUrl = "https:" + one.getElementsByClass("loadimg").get(0).attr("src");
+                String attr = one.getElementsByClass("loadimg").get(0).attr("src");
+                if (StringUtils.isNotBlank(attr)) {
+                    imgUrl = "https:" + attr;
+                }
             } catch (Exception ignored) {
             }
         } catch (Exception ignored) {
