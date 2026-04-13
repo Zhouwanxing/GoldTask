@@ -366,6 +366,10 @@ public class Mp4Service {
         return null;
     }
 
+    public String getRandomMp4Id(Long max){
+        return mp4Dao.getRandomMp4Id(max);
+    }
+
     public void handleDu() {
         Query query = new Query();
         query.addCriteria(Criteria.where("duration").isNull());
@@ -522,5 +526,12 @@ public class Mp4Service {
             return;
         }
         mongoTemplate.updateFirst(query, set, Mp4NewEntity.class);
+    }
+
+    public Mp4NewEntity findOneMp4(String id) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(id));
+        query.fields().include("_id", "name", "url", "tags");
+        return mongoTemplate.findOne(query, Mp4NewEntity.class);
     }
 }

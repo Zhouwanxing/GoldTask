@@ -29,6 +29,7 @@ public class Mp4NewEntity {
     private String m3u8;
     private String url;
     private String path;
+    private String flag;
     private List<String> tags;
     private Double duration;
     private Long fileSize;

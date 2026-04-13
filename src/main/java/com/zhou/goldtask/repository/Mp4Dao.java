@@ -1,6 +1,7 @@
 package com.zhou.goldtask.repository;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import com.mongodb.client.result.UpdateResult;
@@ -212,5 +213,16 @@ public class Mp4Dao {
             map.put(cu.getClassid(), cu.getPath());
         });
         return map;
+    }
+
+    public String getRandomMp4Id(Long max) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("like").is(true));
+        query.addCriteria(Criteria.where("flag").is("best"));
+        query.fields().include("_id");
+        query.skip(RandomUtil.randomLong(max));
+        query.limit(1);
+        List<Mp4NewEntity> list = mongoTemplate.find(query, Mp4NewEntity.class);
+        return list.isEmpty() ? null : list.get(0).get_id();
     }
 }

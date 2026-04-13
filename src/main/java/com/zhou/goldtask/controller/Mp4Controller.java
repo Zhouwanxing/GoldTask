@@ -92,6 +92,20 @@ public class Mp4Controller {
         return ok;
     }
 
+    @GetMapping("/getRandomMp4Id")
+    public SaResult getRandomMp4Id(@RequestParam(value = "count") Long count) {
+        SaResult ok = SaResult.ok();
+        ok.setData(mp4Service.getRandomMp4Id(count));
+        return ok;
+    }
+
+    @GetMapping("/findOneMp4")
+    public SaResult findOneMp4(@RequestParam(value = "id") String id) {
+        SaResult ok = SaResult.ok();
+        ok.setData(mp4Service.findOneMp4(id));
+        return ok;
+    }
+
     @PostMapping("/saveUrl")
     public SaResult initData(@RequestBody JSONObject data) {
         log.info("{}", data);

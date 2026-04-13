@@ -66,7 +66,7 @@ public class HeartTask {
                 goldService.genToDayGold();
             }
             if (now.getHour() > 6 && now.getHour() < 20) {
-                ajkService.startAjk();
+//                ajkService.startAjk();
                 ajkService.handleFtx();
             }
         }
