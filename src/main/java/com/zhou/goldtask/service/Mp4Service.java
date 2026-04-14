@@ -534,4 +534,10 @@ public class Mp4Service {
         query.fields().include("_id", "name", "url", "tags");
         return mongoTemplate.findOne(query, Mp4NewEntity.class);
     }
+
+    public void useOneMp4(String id) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(id));
+        mongoTemplate.updateFirst(query, new Update().inc("useCount", 1), Mp4NewEntity.class);
+    }
 }

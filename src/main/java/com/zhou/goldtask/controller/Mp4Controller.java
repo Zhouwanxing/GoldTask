@@ -106,6 +106,13 @@ public class Mp4Controller {
         return ok;
     }
 
+    @GetMapping("/useOneMp4")
+    public SaResult useOneMp4(@RequestParam(value = "id") String id) {
+        SaResult ok = SaResult.ok();
+        mp4Service.useOneMp4(id);
+        return ok;
+    }
+
     @PostMapping("/saveUrl")
     public SaResult initData(@RequestBody JSONObject data) {
         log.info("{}", data);

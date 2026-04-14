@@ -33,4 +33,5 @@ public class Mp4NewEntity {
     private List<String> tags;
     private Double duration;
     private Long fileSize;
+    private Integer useCount;
 }
