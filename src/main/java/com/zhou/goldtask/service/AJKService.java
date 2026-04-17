@@ -257,6 +257,7 @@ public class AJKService {
                 if (old.getPrice() != ersfEntity.getPrice()) {
                     ErSFHistoryEntity his = ErSFHistoryEntity.builder()._id(UUID.fastUUID().toString()).price(old.getPrice()).homeId(ersfEntity.get_id()).time(DateUtil.now()).build();
                     secondMongoTemplate.save(his);
+                    taskService.remindTask(ersfEntity.getInfo(), old.getPrice() + "=>" + ersfEntity.getPrice(), ersfEntity.getFrom(), ersfEntity.getLinkUrl(), true);
                 }
                 ersfEntity.setLike(old.getLike());
                 ersfEntity.setCreateTime(old.getCreateTime());
