@@ -3,20 +3,29 @@ package com.zhou.goldtask.controller;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.util.SaResult;
-import cn.hutool.core.net.Ipv4Util;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
+import com.mongodb.client.gridfs.model.GridFSFile;
 import com.zhou.goldtask.entity.ErSFEntity;
 import com.zhou.goldtask.entity.Mp4NewEntity;
 import com.zhou.goldtask.service.*;
 import com.zhou.goldtask.utils.MyCrypto;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 @Controller
@@ -39,6 +48,8 @@ public class UserController {
     private AJKService ajkService;
     @Resource
     private MyCrypto myCrypto;
+    @Resource
+    private GridFsTemplate gridFsTemplate;
 
     private static final String[] HEADERS_TO_TRY = {
             "X-Forwarded-For",
@@ -106,13 +117,15 @@ public class UserController {
 //        log.info("{}", data);
         String url = data.getStr("url");
         log.info("{}", url);
-        if (url.contains("chengjiao")) {
-            ajkService.handleLJCJ(url, data.getStr("body"));
-        } else if (url.contains("ershoufang")) {
-            ajkService.handleLJContent(data.getStr("body"));
-        } else if (url.contains("anjuke")) {
-            ajkService.handleOneContent(data.getStr("body"));
-        }
+        new Thread(() -> {
+            if (url.contains("chengjiao")) {
+                ajkService.handleLJCJ(url, data.getStr("body"));
+            } else if (url.contains("ershoufang")) {
+                ajkService.handleLJContent(data.getStr("body"));
+            } else if (url.contains("anjuke")) {
+                ajkService.handleOneContent(data.getStr("body"));
+            }
+        }).start();
         return SaResult.ok();
     }
 
@@ -208,5 +221,32 @@ public class UserController {
     public SaResult updateOneDuration(@RequestBody Mp4NewEntity entity) {
         mp4Service.updateOneDuration(entity);
         return SaResult.ok();
+    }
+
+    @GetMapping("/file/{file}")
+    public void code(@PathVariable String file, HttpServletResponse response) throws IOException {
+        // 1. 查询文件
+        GridFSFile gridFSFile = gridFsTemplate.findOne(
+                Query.query(Criteria.where("_id").is(file))
+        );
+
+        if (gridFSFile == null) {
+            throw new RuntimeException("文件不存在");
+        }
+
+        // 2. 获取文件流
+        InputStream inputStream = gridFsTemplate.getResource(gridFSFile).getInputStream();
+
+        // 3. 设置响应头
+//        response.setContentType(gridFSFile.getContentType());
+        response.setHeader("Content-Disposition",
+                "attachment;filename=" + new String(gridFSFile.getFilename().getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1));
+
+        // 4. 输出到客户端
+        OutputStream outputStream = response.getOutputStream();
+        IOUtils.copy(inputStream, outputStream);
+
+        outputStream.close();
+        inputStream.close();
     }
 }
