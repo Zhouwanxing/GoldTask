@@ -22,6 +22,7 @@ import java.util.UUID;
 @Component
 @Slf4j
 public class ApiLogAspect {
+    private static final String heartbeat = "heartbeat";
 
     @Pointcut("execution(* com.zhou.goldtask.controller..*.*(..)) && !execution(* com.zhou.goldtask.controller.WebSocketServer.*(..))")
     public void controllerPointcut() {
@@ -45,7 +46,9 @@ public class ApiLogAspect {
         Map<String, Object> params = getParams(joinPoint, signature);
         String paramsJson = truncateLongString(JSONUtil.toJsonStr(params), 100);
 
-        log.info("开始请求:[{}]\n请求URL:{}\n请求方法:{}#{}\nHTTP方法:{}\n请求参数:{}", uuid, requestUrl, className, methodName, requestMethod, paramsJson);
+        if (!heartbeat.equals(methodName)) {
+            log.info("开始请求:[{}]\n请求URL:{}\n请求方法:{}#{}\nHTTP方法:{}\n请求参数:{}", uuid, requestUrl, className, methodName, requestMethod, paramsJson);
+        }
 
         Object result = null;
         try {
@@ -56,8 +59,9 @@ public class ApiLogAspect {
             result = SaResult.error(throwable.getMessage());
             return result;
         } finally {
-            String resultJson = truncateLongString(result != null ? JSONUtil.toJsonStr(result) : "null", 101);
-            log.info("响应:[{}]\n结果:{}\n请求耗时:{} ms", uuid, resultJson, System.currentTimeMillis() - startTime);
+            if (!heartbeat.equals(methodName)) {
+                log.info("响应:[{}]\n结果:{}\n请求耗时:{} ms", uuid, truncateLongString(result != null ? JSONUtil.toJsonStr(result) : "null", 101), System.currentTimeMillis() - startTime);
+            }
         }
     }
 
