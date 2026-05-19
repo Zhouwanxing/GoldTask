@@ -99,7 +99,11 @@ public class Mp4Dao {
 
     public List<Mp4NewEntity> findByDto(Mp4LikeDto dto) {
         Query query = searchLikeQuery(dto);
-        query.with(Sort.by(Sort.Direction.DESC, "lut", "date", "path", "_id"));
+        if ("best".equals(dto.getShowBest())) {
+            query.with(Sort.by(Sort.Direction.DESC, "useCount", "lut", "_id"));
+        } else {
+            query.with(Sort.by(Sort.Direction.DESC, "lut", "date", "path", "_id"));
+        }
         query.skip((dto.getPage() - 1) * 10L);
         query.limit(10);
         if (Utils.localhost.equals(envConfig.getHostName())) {
