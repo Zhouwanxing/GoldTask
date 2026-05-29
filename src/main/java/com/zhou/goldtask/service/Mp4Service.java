@@ -531,7 +531,7 @@ public class Mp4Service {
     public Mp4NewEntity findOneMp4(String id) {
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(id));
-        query.fields().include("_id", "name", "url", "tags", "useCount");
+        query.fields().include("_id", "name", "url", "tags", "useCount", "m3u8");
         return mongoTemplate.findOne(query, Mp4NewEntity.class);
     }
 
