@@ -34,4 +34,5 @@ public class Mp4NewEntity {
     private Double duration;
     private Long fileSize;
     private Integer useCount;
+    private List<Mp4MarkerEntity> markers;
 }

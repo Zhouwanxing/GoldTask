@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -531,8 +532,52 @@ public class Mp4Service {
     public Mp4NewEntity findOneMp4(String id) {
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(id));
-        query.fields().include("_id", "name", "url", "tags", "useCount", "m3u8");
-        return mongoTemplate.findOne(query, Mp4NewEntity.class);
+        query.fields().include("_id", "name", "url", "tags", "useCount", "m3u8", "flag", "markers");
+        Mp4NewEntity entity = mongoTemplate.findOne(query, Mp4NewEntity.class);
+        if (entity != null && entity.getMarkers() == null) {
+            entity.setMarkers(new ArrayList<>());
+        }
+        return entity;
+    }
+
+    public List<Mp4MarkerEntity> addMarker(String id, Double time) {
+        if (time == null || time < 0) {
+            return getMarkers(id);
+        }
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(id));
+        query.fields().include("markers");
+        Mp4NewEntity entity = mongoTemplate.findOne(query, Mp4NewEntity.class);
+        if (entity == null) {
+            return Collections.emptyList();
+        }
+        List<Mp4MarkerEntity> markers = entity.getMarkers() == null ? new ArrayList<>() : new ArrayList<>(entity.getMarkers());
+        for (Mp4MarkerEntity marker : markers) {
+            if (marker.getTime() != null && Math.abs(marker.getTime() - time) < 1) {
+                return markers;
+            }
+        }
+        markers.add(Mp4MarkerEntity.builder().time(time).createdAt(System.currentTimeMillis()).build());
+        mongoTemplate.updateFirst(query, new Update().set("markers", markers), Mp4NewEntity.class);
+        return markers;
+    }
+
+    public List<Mp4MarkerEntity> clearMarkers(String id) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(id));
+        mongoTemplate.updateFirst(query, new Update().set("markers", new ArrayList<>()), Mp4NewEntity.class);
+        return Collections.emptyList();
+    }
+
+    private List<Mp4MarkerEntity> getMarkers(String id) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(id));
+        query.fields().include("markers");
+        Mp4NewEntity entity = mongoTemplate.findOne(query, Mp4NewEntity.class);
+        if (entity == null || entity.getMarkers() == null) {
+            return Collections.emptyList();
+        }
+        return entity.getMarkers();
     }
 
     public void useOneMp4(String id) {

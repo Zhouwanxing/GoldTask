@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 
 @Controller
 @Slf4j
@@ -104,6 +105,17 @@ public class Mp4Controller {
         SaResult ok = SaResult.ok();
         ok.setData(mp4Service.findOneMp4(id));
         return ok;
+    }
+
+    @GetMapping("/addMarker")
+    public SaResult addMarker(@RequestParam(value = "id") String id,
+                              @RequestParam(value = "time") Double time) {
+        return SaResult.data(Collections.singletonMap("markers", mp4Service.addMarker(id, time)));
+    }
+
+    @GetMapping("/clearMarkers")
+    public SaResult clearMarkers(@RequestParam(value = "id") String id) {
+        return SaResult.data(Collections.singletonMap("markers", mp4Service.clearMarkers(id)));
     }
 
     @GetMapping("/useOneMp4")
