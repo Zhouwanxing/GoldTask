@@ -25,6 +25,8 @@ import org.ssssssss.magicapi.core.service.MagicAPIService;
 import javax.annotation.Resource;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,6 +99,7 @@ public class GoldService {
     private int getUnit() {
         Query query = new Query();
         query.addCriteria(Criteria.where("area").gte(100).lt(130));
+        query.addCriteria(Criteria.where("lastTime").gte(LocalDate.now().minusDays(4).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
         query.fields().include("unitPrice").exclude("_id");
         List<ErSFEntity> list = secondMongoTemplate.find(query, ErSFEntity.class);
         int all = 0;

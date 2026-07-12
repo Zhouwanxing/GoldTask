@@ -93,8 +93,8 @@ public class Mp4Service {
         mp4Repository.save(entity);
     }
 
-    public List<Mp4NewEntity> pageShowList(Integer page, boolean isShowLike, String path) {
-        return mp4Dao.findByPage(page, isShowLike, path);
+    public List<Mp4NewEntity> pageShowList(Integer page, boolean isShowLike, String path,boolean sort) {
+        return mp4Dao.findByPage(page, isShowLike, path,sort);
 //        return handleList(mp4Dao.findByPage(page, isShowLike));
     }
 
