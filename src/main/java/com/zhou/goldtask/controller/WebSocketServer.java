@@ -1,7 +1,11 @@
 package com.zhou.goldtask.controller;
 
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.zhou.goldtask.entity.WsData;
+import com.zhou.goldtask.websocket.GameRoom;
+import com.zhou.goldtask.websocket.RoomManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * 端点:/ws/{sid}?name={设备名}
  * sid = 客户端设备唯一标识(UUID);设备名走 query,容器自动解码,带中文/特殊字符都安全。
  * 心跳:客户端每 25s 发 {"type":"ping"},这里回 {"type":"pong"};90s 无消息判定死连接自动清理。
+ * 游戏:按 type 分发——房间操作(createRoom/joinRoom/leaveRoom/rejoinRoom/acceptInvite)由服务端处理,
+ * 其余(invite/gameMove/surrender 等)保留 type 点对点转发。
  */
 @Component
 @ServerEndpoint("/ws/{sid}")
@@ -30,6 +36,8 @@ public class WebSocketServer {
     private static final int MAX_IDLE_MS = 90_000;
     /** sid -> 会话信息。多线程读写,必须 ConcurrentHashMap。 */
     private static final Map<String, ClientInfo> SESSION_MAP = new ConcurrentHashMap<>();
+    /** 房间管理。static 单例:端点每连接一个实例,状态必须共享。 */
+    private static final RoomManager ROOM_MANAGER = new RoomManager();
 
     /**
      * 连接建立成功调用的方法
@@ -55,16 +63,32 @@ public class WebSocketServer {
             return;
         }
         WsData wsData = JSONUtil.toBean(message, WsData.class);
-        // 应用层心跳:直接应答,不转发。
-        if ("ping".equals(wsData.getType())) {
-            sendToClient(sid, WsData.builder().type("pong").from("system").build());
+        String type = wsData.getType();
+        if (type == null) {
             return;
         }
-        log.info("收到来自客户端: {} 的信息: {}", sid, message);
-        wsData.setFrom(sid);
-        wsData.setType("newMessage");
-        wsData.setId(System.currentTimeMillis() + "");
-        sendToClient(wsData.getTo(), wsData);
+        switch (type) {
+            case "ping":
+                sendToClient(sid, WsData.builder().type("pong").from("system").build());
+                return;
+            case "createRoom":
+                onCreateRoom(sid);
+                return;
+            case "joinRoom":
+                onJoinRoom(sid, wsData.getMessage());
+                return;
+            case "leaveRoom":
+                onLeaveRoom(sid);
+                return;
+            case "rejoinRoom":
+                onRejoin(sid, wsData.getMessage());
+                return;
+            case "acceptInvite":
+                onAcceptInvite(sid, wsData.getTo());
+                return;
+            default:
+                relay(sid, wsData);
+        }
     }
 
     /**
@@ -84,8 +108,114 @@ public class WebSocketServer {
         remove(sid, "异常");
     }
 
+    // MARK: - 房间操作(服务端处理型)
+
+    private void onCreateRoom(String sid) {
+        String roomId = ROOM_MANAGER.createRoom(sid);
+        if (roomId == null) {
+            sendToClient(sid, WsData.builder().type("roomJoinFailed").from("system").message("busy").build());
+            return;
+        }
+        log.info("房间创建: roomId={}, host={}", roomId, sid);
+        sendToClient(sid, WsData.builder().type("roomCreated").from("system").message(roomId).build());
+    }
+
+    private void onJoinRoom(String sid, String roomId) {
+        RoomManager.JoinResult result = roomId == null
+                ? RoomManager.JoinResult.NOT_FOUND
+                : ROOM_MANAGER.joinRoom(sid, roomId.trim());
+        if (result != RoomManager.JoinResult.OK) {
+            String reason = result == RoomManager.JoinResult.NOT_FOUND ? "房间不存在"
+                    : result == RoomManager.JoinResult.FULL ? "房间已满" : "busy";
+            sendToClient(sid, WsData.builder().type("roomJoinFailed").from("system").message(reason).build());
+            return;
+        }
+        GameRoom room = ROOM_MANAGER.roomOf(sid);
+        log.info("房间加入: roomId={}, guest={}", roomId, sid);
+        notifyGameStart(room);
+    }
+
+    private void onAcceptInvite(String sid, String challengerSid) {
+        if (challengerSid == null) {
+            return;
+        }
+        String roomId = ROOM_MANAGER.createRoomWith(challengerSid, sid);
+        if (roomId == null) {
+            sendToClient(sid, WsData.builder().type("roomJoinFailed").from("system").message("busy").build());
+            return;
+        }
+        log.info("邀请成局: roomId={}, host={}, guest={}", roomId, challengerSid, sid);
+        notifyGameStart(ROOM_MANAGER.roomOf(sid));
+    }
+
+    /** 双方各收一份 gameStart,side 指明红蓝,opponentName 用于界面显示。 */
+    private void notifyGameStart(GameRoom room) {
+        sendToClient(room.getHostSid(), roomPayload("gameStart", room, room.getHostSid()));
+        sendToClient(room.getGuestSid(), roomPayload("gameStart", room, room.getGuestSid()));
+    }
+
+    private WsData roomPayload(String type, GameRoom room, String sid) {
+        String opponent = room.opponentOf(sid);
+        JSONObject payload = new JSONObject();
+        payload.set("roomId", room.getId());
+        payload.set("side", room.isHost(sid) ? "red" : "blue");
+        payload.set("opponent", opponent);
+        ClientInfo opp = opponent == null ? null : SESSION_MAP.get(opponent);
+        payload.set("opponentName", opp == null ? "未知设备" : opp.deviceName);
+        return WsData.builder().type(type).from("system").message(payload.toString()).build();
+    }
+
+    private void onLeaveRoom(String sid) {
+        String opponent = ROOM_MANAGER.leaveRoom(sid);
+        log.info("离开房间: sid={}, 通知对方={}", sid, opponent);
+        if (opponent != null) {
+            sendToClient(opponent, WsData.builder().type("opponentLeft").from("system").build());
+        }
+    }
+
+    private void onRejoin(String sid, String roomId) {
+        GameRoom room = roomId == null ? null : ROOM_MANAGER.rejoin(sid, roomId.trim());
+        if (room == null) {
+            sendToClient(sid, WsData.builder().type("rejoinFailed").from("system").build());
+            return;
+        }
+        log.info("重连回房: roomId={}, sid={}", room.getId(), sid);
+        sendToClient(sid, roomPayload("rejoinOk", room, sid));
+        String opponent = room.opponentOf(sid);
+        if (opponent != null && room.isOnline(opponent)) {
+            sendToClient(opponent, WsData.builder().type("opponentBack").from("system").build());
+        }
+    }
+
+    /** 转发型消息:保留 type,补 from/id;invite 附带发起方设备名;目标不在线回 messageFailed。 */
+    private void relay(String sid, WsData wsData) {
+        wsData.setFrom(sid);
+        wsData.setId(System.currentTimeMillis() + "");
+        if ("invite".equals(wsData.getType())) {
+            ClientInfo from = SESSION_MAP.get(sid);
+            JSONObject payload = new JSONObject();
+            payload.set("fromName", from == null ? "未知设备" : from.deviceName);
+            wsData.setMessage(payload.toString());
+        }
+        String to = wsData.getTo();
+        ClientInfo target = to == null ? null : SESSION_MAP.get(to);
+        if (target == null || !target.session.isOpen()) {
+            sendToClient(sid, WsData.builder().type("messageFailed").from("system").message(wsData.getType()).build());
+            return;
+        }
+        log.info("转发: {} -> {}, type={}", sid, to, wsData.getType());
+        sendToClient(to, wsData);
+    }
+
+    // MARK: - 连接生命周期
+
     private void remove(String sid, String reason) {
         ClientInfo info = SESSION_MAP.remove(sid);
+        String opponent = ROOM_MANAGER.markOffline(sid);
+        if (opponent != null) {
+            // 对方还在线才通知;双方都离线时房间已删,opponent 为 null
+            sendToClient(opponent, WsData.builder().type("opponentOffline").from("system").build());
+        }
         if (info != null) {
             log.info("客户端下线({}): sid={}, name={}, 当前在线={}", reason, sid, info.deviceName, SESSION_MAP.size());
             sendOnlineUser();
@@ -102,9 +232,16 @@ public class WebSocketServer {
         return names.get(0);
     }
 
+    /** 在线列表广播:[{sid, name}] JSON 数组,大厅要显示设备名。 */
     private void sendOnlineUser() {
-        sendToAllClient(WsData.builder().type("onlineUser").from("system")
-                .message(String.join(",", SESSION_MAP.keySet())).build());
+        JSONArray arr = new JSONArray();
+        for (ClientInfo info : SESSION_MAP.values()) {
+            JSONObject item = new JSONObject();
+            item.set("sid", info.sid);
+            item.set("name", info.deviceName);
+            arr.add(item);
+        }
+        sendToAllClient(WsData.builder().type("onlineUser").from("system").message(arr.toString()).build());
     }
 
     /**
