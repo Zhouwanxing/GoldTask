@@ -10,27 +10,68 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * 弹珠库存：管理员加珠、设备上报差值、设备进游戏时查询。
- * 在线设备加珠后立刻经 WebSocket 下发；离线设备下次进游戏再拉。
+ * 弹珠：库存 + 全局获胜概率，同在 marble_bank 集合。
+ * 设备行以 sid 为 id；配置行 id 固定 __config__，只用 winChance 字段。
+ * 在线设备变更后立刻经 WebSocket 下发；离线设备下次进游戏再拉。
  */
 @Service
 public class MarbleBankService {
     private static final int MAX_COUNT = 1_000_000_000;
     private static final int MAX_ADD = 1_000_000;
+    private static final int DEFAULT_WIN_CHANCE = 30;
+    private static final int MAX_WIN_CHANCE = 100;
+    /** 全局配置行的固定 id，不可能撞设备 UUID。 */
+    private static final String CONFIG_ID = "__config__";
+    /** 分段锁数量：固定 64 把，避免每来一台设备就常驻一把锁。 */
+    private static final int LOCK_STRIPES = 64;
 
     @Resource
     private MarbleBankRepository marbleBankRepository;
 
-    private final ConcurrentHashMap<String, Object> locks = new ConcurrentHashMap<>();
+    private final Object[] locks = new Object[LOCK_STRIPES];
+
+    public MarbleBankService() {
+        for (int i = 0; i < locks.length; i++) {
+            locks[i] = new Object();
+        }
+    }
+
+    // MARK: - 获胜概率（全局配置行）
+
+    public int getWinChance() {
+        MarbleBankEntity entity = marbleBankRepository.findById(CONFIG_ID).orElse(null);
+        return entity != null && entity.getWinChance() != null ? entity.getWinChance() : DEFAULT_WIN_CHANCE;
+    }
+
+    /** 保存新概率并广播给全部在线设备。返回落库的值，方便管理页直接采用。 */
+    public int saveWinChance(Integer winChance) {
+        if (winChance == null || winChance < 0 || winChance > MAX_WIN_CHANCE) {
+            throw new IllegalArgumentException("获胜概率要在 0 到 100 之间");
+        }
+        synchronized (lock(CONFIG_ID)) {
+            MarbleBankEntity entity = marbleBankRepository.findById(CONFIG_ID).orElse(null);
+            if (entity == null) {
+                entity = new MarbleBankEntity();
+                entity.setId(CONFIG_ID);
+                entity.setName("全局配置");
+            }
+            entity.setWinChance(winChance);
+            entity.setUpdatedAt(System.currentTimeMillis());
+            marbleBankRepository.save(entity);
+        }
+        WebSocketServer.pushMarbleConfig(winChance);
+        return winChance;
+    }
+
+    // MARK: - 设备库存
 
     /** WebSocket 上线时登记设备，让管理页能看到还没上报库存的机器。 */
     public void touch(String sid, String name) {
         String id = cleanSid(sid);
-        if (id.isEmpty()) {
+        if (id.isEmpty() || CONFIG_ID.equals(id)) {
             return;
         }
         synchronized (lock(id)) {
@@ -55,7 +96,7 @@ public class MarbleBankService {
 
     public List<MarbleDeviceDto> list() {
         return marbleBankRepository.findAll().stream()
-                .filter(entity -> !MarbleConfigService.CONFIG_ID.equals(entity.getId()))
+                .filter(entity -> !CONFIG_ID.equals(entity.getId()))
                 .map(this::toDto)
                 .sorted(Comparator.comparing(MarbleDeviceDto::isOnline).reversed()
                         .thenComparing(MarbleDeviceDto::getName, Comparator.nullsLast(String::compareTo)))
@@ -195,12 +236,12 @@ public class MarbleBankService {
     }
 
     private Object lock(String sid) {
-        return locks.computeIfAbsent(sid, key -> new Object());
+        return locks[(sid.hashCode() & 0x7fffffff) % locks.length];
     }
 
     private static String requireSid(String sid) {
         String id = cleanSid(sid);
-        if (id.isEmpty() || id.length() > 80 || MarbleConfigService.CONFIG_ID.equals(id)) {
+        if (id.isEmpty() || id.length() > 80 || CONFIG_ID.equals(id)) {
             throw new IllegalArgumentException("设备不合法");
         }
         return id;

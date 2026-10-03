@@ -4,7 +4,6 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.util.SaResult;
 import com.zhou.goldtask.entity.MarbleDeviceDto;
 import com.zhou.goldtask.service.MarbleBankService;
-import com.zhou.goldtask.service.MarbleConfigService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -19,7 +18,7 @@ import javax.annotation.Resource;
 import java.util.Collections;
 
 /**
- * 弹珠库存。列表和加珠要登录；设备自己查询和上报不需要登录。
+ * 弹珠：库存和获胜概率。列表、加减珠、改概率要登录；设备自己查询和上报不需要登录。
  */
 @RestController
 @RequestMapping("/page/marble")
@@ -28,8 +27,6 @@ import java.util.Collections;
 public class MarbleController {
     @Resource
     private MarbleBankService marbleBankService;
-    @Resource
-    private MarbleConfigService marbleConfigService;
 
     @SaCheckLogin
     @GetMapping("/list")
@@ -40,9 +37,11 @@ public class MarbleController {
     @SaCheckLogin
     @PostMapping("/add")
     public SaResult add(@RequestBody AddBody body) {
+        String sid = body == null ? null : body.getSid();
+        Integer delta = body == null ? null : body.getDelta();
         try {
-            MarbleDeviceDto dto = marbleBankService.add(body == null ? null : body.getSid(), body == null ? null : body.getDelta());
-            log.info("弹珠加减珠: sid={}, delta={}, count={}, pending={}, known={}", dto.getSid(), body == null ? null : body.getDelta(), dto.getCount(), dto.getPending(), dto.isKnown());
+            MarbleDeviceDto dto = marbleBankService.add(sid, delta);
+            log.info("弹珠加减珠: sid={}, delta={}, count={}, pending={}, known={}", dto.getSid(), delta, dto.getCount(), dto.getPending(), dto.isKnown());
             return SaResult.data(dto);
         } catch (IllegalArgumentException e) {
             return SaResult.error(e.getMessage());
@@ -70,14 +69,14 @@ public class MarbleController {
     /** 获胜概率设备端也要读，不要求登录。 */
     @GetMapping("/config")
     public SaResult config() {
-        return SaResult.data(Collections.singletonMap("winChance", marbleConfigService.getWinChance()));
+        return SaResult.data(Collections.singletonMap("winChance", marbleBankService.getWinChance()));
     }
 
     @SaCheckLogin
     @PostMapping("/config")
     public SaResult saveConfig(@RequestBody ConfigBody body) {
         try {
-            int winChance = marbleConfigService.saveWinChance(body == null ? null : body.getWinChance());
+            int winChance = marbleBankService.saveWinChance(body == null ? null : body.getWinChance());
             log.info("弹珠获胜概率调整: {}%", winChance);
             return SaResult.data(Collections.singletonMap("winChance", winChance));
         } catch (IllegalArgumentException e) {
