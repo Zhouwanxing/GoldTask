@@ -6,6 +6,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.zhou.goldtask.entity.WsData;
 import com.zhou.goldtask.service.MarbleBankService;
+import com.zhou.goldtask.service.MarbleConfigService;
 import com.zhou.goldtask.websocket.GameRoom;
 import com.zhou.goldtask.websocket.RoomManager;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +56,12 @@ public class WebSocketServer {
             SpringUtil.getBean(MarbleBankService.class).touch(sid, name);
         } catch (Exception e) {
             log.warn("登记弹珠设备失败: sid={}, {}", sid, e.toString());
+        }
+        try {
+            int winChance = SpringUtil.getBean(MarbleConfigService.class).getWinChance();
+            pushTo(sid, WsData.builder().type("marbleConfig").from("system").message(Integer.toString(winChance)).build());
+        } catch (Exception e) {
+            log.warn("下发弹珠获胜概率失败: sid={}, {}", sid, e.toString());
         }
         pushTo(sid, WsData.builder().type("marbleQuery").from("system").message("").build());
     }
@@ -292,6 +299,14 @@ public class WebSocketServer {
     /** 库存还没上报时，只下发这次加上的数量。 */
     public static void pushMarbleDelta(String sid, int delta) {
         pushTo(sid, WsData.builder().type("marbleDelta").from("system").message(Integer.toString(delta)).build());
+    }
+
+    /** 获胜概率调整后广播给全部在线设备，游戏内下一局即生效。 */
+    public static void pushMarbleConfig(int winChance) {
+        String text = WsData.builder().type("marbleConfig").from("system").message(Integer.toString(winChance)).build().toString();
+        for (ClientInfo info : SESSION_MAP.values()) {
+            send(info.session, text);
+        }
     }
 
     private static void pushTo(String sid, WsData data) {

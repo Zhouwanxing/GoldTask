@@ -55,6 +55,7 @@ public class MarbleBankService {
 
     public List<MarbleDeviceDto> list() {
         return marbleBankRepository.findAll().stream()
+                .filter(entity -> !MarbleConfigService.CONFIG_ID.equals(entity.getId()))
                 .map(this::toDto)
                 .sorted(Comparator.comparing(MarbleDeviceDto::isOnline).reversed()
                         .thenComparing(MarbleDeviceDto::getName, Comparator.nullsLast(String::compareTo)))
@@ -68,11 +69,11 @@ public class MarbleBankService {
         }
     }
 
-    /** 管理员给某台设备加珠。库存未上报时先记 pending，并下发本次加上的数量。 */
+    /** 管理员给某台设备加减珠。库存未上报时先记 pending，并下发本次调整的数量。 */
     public MarbleDeviceDto add(String sid, Integer delta) {
         String id = requireSid(sid);
-        if (delta == null || delta <= 0 || delta > MAX_ADD) {
-            throw new IllegalArgumentException("加珠数量不合法");
+        if (delta == null || delta == 0 || delta > MAX_ADD || delta < -MAX_ADD) {
+            throw new IllegalArgumentException("加减珠数量不合法");
         }
         MarbleDeviceDto dto;
         boolean pending;
@@ -199,7 +200,7 @@ public class MarbleBankService {
 
     private static String requireSid(String sid) {
         String id = cleanSid(sid);
-        if (id.isEmpty() || id.length() > 80) {
+        if (id.isEmpty() || id.length() > 80 || MarbleConfigService.CONFIG_ID.equals(id)) {
             throw new IllegalArgumentException("设备不合法");
         }
         return id;
