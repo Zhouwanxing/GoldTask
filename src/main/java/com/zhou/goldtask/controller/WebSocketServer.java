@@ -1,9 +1,11 @@
 package com.zhou.goldtask.controller;
 
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.zhou.goldtask.entity.WsData;
+import com.zhou.goldtask.service.MarbleBankService;
 import com.zhou.goldtask.websocket.GameRoom;
 import com.zhou.goldtask.websocket.RoomManager;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +51,12 @@ public class WebSocketServer {
         SESSION_MAP.put(sid, new ClientInfo(sid, name, session));
         log.info("客户端上线: sid={}, name={}, 当前在线={}", sid, name, SESSION_MAP.size());
         sendOnlineUser();
+        try {
+            SpringUtil.getBean(MarbleBankService.class).touch(sid, name);
+        } catch (Exception e) {
+            log.warn("登记弹珠设备失败: sid={}, {}", sid, e.toString());
+        }
+        pushTo(sid, WsData.builder().type("marbleQuery").from("system").message("").build());
     }
 
     /**
@@ -271,8 +279,31 @@ public class WebSocketServer {
         sendToClient(sid, message.toString());
     }
 
+    public static boolean isOnline(String sid) {
+        ClientInfo info = sid == null ? null : SESSION_MAP.get(sid);
+        return info != null && info.session != null && info.session.isOpen();
+    }
+
+    /** 库存已确定时下发绝对数量。 */
+    public static void pushMarbleBank(String sid, int count) {
+        pushTo(sid, WsData.builder().type("marbleBank").from("system").message(Integer.toString(count)).build());
+    }
+
+    /** 库存还没上报时，只下发这次加上的数量。 */
+    public static void pushMarbleDelta(String sid, int delta) {
+        pushTo(sid, WsData.builder().type("marbleDelta").from("system").message(Integer.toString(delta)).build());
+    }
+
+    private static void pushTo(String sid, WsData data) {
+        ClientInfo info = sid == null ? null : SESSION_MAP.get(sid);
+        if (info == null || info.session == null || !info.session.isOpen()) {
+            return;
+        }
+        send(info.session, data.toString());
+    }
+
     /** 同一会话串行发送,避免多线程并发写帧。 */
-    private void send(Session session, String message) {
+    private static void send(Session session, String message) {
         if (session == null || !session.isOpen()) {
             return;
         }
