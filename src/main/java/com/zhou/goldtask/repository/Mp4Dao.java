@@ -219,10 +219,13 @@ public class Mp4Dao {
         return map;
     }
 
-    public String getRandomMp4Id(Long max) {
+    public String getRandomMp4Id(Long max, Boolean hasMarker) {
         Query query = new Query();
         query.addCriteria(Criteria.where("like").is(true));
         query.addCriteria(Criteria.where("flag").is("best"));
+        if (hasMarker != null) {
+            query.addCriteria(Criteria.where("markers").exists(hasMarker));
+        }
         query.fields().include("_id");
         query.skip(RandomUtil.randomLong(max));
         query.limit(1);

@@ -95,9 +95,9 @@ public class Mp4Controller {
     }
 
     @GetMapping("/getRandomMp4Id")
-    public SaResult getRandomMp4Id(@RequestParam(value = "count") Long count) {
+    public SaResult getRandomMp4Id(@RequestParam(value = "count") Long count, @RequestParam(value = "hasMarker") Boolean hasMarker) {
         SaResult ok = SaResult.ok();
-        ok.setData(mp4Service.getRandomMp4Id(count));
+        ok.setData(mp4Service.getRandomMp4Id(count,hasMarker));
         return ok;
     }
 

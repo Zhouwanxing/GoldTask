@@ -367,8 +367,8 @@ public class Mp4Service {
         return null;
     }
 
-    public String getRandomMp4Id(Long max){
-        return mp4Dao.getRandomMp4Id(max);
+    public String getRandomMp4Id(Long max,Boolean hasMarker){
+        return mp4Dao.getRandomMp4Id(max, hasMarker);
     }
 
     public void handleDu() {
