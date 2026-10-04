@@ -226,8 +226,9 @@ public class Mp4Dao {
         if (hasMarker != null) {
             query.addCriteria(Criteria.where("markers").exists(hasMarker));
         }
+        long count = mongoTemplate.count(query, Mp4NewEntity.class);
         query.fields().include("_id");
-        query.skip(RandomUtil.randomLong(max));
+        query.skip(RandomUtil.randomLong(count));
         query.limit(1);
         List<Mp4NewEntity> list = mongoTemplate.find(query, Mp4NewEntity.class);
         return list.isEmpty() ? null : list.get(0).get_id();
