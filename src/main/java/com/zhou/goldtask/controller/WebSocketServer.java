@@ -28,7 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * sid = 客户端设备唯一标识(UUID);设备名走 query,容器自动解码,带中文/特殊字符都安全。
  * 心跳:客户端每 25s 发 {"type":"ping"},这里回 {"type":"pong"};90s 无消息判定死连接自动清理。
  * 游戏:按 type 分发——房间操作(createRoom/joinRoom/leaveRoom/rejoinRoom/acceptInvite)由服务端处理,
- * 其余(invite/gameMove/surrender 等)保留 type 点对点转发。
+ * 其余(invite/gameMove/poolShot/surrender 等)保留 type 点对点转发。
+ * game 字段区分玩法:空或 checkers 是跳棋,pool 是台球,两种房间不能互进。
  */
 @Component
 @ServerEndpoint("/ws/{sid}")
@@ -82,19 +83,19 @@ public class WebSocketServer {
                 sendToClient(sid, WsData.builder().type("pong").from("system").build());
                 return;
             case "createRoom":
-                onCreateRoom(sid);
+                onCreateRoom(sid, gameOf(wsData));
                 return;
             case "joinRoom":
-                onJoinRoom(sid, wsData.getMessage());
+                onJoinRoom(sid, wsData.getMessage(), gameOf(wsData));
                 return;
             case "leaveRoom":
                 onLeaveRoom(sid);
                 return;
             case "rejoinRoom":
-                onRejoin(sid, wsData.getMessage());
+                onRejoin(sid, wsData.getMessage(), gameOf(wsData));
                 return;
             case "acceptInvite":
-                onAcceptInvite(sid, wsData.getTo());
+                onAcceptInvite(sid, wsData.getTo(), gameOf(wsData));
                 return;
             default:
                 relay(sid, wsData);
@@ -120,41 +121,51 @@ public class WebSocketServer {
 
     // MARK: - 房间操作(服务端处理型)
 
-    private void onCreateRoom(String sid) {
-        String roomId = ROOM_MANAGER.createRoom(sid);
-        if (roomId == null) {
-            sendToClient(sid, WsData.builder().type("roomJoinFailed").from("system").message("busy").build());
-            return;
+    /** 空 game 按跳棋,只接受 checkers / pool,避免客户端塞进别的字符串。 */
+    private static String gameOf(WsData data) {
+        String game = data == null ? null : data.getGame();
+        if ("pool".equals(game)) {
+            return "pool";
         }
-        log.info("房间创建: roomId={}, host={}", roomId, sid);
-        sendToClient(sid, WsData.builder().type("roomCreated").from("system").message(roomId).build());
+        return "checkers";
     }
 
-    private void onJoinRoom(String sid, String roomId) {
+    private void onCreateRoom(String sid, String game) {
+        String roomId = ROOM_MANAGER.createRoom(sid, game);
+        if (roomId == null) {
+            sendToClient(sid, WsData.builder().type("roomJoinFailed").from("system").message("busy").game(game).build());
+            return;
+        }
+        log.info("房间创建: roomId={}, host={}, game={}", roomId, sid, game);
+        sendToClient(sid, WsData.builder().type("roomCreated").from("system").message(roomId).game(game).build());
+    }
+
+    private void onJoinRoom(String sid, String roomId, String game) {
         RoomManager.JoinResult result = roomId == null
                 ? RoomManager.JoinResult.NOT_FOUND
-                : ROOM_MANAGER.joinRoom(sid, roomId.trim());
+                : ROOM_MANAGER.joinRoom(sid, roomId.trim(), game);
         if (result != RoomManager.JoinResult.OK) {
             String reason = result == RoomManager.JoinResult.NOT_FOUND ? "房间不存在"
-                    : result == RoomManager.JoinResult.FULL ? "房间已满" : "busy";
-            sendToClient(sid, WsData.builder().type("roomJoinFailed").from("system").message(reason).build());
+                    : result == RoomManager.JoinResult.FULL ? "房间已满"
+                    : result == RoomManager.JoinResult.MISMATCH ? "房间玩法不一致" : "busy";
+            sendToClient(sid, WsData.builder().type("roomJoinFailed").from("system").message(reason).game(game).build());
             return;
         }
         GameRoom room = ROOM_MANAGER.roomOf(sid);
-        log.info("房间加入: roomId={}, guest={}", roomId, sid);
+        log.info("房间加入: roomId={}, guest={}, game={}", roomId, sid, room.getGame());
         notifyGameStart(room);
     }
 
-    private void onAcceptInvite(String sid, String challengerSid) {
+    private void onAcceptInvite(String sid, String challengerSid, String game) {
         if (challengerSid == null) {
             return;
         }
-        String roomId = ROOM_MANAGER.createRoomWith(challengerSid, sid);
+        String roomId = ROOM_MANAGER.createRoomWith(challengerSid, sid, game);
         if (roomId == null) {
-            sendToClient(sid, WsData.builder().type("roomJoinFailed").from("system").message("busy").build());
+            sendToClient(sid, WsData.builder().type("roomJoinFailed").from("system").message("busy").game(game).build());
             return;
         }
-        log.info("邀请成局: roomId={}, host={}, guest={}", roomId, challengerSid, sid);
+        log.info("邀请成局: roomId={}, host={}, guest={}, game={}", roomId, challengerSid, sid, game);
         notifyGameStart(ROOM_MANAGER.roomOf(sid));
     }
 
@@ -172,28 +183,36 @@ public class WebSocketServer {
         payload.set("opponent", opponent);
         ClientInfo opp = opponent == null ? null : SESSION_MAP.get(opponent);
         payload.set("opponentName", opp == null ? "未知设备" : opp.deviceName);
-        return WsData.builder().type(type).from("system").message(payload.toString()).build();
+        payload.set("game", room.getGame());
+        return WsData.builder().type(type).from("system").message(payload.toString()).game(room.getGame()).build();
     }
 
     private void onLeaveRoom(String sid) {
+        GameRoom room = ROOM_MANAGER.roomOf(sid);
+        String game = room == null ? "checkers" : room.getGame();
         String opponent = ROOM_MANAGER.leaveRoom(sid);
-        log.info("离开房间: sid={}, 通知对方={}", sid, opponent);
+        log.info("离开房间: sid={}, 通知对方={}, game={}", sid, opponent, game);
         if (opponent != null) {
-            sendToClient(opponent, WsData.builder().type("opponentLeft").from("system").build());
+            sendToClient(opponent, WsData.builder().type("opponentLeft").from("system").game(game).build());
         }
     }
 
-    private void onRejoin(String sid, String roomId) {
-        GameRoom room = roomId == null ? null : ROOM_MANAGER.rejoin(sid, roomId.trim());
-        if (room == null) {
-            sendToClient(sid, WsData.builder().type("rejoinFailed").from("system").build());
+    private void onRejoin(String sid, String roomId, String game) {
+        GameRoom existing = roomId == null ? null : ROOM_MANAGER.roomById(roomId.trim());
+        if (existing == null || !game.equals(existing.getGame())) {
+            sendToClient(sid, WsData.builder().type("rejoinFailed").from("system").game(game).build());
             return;
         }
-        log.info("重连回房: roomId={}, sid={}", room.getId(), sid);
+        GameRoom room = ROOM_MANAGER.rejoin(sid, roomId.trim());
+        if (room == null) {
+            sendToClient(sid, WsData.builder().type("rejoinFailed").from("system").game(game).build());
+            return;
+        }
+        log.info("重连回房: roomId={}, sid={}, game={}", room.getId(), sid, room.getGame());
         sendToClient(sid, roomPayload("rejoinOk", room, sid));
         String opponent = room.opponentOf(sid);
         if (opponent != null && room.isOnline(opponent)) {
-            sendToClient(opponent, WsData.builder().type("opponentBack").from("system").build());
+            sendToClient(opponent, WsData.builder().type("opponentBack").from("system").game(room.getGame()).build());
         }
     }
 
@@ -203,9 +222,12 @@ public class WebSocketServer {
         wsData.setId(System.currentTimeMillis() + "");
         if ("invite".equals(wsData.getType())) {
             ClientInfo from = SESSION_MAP.get(sid);
+            String game = gameOf(wsData);
             JSONObject payload = new JSONObject();
             payload.set("fromName", from == null ? "未知设备" : from.deviceName);
+            payload.set("game", game);
             wsData.setMessage(payload.toString());
+            wsData.setGame(game);
         }
         String to = wsData.getTo();
         ClientInfo target = to == null ? null : SESSION_MAP.get(to);
@@ -221,10 +243,12 @@ public class WebSocketServer {
 
     private void remove(String sid, String reason) {
         ClientInfo info = SESSION_MAP.remove(sid);
+        GameRoom room = ROOM_MANAGER.roomOf(sid);
+        String game = room == null ? "checkers" : room.getGame();
         String opponent = ROOM_MANAGER.markOffline(sid);
         if (opponent != null) {
             // 对方还在线才通知;双方都离线时房间已删,opponent 为 null
-            sendToClient(opponent, WsData.builder().type("opponentOffline").from("system").build());
+            sendToClient(opponent, WsData.builder().type("opponentOffline").from("system").game(game).build());
         }
         if (info != null) {
             log.info("客户端下线({}): sid={}, name={}, 当前在线={}", reason, sid, info.deviceName, SESSION_MAP.size());

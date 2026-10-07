@@ -12,26 +12,29 @@ public class RoomManager {
     private final Map<String, GameRoom> rooms = new ConcurrentHashMap<>();
     private final Map<String, String> sidRoom = new ConcurrentHashMap<>();
 
-    public enum JoinResult { OK, NOT_FOUND, FULL, BUSY }
+    public enum JoinResult { OK, NOT_FOUND, FULL, BUSY, MISMATCH }
 
-    /** 创建等待房,返回 4 位数字码;已在别的房返回 null。 */
-    public synchronized String createRoom(String hostSid) {
+    /** 创建等待房,返回 4 位数字码;已在别的房返回 null。game 为 checkers 或 pool。 */
+    public synchronized String createRoom(String hostSid, String game) {
         if (sidRoom.containsKey(hostSid)) {
             return null;
         }
         String id = nextId();
-        rooms.put(id, new GameRoom(id, hostSid));
+        rooms.put(id, new GameRoom(id, hostSid, game));
         sidRoom.put(hostSid, id);
         return id;
     }
 
-    public synchronized JoinResult joinRoom(String sid, String roomId) {
+    public synchronized JoinResult joinRoom(String sid, String roomId, String game) {
         if (sidRoom.containsKey(sid)) {
             return JoinResult.BUSY;
         }
         GameRoom room = rooms.get(roomId);
         if (room == null) {
             return JoinResult.NOT_FOUND;
+        }
+        if (game != null && !game.equals(room.getGame())) {
+            return JoinResult.MISMATCH;
         }
         if (room.getGuestSid() != null) {
             return JoinResult.FULL;
@@ -42,12 +45,12 @@ public class RoomManager {
     }
 
     /** 邀请接受后直接成房(挑战方=房主)。任一方已在房返回 null。 */
-    public synchronized String createRoomWith(String hostSid, String guestSid) {
+    public synchronized String createRoomWith(String hostSid, String guestSid, String game) {
         if (sidRoom.containsKey(hostSid) || sidRoom.containsKey(guestSid)) {
             return null;
         }
         String id = nextId();
-        GameRoom room = new GameRoom(id, hostSid);
+        GameRoom room = new GameRoom(id, hostSid, game);
         room.setGuestSid(guestSid);
         rooms.put(id, room);
         sidRoom.put(hostSid, id);
@@ -110,6 +113,10 @@ public class RoomManager {
 
     public synchronized GameRoom roomOf(String sid) {
         String roomId = sidRoom.get(sid);
+        return roomId == null ? null : rooms.get(roomId);
+    }
+
+    public synchronized GameRoom roomById(String roomId) {
         return roomId == null ? null : rooms.get(roomId);
     }
 

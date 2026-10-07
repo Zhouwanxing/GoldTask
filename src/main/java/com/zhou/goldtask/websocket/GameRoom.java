@@ -3,21 +3,25 @@ package com.zhou.goldtask.websocket;
 import lombok.Data;
 
 /**
- * 跳棋房间。房主执红(bottom)先手,客人执蓝(top)。
+ * 对战房间。房主执红先手,客人执蓝。
+ * game 为 checkers 或 pool,两种玩法不能进同一个房间。
  * guestSid 为 null 表示房间已创建还没人加入。
  */
 @Data
 public class GameRoom {
     private final String id;
     private final String hostSid;
+    /** checkers 或 pool。 */
+    private final String game;
     private String guestSid;
     private boolean hostOnline = true;
     private boolean guestOnline = true;
     private final long createdAt = System.currentTimeMillis();
 
-    public GameRoom(String id, String hostSid) {
+    public GameRoom(String id, String hostSid, String game) {
         this.id = id;
         this.hostSid = hostSid;
+        this.game = game == null || game.trim().isEmpty() ? "checkers" : game;
     }
 
     public boolean hasSid(String sid) {
