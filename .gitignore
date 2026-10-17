@@ -7,3 +7,11 @@
 /dataSources/
 /dataSources.local.xml
 /target/
+src/main/resources/application-dev.yml
+compiler.xml
+encodings.xml
+jarRepositories.xml
+misc.xml
+vcs.xml
+.idea
+src/test/

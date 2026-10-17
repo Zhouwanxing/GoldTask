@@ -11,6 +11,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
@@ -74,9 +75,15 @@ public class ApiLogAspect {
             for (int i = 0; i < parameterNames.length; i++) {
                 String name = parameterNames[i];
                 Object value = args[i];
-                if (!(value instanceof HttpServletRequest || value instanceof javax.servlet.http.HttpServletResponse)) {
-                    params.put(name, value);
+                if (value instanceof HttpServletRequest || value instanceof javax.servlet.http.HttpServletResponse) {
+                    continue;
                 }
+                if (value instanceof MultipartFile) {
+                    MultipartFile file = (MultipartFile) value;
+                    params.put(name, "file:" + file.getOriginalFilename() + ",size=" + file.getSize());
+                    continue;
+                }
+                params.put(name, value);
             }
         }
         return params;

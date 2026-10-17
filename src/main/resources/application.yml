@@ -4,6 +4,8 @@ server:
     threads:
       min-spare: 1
       max: 10
+    max-swallow-size: -1
+    max-http-form-post-size: 90MB
   max-http-header-size: 100KB
 # 数据监控配置
 management:
@@ -45,6 +47,10 @@ spring:
     enabled: true
     prefix: classpath:/templates/
     suffix: .html
+  servlet:
+    multipart:
+      max-file-size: 80MB
+      max-request-size: 85MB
 
 ############## Sa-Token 配置 (文档: https://sa-token.cc) ##############
 sa-token:
