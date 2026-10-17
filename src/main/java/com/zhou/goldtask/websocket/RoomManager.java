@@ -14,7 +14,7 @@ public class RoomManager {
 
     public enum JoinResult { OK, NOT_FOUND, FULL, BUSY, MISMATCH }
 
-    /** 创建等待房,返回 4 位数字码;已在别的房返回 null。game 为 checkers 或 pool。 */
+    /** 创建等待房,返回 4 位数字码;已在别的房返回 null。game 为 checkers、pool 或 flight。 */
     public synchronized String createRoom(String hostSid, String game) {
         if (sidRoom.containsKey(hostSid)) {
             return null;

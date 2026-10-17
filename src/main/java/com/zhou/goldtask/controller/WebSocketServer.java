@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 心跳:客户端每 25s 发 {"type":"ping"},这里回 {"type":"pong"};90s 无消息判定死连接自动清理。
  * 游戏:按 type 分发——房间操作(createRoom/joinRoom/leaveRoom/rejoinRoom/acceptInvite)由服务端处理,
  * 其余(invite/gameMove/poolShot/surrender 等)保留 type 点对点转发。
- * game 字段区分玩法:空或 checkers 是跳棋,pool 是台球,两种房间不能互进。
+ * game 字段区分玩法:空或 checkers 是跳棋,pool 是台球,flight 是飞行棋,不同玩法不能互进。
  */
 @Component
 @ServerEndpoint("/ws/{sid}")
@@ -60,6 +60,22 @@ public class WebSocketServer {
             log.warn("弹珠登记/下发获胜概率失败: sid={}, {}", sid, e.toString());
         }
         pushTo(sid, WsData.builder().type("marbleQuery").from("system").message("").build());
+        notifyRejoinOnReconnect(sid);
+    }
+
+    /**
+     * 杀进程重连(sid 不变)时,若服务端还留着这人的房间,主动推一次房间状态。
+     * 客户端引擎已丢、无法恢复棋盘时,会回 leaveRoom 让双方解脱,避免建房一直 busy 的软锁。
+     */
+    private void notifyRejoinOnReconnect(String sid) {
+        GameRoom room = ROOM_MANAGER.roomOf(sid);
+        if (room == null) {
+            return;
+        }
+        // 双方都在线才算正常对局;否则把房间状态推给刚回来的这方,由客户端决定恢复或退房。
+        room.setOnline(sid, true);
+        log.info("重连时仍在房: roomId={}, sid={}, game={}", room.getId(), sid, room.getGame());
+        sendToClient(sid, roomPayload("gameResume", room, sid));
     }
 
     /**
@@ -121,11 +137,11 @@ public class WebSocketServer {
 
     // MARK: - 房间操作(服务端处理型)
 
-    /** 空 game 按跳棋,只接受 checkers / pool,避免客户端塞进别的字符串。 */
+    /** 空 game 按跳棋,只接受 checkers / pool / flight,避免客户端塞进别的字符串。 */
     private static String gameOf(WsData data) {
         String game = data == null ? null : data.getGame();
-        if ("pool".equals(game)) {
-            return "pool";
+        if ("pool".equals(game) || "flight".equals(game)) {
+            return game;
         }
         return "checkers";
     }
@@ -163,6 +179,8 @@ public class WebSocketServer {
         String roomId = ROOM_MANAGER.createRoomWith(challengerSid, sid, game);
         if (roomId == null) {
             sendToClient(sid, WsData.builder().type("roomJoinFailed").from("system").message("busy").game(game).build());
+            // 挑战方也在等,一并通知,避免停在"等待接受"无回应。
+            sendToClient(challengerSid, WsData.builder().type("rejectInvite").from(sid).message("busy").game(game).build());
             return;
         }
         log.info("邀请成局: roomId={}, host={}, guest={}, game={}", roomId, challengerSid, sid, game);
@@ -179,7 +197,9 @@ public class WebSocketServer {
         String opponent = room.opponentOf(sid);
         JSONObject payload = new JSONObject();
         payload.set("roomId", room.getId());
-        payload.set("side", room.isHost(sid) ? "red" : "blue");
+        // 飞行棋黄方坐对面,用 yellow;跳棋/台球沿用 blue。客户端按自己的玩法解析。
+        String guest = "flight".equals(room.getGame()) ? "yellow" : "blue";
+        payload.set("side", room.isHost(sid) ? "red" : guest);
         payload.set("opponent", opponent);
         ClientInfo opp = opponent == null ? null : SESSION_MAP.get(opponent);
         payload.set("opponentName", opp == null ? "未知设备" : opp.deviceName);
@@ -235,8 +255,46 @@ public class WebSocketServer {
             sendToClient(sid, WsData.builder().type("messageFailed").from("system").message(wsData.getType()).build());
             return;
         }
+        // 对局消息要求双方同房,防止拿到 sid 后给任意设备构造走子。邀请类不属于对局,放行。
+        if (isGameMessage(wsData.getType()) && !sameRoom(sid, to)) {
+            log.warn("对局消息双方不同房,丢弃: {} -> {}, type={}", sid, to, wsData.getType());
+            sendToClient(sid, WsData.builder().type("messageFailed").from("system").message(wsData.getType()).build());
+            return;
+        }
         log.info("转发: {} -> {}, type={}", sid, to, wsData.getType());
         sendToClient(to, wsData);
+    }
+
+    /** 需要双方同房才允许转发的对局消息类型。 */
+    private static boolean isGameMessage(String type) {
+        if (type == null) {
+            return false;
+        }
+        switch (type) {
+            case "gameMove":
+            case "gamePass":
+            case "flightRoll":
+            case "flightMove":
+            case "flightSync":
+            case "flightWantSync":
+            case "poolShot":
+            case "poolSync":
+            case "poolWantSync":
+            case "poolPlace":
+            case "surrender":
+            case "drawOffer":
+            case "drawAccept":
+            case "drawReject":
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /** 双方是否在同一个房间。 */
+    private static boolean sameRoom(String a, String b) {
+        GameRoom room = ROOM_MANAGER.roomOf(a);
+        return room != null && room.hasSid(b);
     }
 
     // MARK: - 连接生命周期

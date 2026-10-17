@@ -4,14 +4,14 @@ import lombok.Data;
 
 /**
  * 对战房间。房主执红先手,客人执蓝。
- * game 为 checkers 或 pool,两种玩法不能进同一个房间。
+ * game 为 checkers、pool 或 flight,不同玩法不能进同一个房间。
  * guestSid 为 null 表示房间已创建还没人加入。
  */
 @Data
 public class GameRoom {
     private final String id;
     private final String hostSid;
-    /** checkers 或 pool。 */
+    /** checkers、pool 或 flight。 */
     private final String game;
     private String guestSid;
     private boolean hostOnline = true;
