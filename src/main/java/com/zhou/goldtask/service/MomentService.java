@@ -8,6 +8,7 @@ import com.zhou.goldtask.entity.MomentMedia;
 import com.zhou.goldtask.entity.MomentMediaClaim;
 import com.zhou.goldtask.moment.MomentFileRanges;
 import com.zhou.goldtask.moment.MomentRules;
+import com.zhou.goldtask.moment.MomentThumbs;
 import com.zhou.goldtask.repository.MomentMediaClaimRepository;
 import com.zhou.goldtask.repository.MomentRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,6 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.ByteArrayInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -42,8 +43,6 @@ public class MomentService {
     private MomentMediaClaimRepository momentMediaClaimRepository;
     @Resource
     private GridFsTemplate gridFsTemplate;
-    @Resource
-    private MongoTemplate mongoTemplate;
 
     public SaResult list(String username, Integer page) {
         int safePage = MomentRules.page(page);
@@ -53,26 +52,46 @@ public class MomentService {
         return SaResult.ok().set("list", items).set("count", count);
     }
 
-    public SaResult upload(String username, MultipartFile file) {
+    public SaResult upload(String username, MultipartFile file, MultipartFile thumb) {
         if (file == null || file.isEmpty()) {
             return SaResult.error("文件是空的");
         }
+        byte[] bytes;
+        try {
+            bytes = file.getBytes();
+        } catch (IOException ex) {
+            log.warn("朋友圈读取上传文件失败", ex);
+            return SaResult.error("上传失败");
+        }
         String contentType = file.getContentType();
-        String error = MomentRules.validateFile(contentType, file.getSize());
+        String error = MomentRules.validateFile(contentType, bytes.length);
         if (error != null) {
             return SaResult.error(error);
         }
         String kind = MomentRules.kindOf(contentType);
         String name = safeName(file.getOriginalFilename(), kind);
+        String thumbId = null;
+        if ("image".equals(kind) && thumb != null && !thumb.isEmpty()) {
+            try {
+                thumbId = storeThumb(username, MomentThumbs.accept(thumb.getBytes(), thumb.getContentType()));
+            } catch (IOException ex) {
+                log.warn("朋友圈读取缩略图失败", ex);
+            }
+        }
         Document meta = new Document();
         meta.put("username", username);
         meta.put("kind", kind);
         meta.put("contentType", contentType);
         meta.put("name", name);
+        if (thumbId != null) {
+            meta.put("thumbFileId", thumbId);
+        }
         try {
-            ObjectId stored = gridFsTemplate.store(file.getInputStream(), name, contentType, meta);
-            return SaResult.data(new MomentMedia(stored.toHexString(), kind, contentType, name));
-        } catch (IOException ex) {
+            ObjectId stored = gridFsTemplate.store(new ByteArrayInputStream(bytes), name, contentType, meta);
+            log.info("朋友圈附件已保存 fileId={} thumb={}", stored.toHexString(), thumbId);
+            return SaResult.data(new MomentMedia(stored.toHexString(), kind, contentType, name, thumbId));
+        } catch (RuntimeException ex) {
+            deleteStored(thumbId);
             log.warn("朋友圈上传失败", ex);
             return SaResult.error("上传失败");
         }
@@ -100,6 +119,11 @@ public class MomentService {
             if (file == null) {
                 return SaResult.error("附件不存在");
             }
+            Document metadata = file.getMetadata();
+            if (metadata != null && "thumb".equals(metadata.getString("role"))) {
+                releaseClaims(claims);
+                return SaResult.error("附件不存在");
+            }
             MomentMediaClaim claim = new MomentMediaClaim(null, fileId, username);
             try {
                 momentMediaClaimRepository.save(claim);
@@ -109,10 +133,10 @@ public class MomentService {
                 return SaResult.error("附件已使用");
             }
             claims.add(claim);
-            Document metadata = file.getMetadata();
-            String kind = metadata.getString("kind");
-            String contentType = metadata.getString("contentType");
-            String name = metadata.getString("name");
+            String kind = metadata == null ? null : metadata.getString("kind");
+            String contentType = metadata == null ? null : metadata.getString("contentType");
+            String name = metadata == null ? null : metadata.getString("name");
+            String thumbFileId = metadata == null ? null : metadata.getString("thumbFileId");
             if (kind == null) {
                 kind = "image";
             }
@@ -122,7 +146,7 @@ public class MomentService {
             if (name == null) {
                 name = "";
             }
-            media.add(new MomentMedia(fileId, kind, contentType, name));
+            media.add(new MomentMedia(fileId, kind, contentType, name, thumbFileId));
         }
         MomentEntity entity = new MomentEntity();
         entity.setUsername(username);
@@ -153,8 +177,8 @@ public class MomentService {
         }
         if (!fileIds.isEmpty()) {
             momentMediaClaimRepository.deleteByFileIdIn(fileIds);
-            for (String fileId : fileIds) {
-                deleteStored(fileId);
+            for (MomentMedia item : entity.getMedia()) {
+                deleteMediaFiles(item);
             }
         }
         return SaResult.ok();
@@ -200,6 +224,35 @@ public class MomentService {
         } finally {
             input.close();
         }
+    }
+
+    private String storeThumb(String username, byte[] jpeg) {
+        if (jpeg == null || jpeg.length == 0) {
+            return null;
+        }
+        Document meta = new Document();
+        meta.put("username", username);
+        meta.put("kind", "image");
+        meta.put("contentType", "image/jpeg");
+        meta.put("name", "thumb.jpg");
+        meta.put("role", "thumb");
+        ObjectId stored = gridFsTemplate.store(new ByteArrayInputStream(jpeg), "thumb.jpg", "image/jpeg", meta);
+        return stored.toHexString();
+    }
+
+    private void deleteMediaFiles(MomentMedia item) {
+        if (item == null) {
+            return;
+        }
+        deleteStored(item.getFileId());
+        String thumbId = item.getThumbFileId();
+        if (hasText(thumbId) && !thumbId.equals(item.getFileId())) {
+            deleteStored(thumbId);
+        }
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 
     /** 发帖失败时把已经占用的附件还回去，下一次可再引用。 */

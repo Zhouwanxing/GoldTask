@@ -37,8 +37,10 @@ public class MomentController {
     }
 
     @PostMapping("/upload")
-    public SaResult upload(@RequestParam("file") MultipartFile file) {
-        return momentService.upload(StpUtil.getLoginIdAsString(), file);
+    public SaResult upload(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "thumb", required = false) MultipartFile thumb) {
+        return momentService.upload(StpUtil.getLoginIdAsString(), file, thumb);
     }
 
     @PostMapping

@@ -12,4 +12,6 @@ public class MomentMedia {
     private String kind;
     private String contentType;
     private String name;
+    /** 列表用的小图。为空时客户端退回原图。 */
+    private String thumbFileId;
 }
